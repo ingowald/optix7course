@@ -29,8 +29,24 @@
 # Locate the OptiX distribution.  Search relative to the SDK first, then look in the system.
 
 # Our initial guess will be within the SDK.
-SET(OptiX_INSTALL_DIR $ENV{OptiX_INSTALL_DIR})
 
+if (WIN32)
+#		set(OptiX_INSTALL_DIR "C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.1.0" CACHE PATH "Path to OptiX installed location.")
+	find_path(searched_OptiX_INSTALL_DIR
+		NAME include/optix.h
+		PATHS
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 6.0.0"
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.1.1"
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.1.0"
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.0.1"
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.0.0"
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK *"
+	)
+	mark_as_advanced(searched_OptiX_INSTALL_DIR)
+  set(OptiX_INSTALL_DIR ${searched_OptiX_INSTALL_DIR} CACHE PATH "Path to OptiX installed location.")
+else()
+  set(OptiX_INSTALL_DIR $ENV{OptiX_INSTALL_DIR} CACHE PATH "Path to OptiX installed location.")
+endif()
 # The distribution contains both 32 and 64 bit libraries.  Adjust the library
 # search path based on the bit-ness of the build.  (i.e. 64: bin64, lib64; 32:
 # bin, lib).  Note that on Mac, the OptiX library is a universal binary, so we
@@ -62,9 +78,9 @@ macro(OPTIX_find_api_library name version)
   endif()
 endmacro()
 
-OPTIX_find_api_library(optix 61)
-OPTIX_find_api_library(optixu 1)
-OPTIX_find_api_library(optix_prime 1)
+OPTIX_find_api_library(optix 6.0.0)
+OPTIX_find_api_library(optixu 6.0.0)
+OPTIX_find_api_library(optix_prime 6.0.0)
 
 # Include
 find_path(OptiX_INCLUDE
