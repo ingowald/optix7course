@@ -1,0 +1,7 @@
+*~
+*#
+bin
+*.autosave
+*.gz
+*.zip
+Session.vim
