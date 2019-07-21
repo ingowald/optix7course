@@ -60,4 +60,5 @@ endif()
 # ------------------------------------------------------------------
 
 add_subdirectory(example1_helloOptix)
+add_subdirectory(example2_pipelineAndRayGen)
 
