@@ -35,6 +35,7 @@ if (WIN32)
 	find_path(searched_OptiX_INSTALL_DIR
 		NAME include/optix.h
 		PATHS
+		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 6.5.0"
 		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 6.0.0"
 		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.1.1"
 		"C:/ProgramData/NVIDIA Corporation/OptiX SDK 5.1.0"
@@ -78,9 +79,9 @@ macro(OPTIX_find_api_library name version)
   endif()
 endmacro()
 
-OPTIX_find_api_library(optix 6.0.0)
-OPTIX_find_api_library(optixu 6.0.0)
-OPTIX_find_api_library(optix_prime 6.0.0)
+OPTIX_find_api_library(optix 6.5.0)
+OPTIX_find_api_library(optixu 6.5.0)
+OPTIX_find_api_library(optix_prime 6.5.0)
 
 # Include
 find_path(OptiX_INCLUDE

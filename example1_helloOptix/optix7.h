@@ -18,7 +18,7 @@
 //  SUCH DAMAGES
 // ======================================================================================
 
-#pragma one
+#pragma once
 
 // optix 7
 #define OPTIX_COMPATIBILITY 7
