@@ -18,32 +18,6 @@
 #  SUCH DAMAGES
 #
 
-project(optix7course)
-
-cmake_minimum_required(VERSION 2.8)
-
-
-# ------------------------------------------------------------------
-# first, include gdt project to do some general configuration stuff
-# (build modes, glut, optix, etc)
-# ------------------------------------------------------------------
-set(gdt_dir ${PROJECT_SOURCE_DIR}/submodules/gdt/)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${gdt_dir}/cmake/")
-include(${gdt_dir}/cmake/configure_build_type.cmake)
-include(${gdt_dir}/cmake/configure_glfw.cmake)
-include(${gdt_dir}/cmake/configure_optix.cmake)
-
-mark_as_advanced(CUDA_SDK_ROOT_DIR)
-
-# ------------------------------------------------------------------
-# import gdt submodules itself: gdt, and viewer
-# ------------------------------------------------------------------
-include_directories(${gdt_dir})
-add_subdirectory(${gdt_dir} EXCLUDE_FROM_ALL)
-
-
-# ------------------------------------------------------------------
-# and final build rules for the project
-# ------------------------------------------------------------------
-
-add_executable(example1_openWindow)
+add_executable(example1_openWindow
+  main.cpp
+  )
