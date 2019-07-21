@@ -26,9 +26,14 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(gdt 
-	gdt/gdt.h
-	gdt/gdt.cpp
-	gdt/math/LinearSpace.h
-	gdt/math/AffineSpace.h
-	)
+  cmake/configure_build_type.cmake
+  cmake/configure_optix.cmake
+  cmake/FindOptiX.cmake
+  
+  gdt/gdt.h
+  gdt/math/LinearSpace.h
+  gdt/math/AffineSpace.h
+  
+  gdt/gdt.cpp
+  )
 

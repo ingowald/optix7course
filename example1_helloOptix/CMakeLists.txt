@@ -21,6 +21,7 @@
 include_directories(${OptiX_INCLUDE})
 
 add_executable(ex1_helloOptix
+  optix7.h
   main.cpp
   )
 target_link_libraries(ex1_helloOptix
