@@ -72,7 +72,7 @@ namespace osc {
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
       glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
       
-      handle = glfwCreateWindow(640, 480, title.c_str(), NULL, NULL);
+      handle = glfwCreateWindow(1200, 900, title.c_str(), NULL, NULL);
       if (!handle) {
         glfwTerminate();
         exit(EXIT_FAILURE);
@@ -82,9 +82,13 @@ namespace osc {
       glfwSwapInterval( 1 );
     }
 
+	/*! re-render the frame buffer */
+	virtual void render()
+	{}
+
+	/*! re-draw the rendererd frame buffer */
     virtual void draw()
-    {
-    }
+    {}
 
     static void reshape(GLFWwindow* window, int width, int height )
     {
@@ -101,10 +105,8 @@ namespace osc {
       glfwSetFramebufferSizeCallback(handle, reshape);
       
       while (!glfwWindowShouldClose(handle)) {
-        // Draw gears
-        draw();
-        
-        // Swap buffers
+		render();
+        draw();        
         glfwSwapBuffers(handle);
         glfwPollEvents();
       }
