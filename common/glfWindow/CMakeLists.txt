@@ -18,17 +18,8 @@
 #  SUCH DAMAGES
 # ======================================================================================
 
-include_directories(${OptiX_INCLUDE})
-
-add_executable(ex2_pipelineAndRayGen
-  optix7.h
-  main.cpp
-  )
-target_link_libraries(ex2_pipelineAndRayGen
-  gdt
-  glfWindow
-  glfw
-  ${optix_LIBRARY}
-  ${CUDA_LIBRARIES}
-  ${CUDA_CUDA_LIBRARY}
+add_library(glfWindow
+  CUDAFrameBuffer.h
+  GLFWindow.h
+  GLFWindow.cpp
   )

@@ -79,9 +79,9 @@ macro(OPTIX_find_api_library name version)
   endif()
 endmacro()
 
-OPTIX_find_api_library(optix 6.5.0)
-OPTIX_find_api_library(optixu 6.5.0)
-OPTIX_find_api_library(optix_prime 6.5.0)
+OPTIX_find_api_library(optix 6.6.0)
+OPTIX_find_api_library(optixu 6.6.0)
+OPTIX_find_api_library(optix_prime 6.6.0)
 
 # Include
 find_path(OptiX_INCLUDE

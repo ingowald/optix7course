@@ -18,9 +18,10 @@
 //  SUCH DAMAGES
 // ======================================================================================
 
-// common gdt helper tools
-#include "gdt/math/vec.h"
 #include "optix7.h"
+// our helper library for window handling
+#include "glfWindow/CUDAFrameBuffer.h"
+#include "glfWindow/GLFWindow.h"
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
@@ -33,7 +34,15 @@ namespace osc {
     
     virtual void render() override
     {
-      PING;
+    }
+    
+    virtual void draw() override
+    {
+    }
+    
+    virtual void resize(const vec2i &newSize) 
+    {
+      fb.resize(newSize);
     }
     
     /*! our internal frame buffer */
