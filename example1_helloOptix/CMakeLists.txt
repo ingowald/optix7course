@@ -24,6 +24,7 @@ add_executable(ex1_helloOptix
   main.cpp
   )
 target_link_libraries(ex1_helloOptix
+  gdt
   ${optix_LIBRARY}
   ${CUDA_LIBRARIES}
   ${CUDA_CUDA_LIBRARY}
