@@ -22,119 +22,8 @@
 #include "gdt/math/vec.h"
 #include "optix7.h"
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
-  using namespace gdt;
-  
-  struct FrameBuffer
-  {
-    void resize(const vec2i &size)
-    {
-      if (d_colorBuffer) CUDA_CHECK(Free(d_colorBuffer));
-      if (h_colorBuffer) delete[] h_colorBuffer;
-
-      CUDA_CHECK(Malloc(&d_colorBuffer,size.x*size.y*sizeof(uint32_t)));
-      h_colorBuffer = new uint32_t[size.x*size.y];
-    }
-    ~FrameBuffer()
-    {
-      if (d_colorBuffer) CUDA_CHECK_NOEXCEPT(Free(d_colorBuffer));
-      if (h_colorBuffer) delete[] h_colorBuffer;
-    }
-
-    vec2i size              { 0,0 };
-    uint32_t *h_colorBuffer { nullptr };
-    uint32_t *d_colorBuffer { nullptr };
-  };
-
-  static void glfw_error_callback(int error, const char* description)
-  {
-    fprintf(stderr, "Error: %s\n", description);
-  }
-  
-  struct GLFWindow {
-    GLFWindow(const std::string &title)
-    {
-      if (current)
-        throw std::runtime_error("GLFWindow: can only have one active window ...");
-      current = this;
-      
-      glfwSetErrorCallback(glfw_error_callback);
-      // glfwInitHint(GLFW_COCOA_MENUBAR, GLFW_FALSE);
-      
-      if (!glfwInit())
-        exit(EXIT_FAILURE);
-      
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-      glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-      
-      handle = glfwCreateWindow(640, 480, title.c_str(), NULL, NULL);
-      if (!handle) {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-      }
-      
-      glfwMakeContextCurrent(handle);
-      glfwSwapInterval( 1 );
-    }
-
-    virtual void draw()
-    {
-    }
-
-    static void reshape(GLFWwindow* window, int width, int height )
-    {
-      assert(current);
-      current->resize(vec2i(width,height));
-    }
-    
-    void run()
-    {
-      int width, height;
-      glfwGetFramebufferSize(handle, &width, &height);
-      resize(vec2i(width,height));
-
-      glfwSetFramebufferSizeCallback(handle, reshape);
-      
-      while (!glfwWindowShouldClose(handle)) {
-        // Draw gears
-        draw();
-        
-        // Swap buffers
-        glfwSwapBuffers(handle);
-        glfwPollEvents();
-      }
-    }
-
-    
-    ~GLFWindow()
-    {
-      glfwDestroyWindow(handle);
-      glfwTerminate();
-    }
-    
-    virtual void resize(const vec2i &newSize) 
-    {
-      fb.resize(newSize);
-    }
-    
-    virtual void render()
-    {
-    }
-
-    static GLFWindow *current;
-    /*! the glfw window handle */
-    GLFWwindow *handle;
-    
-    /*! our internal frame buffer */
-    FrameBuffer fb;
-  };
-
-  GLFWindow *GLFWindow::current = nullptr;
   
   struct SampleWindow : public GLFWindow
   {
@@ -147,6 +36,8 @@ namespace osc {
       PING;
     }
     
+    /*! our internal frame buffer */
+    CUDAFrameBuffer fb;
   };
   
   
@@ -193,4 +84,4 @@ namespace osc {
     return 0;
   }
   
-}
+} // ::osc
