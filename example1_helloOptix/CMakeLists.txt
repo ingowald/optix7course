@@ -18,6 +18,13 @@
 #  SUCH DAMAGES
 # ======================================================================================
 
+include_directories(${OptiX_INCLUDE})
+
 add_executable(ex1_helloOptix
   main.cpp
+  )
+target_link_libraries(ex1_helloOptix
+  ${optix_LIBRARY}
+  ${CUDA_LIBRARIES}
+  ${CUDA_CUDA_LIBRARY}
   )
