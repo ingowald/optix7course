@@ -1,4 +1,4 @@
-#
+# ======================================================================================
 #  Copyright (c) 2019 NVIDIA Corporation.  All rights reserved.
 #
 #  NVIDIA Corporation and its licensors retain all intellectual property and proprietary
@@ -16,8 +16,8 @@
 #  BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR
 #  INABILITY TO USE THIS SOFTWARE, EVEN IF NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 #  SUCH DAMAGES
-#
+# ======================================================================================
 
-add_executable(example1_openWindow
+add_executable(ex1_helloOptix
   main.cpp
   )
