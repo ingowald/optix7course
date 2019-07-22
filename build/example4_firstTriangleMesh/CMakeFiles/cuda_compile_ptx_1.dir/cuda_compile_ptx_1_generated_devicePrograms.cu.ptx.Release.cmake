@@ -57,26 +57,26 @@ if(NOT generated_file)
 endif()
 
 # Set these up as variables to make reading the generated file easier
-set(CMAKE_COMMAND "/usr/bin/cmake") # path
-set(source_file "/home/iwald/Projects/optix7course/example4_firstTriangleMesh/devicePrograms.cu") # path
-set(NVCC_generated_dependency_file "/home/iwald/Projects/optix7course/build/example4_firstTriangleMesh/CMakeFiles/cuda_compile_ptx_1.dir//cuda_compile_ptx_1_generated_devicePrograms.cu.ptx.NVCC-depend") # path
-set(cmake_dependency_file "/home/iwald/Projects/optix7course/build/example4_firstTriangleMesh/CMakeFiles/cuda_compile_ptx_1.dir//cuda_compile_ptx_1_generated_devicePrograms.cu.ptx.depend") # path
-set(CUDA_make2cmake "/usr/share/cmake-3.10/Modules/FindCUDA/make2cmake.cmake") # path
-set(CUDA_parse_cubin "/usr/share/cmake-3.10/Modules/FindCUDA/parse_cubin.cmake") # path
+set(CMAKE_COMMAND "C:/Program Files/CMake/bin/cmake.exe") # path
+set(source_file "C:/Users/wald/Desktop/Projects/optix7course/example4_firstTriangleMesh/devicePrograms.cu") # path
+set(NVCC_generated_dependency_file "C:/Users/wald/Desktop/Projects/optix7course/build/example4_firstTriangleMesh/CMakeFiles/cuda_compile_ptx_1.dir//cuda_compile_ptx_1_generated_devicePrograms.cu.ptx.NVCC-depend") # path
+set(cmake_dependency_file "C:/Users/wald/Desktop/Projects/optix7course/build/example4_firstTriangleMesh/CMakeFiles/cuda_compile_ptx_1.dir//cuda_compile_ptx_1_generated_devicePrograms.cu.ptx.depend") # path
+set(CUDA_make2cmake "C:/Program Files/CMake/share/cmake-3.15/Modules/FindCUDA/make2cmake.cmake") # path
+set(CUDA_parse_cubin "C:/Program Files/CMake/share/cmake-3.15/Modules/FindCUDA/parse_cubin.cmake") # path
 set(build_cubin OFF) # bool
-set(CUDA_HOST_COMPILER "/usr/bin/cc") # path
+set(CUDA_HOST_COMPILER "$(VCInstallDir)Tools/MSVC/$(VCToolsVersion)/bin/Host$(Platform)/$(PlatformTarget)") # path
 # We won't actually use these variables for now, but we need to set this, in
 # order to force this file to be run again if it changes.
-set(generated_file_path "/home/iwald/Projects/optix7course/build/example4_firstTriangleMesh") # path
-set(generated_file_internal "/home/iwald/Projects/optix7course/build/example4_firstTriangleMesh/cuda_compile_ptx_1_generated_devicePrograms.cu.ptx") # path
-set(generated_cubin_file_internal "/home/iwald/Projects/optix7course/build/example4_firstTriangleMesh/cuda_compile_ptx_1_generated_devicePrograms.cu.ptx.cubin.txt") # path
+set(generated_file_path "C:/Users/wald/Desktop/Projects/optix7course/build/example4_firstTriangleMesh") # path
+set(generated_file_internal "C:/Users/wald/Desktop/Projects/optix7course/build/example4_firstTriangleMesh/cuda_compile_ptx_1_generated_devicePrograms.cu.ptx") # path
+set(generated_cubin_file_internal "C:/Users/wald/Desktop/Projects/optix7course/build/example4_firstTriangleMesh/cuda_compile_ptx_1_generated_devicePrograms.cu.ptx.cubin.txt") # path
 
-set(CUDA_NVCC_EXECUTABLE "/usr/local/cuda/bin/nvcc") # path
+set(CUDA_NVCC_EXECUTABLE "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/bin/nvcc.exe") # path
 set(CUDA_NVCC_FLAGS  ;; ) # list
 
 set(nvcc_flags -m64) # list
-set(CUDA_NVCC_INCLUDE_DIRS "/usr/local/cuda/include;/usr/local/cuda/include;/home/iwald/OPTIX/current/include;/home/iwald/OPTIX/current/include;/home/iwald/Projects/optix7course/common/gdt;/home/iwald/Projects/optix7course/common;/home/iwald/OPTIX/current/include") # list (needs to be in quotes to handle spaces properly).
-set(CUDA_NVCC_COMPILE_DEFINITIONS [==[__CUDA_INCLUDE_COMPILER_INTERNAL_HEADERS__=1]==]) # list (needs to be in lua quotes see #16510 ).
+set(CUDA_NVCC_INCLUDE_DIRS "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/include;C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/include;C:/ProgramData/NVIDIA Corporation/OptiX SDK 6.5.0/include;C:/ProgramData/NVIDIA Corporation/OptiX SDK 6.5.0/include;C:/Users/wald/Desktop/Projects/optix7course/common/gdt;C:/Users/wald/Desktop/Projects/optix7course/submodules/glfw/include;C:/Users/wald/Desktop/Projects/optix7course/common;C:/ProgramData/NVIDIA Corporation/OptiX SDK 6.5.0/include") # list (needs to be in quotes to handle spaces properly).
+set(CUDA_NVCC_COMPILE_DEFINITIONS [==[NOMINMAX;__CUDA_INCLUDE_COMPILER_INTERNAL_HEADERS__=1]==]) # list (needs to be in lua quotes see #16510 ).
 set(format_flag "-ptx") # string
 set(cuda_language_flag ) # list
 
@@ -125,7 +125,7 @@ list(APPEND CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS_${build_configuration}})
 list( FIND CUDA_NVCC_FLAGS "-ccbin" ccbin_found0 )
 list( FIND CUDA_NVCC_FLAGS "--compiler-bindir" ccbin_found1 )
 if( ccbin_found0 LESS 0 AND ccbin_found1 LESS 0 AND CUDA_HOST_COMPILER )
-  if (CUDA_HOST_COMPILER STREQUAL "$(VCInstallDir)bin" AND DEFINED CCBIN)
+  if (CUDA_HOST_COMPILER STREQUAL "$(VCInstallDir)Tools/MSVC/$(VCToolsVersion)/bin/Host$(Platform)/$(PlatformTarget)" AND DEFINED CCBIN)
     set(CCBIN -ccbin "${CCBIN}")
   else()
     set(CCBIN -ccbin "${CUDA_HOST_COMPILER}")
@@ -181,13 +181,13 @@ cuda_execute_process(
 set(depends_CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}")
 set(CUDA_VERSION 10.1)
 if(CUDA_VERSION VERSION_LESS "3.0")
-  # Note that this will remove all occurances of -G.
+  # Note that this will remove all occurrences of -G.
   list(REMOVE_ITEM depends_CUDA_NVCC_FLAGS "-G")
 endif()
 
 # nvcc doesn't define __CUDACC__ for some reason when generating dependency files.  This
 # can cause incorrect dependencies when #including files based on this macro which is
-# defined in the generating passes of nvcc invokation.  We will go ahead and manually
+# defined in the generating passes of nvcc invocation.  We will go ahead and manually
 # define this for now until a future version fixes this bug.
 set(CUDACC_DEFINE -D__CUDACC__)
 

@@ -70,7 +70,7 @@ namespace osc {
       triangleMesh */
   void TriangleMesh::addUnitCube(const affine3f &xfm)
   {
-    int firstVertexID = vertex.size();
+    int firstVertexID = (int)vertex.size();
     vertex.push_back(xfmPoint(xfm,vec3f(0.f,0.f,0.f)));
     vertex.push_back(xfmPoint(xfm,vec3f(1.f,0.f,0.f)));
     vertex.push_back(xfmPoint(xfm,vec3f(0.f,1.f,0.f)));
@@ -152,12 +152,12 @@ namespace osc {
       
     triangleInput.triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
     triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
-    triangleInput.triangleArray.numVertices         = model.vertex.size();
+    triangleInput.triangleArray.numVertices         = (int)model.vertex.size();
     triangleInput.triangleArray.vertexBuffers       = &d_vertices;
     
     triangleInput.triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
     triangleInput.triangleArray.indexStrideInBytes  = sizeof(vec3i);
-    triangleInput.triangleArray.numIndexTriplets    = model.index.size();
+    triangleInput.triangleArray.numIndexTriplets    = (int)model.index.size();
     triangleInput.triangleArray.indexBuffer         = d_indices;
     
     uint32_t triangleInputFlags[1] = { 0 };
@@ -439,7 +439,7 @@ namespace osc {
                                     &pipelineCompileOptions,
                                     &pipelineLinkOptions,
                                     programGroups.data(),
-                                    programGroups.size(),
+                                    (int)programGroups.size(),
                                     log,&sizeof_log,
                                     &pipeline
                                     ));
@@ -492,7 +492,7 @@ namespace osc {
     missRecordsBuffer.alloc_and_upload(missRecords);
     sbt.missRecordBase          = missRecordsBuffer.d_pointer();
     sbt.missRecordStrideInBytes = sizeof(MissRecord);
-    sbt.missRecordCount         = missRecords.size();
+    sbt.missRecordCount         = (int)missRecords.size();
 
     // ------------------------------------------------------------------
     // build hitgroup records
@@ -513,7 +513,7 @@ namespace osc {
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
     sbt.hitgroupRecordBase          = hitgroupRecordsBuffer.d_pointer();
     sbt.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
-    sbt.hitgroupRecordCount         = hitgroupRecords.size();
+    sbt.hitgroupRecordCount         = (int)hitgroupRecords.size();
   }
 
 

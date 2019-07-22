@@ -142,10 +142,10 @@ namespace osc {
     // ==================================================================
     // triangle inputs
     // ==================================================================
-    OptixBuildInput triangleInput[meshes.size()];
-    CUdeviceptr d_vertices[meshes.size()];
-    CUdeviceptr d_indices[meshes.size()];
-    uint32_t triangleInputFlags[meshes.size()];
+    std::vector<OptixBuildInput> triangleInput(meshes.size());
+	std::vector<CUdeviceptr> d_vertices(meshes.size());
+	std::vector<CUdeviceptr> d_indices(meshes.size());
+    std::vector<uint32_t> triangleInputFlags(meshes.size());
 
     for (int meshID=0;meshID<meshes.size();meshID++) {
     // upload the model to the device: the builder
@@ -164,12 +164,12 @@ namespace osc {
       
     triangleInput[meshID].triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
     triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(vec3f);
-    triangleInput[meshID].triangleArray.numVertices         = model.vertex.size();
+    triangleInput[meshID].triangleArray.numVertices         = (int)model.vertex.size();
     triangleInput[meshID].triangleArray.vertexBuffers       = &d_vertices[meshID];
     
     triangleInput[meshID].triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
     triangleInput[meshID].triangleArray.indexStrideInBytes  = sizeof(vec3i);
-    triangleInput[meshID].triangleArray.numIndexTriplets    = model.index.size();
+    triangleInput[meshID].triangleArray.numIndexTriplets    = (int)model.index.size();
     triangleInput[meshID].triangleArray.indexBuffer         = d_indices[meshID];
     
     triangleInputFlags[meshID] = 0 ;
@@ -197,8 +197,8 @@ namespace osc {
     OPTIX_CHECK(optixAccelComputeMemoryUsage
                 (optixContext,
                  &accelOptions,
-                 triangleInput,
-                 meshes.size(),  // num_build_inputs
+                 triangleInput.data(),
+					(int)meshes.size(),  // num_build_inputs
                  &blasBufferSizes
                  ));
     
@@ -226,8 +226,8 @@ namespace osc {
     OPTIX_CHECK(optixAccelBuild(optixContext,
                                 /* stream */0,
                                 &accelOptions,
-                                triangleInput,
-                                meshes.size(),  
+                                triangleInput.data(),
+		(int)meshes.size(),
                                 tempBuffer.d_pointer(),
                                 tempBuffer.sizeInBytes,
                                 
@@ -453,7 +453,7 @@ namespace osc {
                                     &pipelineCompileOptions,
                                     &pipelineLinkOptions,
                                     programGroups.data(),
-                                    programGroups.size(),
+		(int)programGroups.size(),
                                     log,&sizeof_log,
                                     &pipeline
                                     ));
@@ -506,7 +506,7 @@ namespace osc {
     missRecordsBuffer.alloc_and_upload(missRecords);
     sbt.missRecordBase          = missRecordsBuffer.d_pointer();
     sbt.missRecordStrideInBytes = sizeof(MissRecord);
-    sbt.missRecordCount         = missRecords.size();
+    sbt.missRecordCount         = (int)missRecords.size();
 
     // ------------------------------------------------------------------
     // build hitgroup records
@@ -515,7 +515,7 @@ namespace osc {
     // we don't actually have any objects in this example, but let's
     // create a dummy one so the SBT doesn't have any null pointers
     // (which the sanity checks in compilation would compain about)
-    int numObjects = meshes.size();
+    int numObjects = (int)meshes.size();
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int meshID=0;meshID<numObjects;meshID++) {
       HitgroupRecord rec;
@@ -528,7 +528,7 @@ namespace osc {
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
     sbt.hitgroupRecordBase          = hitgroupRecordsBuffer.d_pointer();
     sbt.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
-    sbt.hitgroupRecordCount         = hitgroupRecords.size();
+    sbt.hitgroupRecordCount         = (int)hitgroupRecords.size();
   }
 
 

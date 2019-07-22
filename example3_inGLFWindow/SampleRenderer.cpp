@@ -273,7 +273,7 @@ namespace osc {
                                     &pipelineCompileOptions,
                                     &pipelineLinkOptions,
                                     programGroups.data(),
-                                    programGroups.size(),
+                                    (int)programGroups.size(),
                                     log,&sizeof_log,
                                     &pipeline
                                     ));
@@ -326,7 +326,7 @@ namespace osc {
     missRecordsBuffer.alloc_and_upload(missRecords);
     sbt.missRecordBase          = missRecordsBuffer.d_pointer();
     sbt.missRecordStrideInBytes = sizeof(MissRecord);
-    sbt.missRecordCount         = missRecords.size();
+    sbt.missRecordCount         = (int)missRecords.size();
 
     // ------------------------------------------------------------------
     // build hitgroup records
@@ -347,7 +347,7 @@ namespace osc {
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
     sbt.hitgroupRecordBase          = hitgroupRecordsBuffer.d_pointer();
     sbt.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
-    sbt.hitgroupRecordCount         = hitgroupRecords.size();
+    sbt.hitgroupRecordCount         = (int)hitgroupRecords.size();
   }
 
 
