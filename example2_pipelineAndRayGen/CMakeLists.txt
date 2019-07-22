@@ -25,6 +25,9 @@ cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 add_executable(ex2_pipelineAndRayGen
   ${embedded_ptx_code}
   optix7.h
+  CUDABuffer.h
+  SampleRenderer.h
+  SampleRenderer.cpp
   main.cpp
   )
 target_link_libraries(ex2_pipelineAndRayGen
