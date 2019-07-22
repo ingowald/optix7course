@@ -79,6 +79,7 @@ namespace osc {
     glfwSetFramebufferSizeCallback(handle, glfw_reshape);
     
     while (!glfwWindowShouldClose(handle)) {
+      render();
       draw();
         
       glfwSwapBuffers(handle);
