@@ -1,0 +1,10 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/iwald/Projects/optix7course/build/example4_firstTriangleMesh/cuda_compile_ptx_1_generated_devicePrograms.cu.ptx_embedded.c
+

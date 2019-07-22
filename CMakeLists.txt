@@ -76,3 +76,5 @@ add_subdirectory(example2_pipelineAndRayGen)
 # rendering
 add_subdirectory(example3_inGLFWindow)
 
+add_subdirectory(example4_firstTriangleMesh)
+
