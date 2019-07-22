@@ -132,81 +132,72 @@ namespace osc {
 
   OptixTraversableHandle SampleRenderer::buildAccel()
   {
-    // ==================================================================
-    // upload mesh data
-    // ==================================================================
+    // meshes.resize(1);
+
     vertexBuffer.resize(meshes.size());
     indexBuffer.resize(meshes.size());
-    for (int meshID=0;meshID<meshes.size();meshID++) {
-      // upload the model to the device: the builder
-      vertexBuffer[meshID].alloc_and_upload(meshes[meshID].vertex);
-      indexBuffer[meshID].alloc_and_upload(meshes[meshID].index);
-      PRINT((void*)vertexBuffer[meshID].d_pointer());
-    }
     
     OptixTraversableHandle asHandle { 0 };
     
     // ==================================================================
     // triangle inputs
     // ==================================================================
+    OptixBuildInput triangleInput[meshes.size()];
+    CUdeviceptr d_vertices[meshes.size()];
+    CUdeviceptr d_indices[meshes.size()];
     uint32_t triangleInputFlags[meshes.size()];
-    std::vector<OptixBuildInput> triangleInputs(meshes.size());
-    PRINT(meshes.size());
-    for (int meshID=0;meshID<meshes.size();meshID++) {
-      triangleInputFlags[meshID] = 0;
-      OptixBuildInput &triangleInput = triangleInputs[meshID];
-      triangleInput.type
-        = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-      
-      triangleInput.triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
-      triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
-      triangleInput.triangleArray.numVertices         = meshes[meshID].vertex.size();
-      triangleInput.triangleArray.vertexBuffers       = (CUdeviceptr*)&vertexBuffer[meshID].d_ptr;
-      
-      triangleInput.triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-      triangleInput.triangleArray.indexStrideInBytes  = sizeof(vec3i);
-      triangleInput.triangleArray.numIndexTriplets    = meshes[meshID].index.size();
-      triangleInput.triangleArray.indexBuffer         = vertexBuffer[meshID].d_pointer();
-      
-      // in this example we have one SBT entry, and no per-primitive
-      // materials:
-      triangleInput.triangleArray.flags               = triangleInputFlags;
-      triangleInput.triangleArray.numSbtRecords               = 1;
-      triangleInput.triangleArray.sbtIndexOffsetBuffer        = 0; 
-      triangleInput.triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
-      triangleInput.triangleArray.sbtIndexOffsetStrideInBytes = 0; 
-    }
 
+    for (int meshID=0;meshID<meshes.size();meshID++) {
+    // upload the model to the device: the builder
+    TriangleMesh &model = meshes[meshID];
+    vertexBuffer[meshID].alloc_and_upload(model.vertex);
+    indexBuffer[meshID].alloc_and_upload(model.index);
+
+    triangleInput[meshID] = {};
+    triangleInput[meshID].type
+      = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+
+    // create local variables, because we need a *pointer* to the
+    // device pointers
+    d_vertices[meshID] = vertexBuffer[meshID].d_pointer();
+    d_indices[meshID]  = indexBuffer[meshID].d_pointer();
+      
+    triangleInput[meshID].triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
+    triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(vec3f);
+    triangleInput[meshID].triangleArray.numVertices         = model.vertex.size();
+    triangleInput[meshID].triangleArray.vertexBuffers       = &d_vertices[meshID];
+    
+    triangleInput[meshID].triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+    triangleInput[meshID].triangleArray.indexStrideInBytes  = sizeof(vec3i);
+    triangleInput[meshID].triangleArray.numIndexTriplets    = model.index.size();
+    triangleInput[meshID].triangleArray.indexBuffer         = d_indices[meshID];
+    
+    triangleInputFlags[meshID] = 0 ;
+    
+    // in this example we have one SBT entry, and no per-primitive
+    // materials:
+    triangleInput[meshID].triangleArray.flags               = &triangleInputFlags[meshID];
+    triangleInput[meshID].triangleArray.numSbtRecords               = 1;
+    triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 1; 
+    triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
+    triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0; 
+    }
     // ==================================================================
     // BLAS setup
     // ==================================================================
-
-#if 1
-    OptixAccelBuildOptions accelOptions[2] = {};
-    accelOptions[0].buildFlags             = OPTIX_BUILD_FLAG_NONE
-      | OPTIX_BUILD_FLAG_ALLOW_COMPACTION
-      ;
-    accelOptions[0].motionOptions.numKeys  = 1;
-    accelOptions[0].operation              = OPTIX_BUILD_OPERATION_BUILD;
-
-    accelOptions[1].buildFlags             = OPTIX_BUILD_FLAG_NONE
-      | OPTIX_BUILD_FLAG_ALLOW_COMPACTION
-      ;
-    accelOptions[1].motionOptions.numKeys  = 1;
-    accelOptions[1].operation              = OPTIX_BUILD_OPERATION_BUILD;
-#else
+    
     OptixAccelBuildOptions accelOptions = {};
     accelOptions.buildFlags             = OPTIX_BUILD_FLAG_NONE
       | OPTIX_BUILD_FLAG_ALLOW_COMPACTION
       ;
     accelOptions.motionOptions.numKeys  = 1;
     accelOptions.operation              = OPTIX_BUILD_OPERATION_BUILD;
-#endif
+    
     OptixAccelBufferSizes blasBufferSizes;
     OPTIX_CHECK(optixAccelComputeMemoryUsage
                 (optixContext,
-                 accelOptions,
-                 &triangleInputs[0],
+                 &accelOptions,
+                 triangleInput,
                  meshes.size(),  // num_build_inputs
                  &blasBufferSizes
                  ));
@@ -231,16 +222,12 @@ namespace osc {
     
     CUDABuffer outputBuffer;
     outputBuffer.alloc(blasBufferSizes.outputSizeInBytes);
-
-    PRINT(tempBuffer.sizeInBytes);
-    PRINT(outputBuffer.sizeInBytes);
-
-    PING;
+      
     OPTIX_CHECK(optixAccelBuild(optixContext,
                                 /* stream */0,
-                                accelOptions,
-                                &triangleInputs[0],
-                                meshes.size(),  // num_build_inputs
+                                &accelOptions,
+                                triangleInput,
+                                meshes.size(),  
                                 tempBuffer.d_pointer(),
                                 tempBuffer.sizeInBytes,
                                 
@@ -252,7 +239,6 @@ namespace osc {
                                 &emitDesc,1
                                 ));
     CUDA_SYNC_CHECK();
-    PING;
     
     // ==================================================================
     // perform compaction
@@ -275,8 +261,7 @@ namespace osc {
     outputBuffer.free(); // << the UNcompacted, temporary output buffer
     tempBuffer.free();
     compactedSizeBuffer.free();
-
-    PRINT((int*)asHandle);
+    
     return asHandle;
   }
   
@@ -426,26 +411,28 @@ namespace osc {
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
-    hitgroupPGs.resize(1);
-      
-    OptixProgramGroupOptions pgOptions = {};
-    OptixProgramGroupDesc pgDesc    = {};
-    pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
-    pgDesc.hitgroup.moduleCH            = module;           
-    pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
-    pgDesc.hitgroup.moduleAH            = module;           
-    pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
+    hitgroupPGs.resize(meshes.size());
 
-    char log[2048];
-    size_t sizeof_log = sizeof( log );
-    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
-                                        &pgDesc,
-                                        1,
-                                        &pgOptions,
-                                        log,&sizeof_log,
-                                        &hitgroupPGs[0]
-                                        ));
-    if (sizeof_log > 1) PRINT(log);
+    for (int meshID=0;meshID<meshes.size();meshID++) {
+      OptixProgramGroupOptions pgOptions = {};
+      OptixProgramGroupDesc pgDesc    = {};
+      pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
+      pgDesc.hitgroup.moduleCH            = module;           
+      pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
+      pgDesc.hitgroup.moduleAH            = module;           
+      pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
+
+      char log[2048];
+      size_t sizeof_log = sizeof( log );
+      OPTIX_CHECK(optixProgramGroupCreate(optixContext,
+                                          &pgDesc,
+                                          1,
+                                          &pgOptions,
+                                          log,&sizeof_log,
+                                          &hitgroupPGs[meshID]
+                                          ));
+      if (sizeof_log > 1) PRINT(log);
+    }
   }
     
 
@@ -524,18 +511,18 @@ namespace osc {
     // ------------------------------------------------------------------
     // build hitgroup records
     // ------------------------------------------------------------------
-
+    
     // we don't actually have any objects in this example, but let's
     // create a dummy one so the SBT doesn't have any null pointers
     // (which the sanity checks in compilation would compain about)
     int numObjects = meshes.size();
     std::vector<HitgroupRecord> hitgroupRecords;
-    for (int i=0;i<numObjects;i++) {
+    for (int meshID=0;meshID<numObjects;meshID++) {
       HitgroupRecord rec;
-      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[i],&rec));
-      rec.data.color  = meshes[i].color;
-      rec.data.vertex = (vec3f*)vertexBuffer[i].d_pointer();
-      rec.data.index  = (vec3i*)indexBuffer[i].d_pointer();
+      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[meshID],&rec));
+      rec.data.color  = meshes[meshID].color;
+      rec.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
+      rec.data.index  = (vec3i*)indexBuffer[meshID].d_pointer();
       hitgroupRecords.push_back(rec);
     }
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);

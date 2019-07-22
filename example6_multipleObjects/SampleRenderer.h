@@ -156,7 +156,7 @@ namespace osc {
     Camera lastSetCamera;
     
     /*! the model we are going to trace rays against */
-    const std::vector<TriangleMesh> meshes;
+    std::vector<TriangleMesh> meshes;
     /*! one buffer per input mesh */
     std::vector<CUDABuffer> vertexBuffer;
     /*! one buffer per input mesh */

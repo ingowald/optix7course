@@ -71,8 +71,6 @@ namespace osc {
   
   extern "C" __global__ void __closesthit__radiance()
   {
-    printf("hit\n");
-    return;
     const TriangleMeshSBTData &sbtData
       = *(const TriangleMeshSBTData*)optixGetSbtDataPointer();
 
