@@ -33,9 +33,12 @@ add_executable(ex3_testFrameInWindow
 
 target_link_libraries(ex3_testFrameInWindow
   gdt
-  glfWindow
-  glfw
+  # optix dependencies, for rendering
   ${optix_LIBRARY}
   ${CUDA_LIBRARIES}
   ${CUDA_CUDA_LIBRARY}
+  # glfw and opengl, for display
+  glfWindow
+  glfw
+  ${OPENGL_gl_LIBRARY}
   )
