@@ -94,8 +94,10 @@ namespace osc {
     const int g = (iy % 256);
     const int b = ((ix+iy) % 256);
 
-    // convert to 32-bit rgba value
-    const uint32_t rgba = (r<<0) | (g<<8) | (b<<16);
+    // convert to 32-bit rgba value (we explicitly set alpha to 0xff
+    // to make stb_image_write happy ...
+    const uint32_t rgba = 0xff000000
+      | (r<<0) | (g<<8) | (b<<16);
 
     // and write to frame buffer ...
     const uint32_t fbIndex = ix+iy*optixLaunchParams.fbSize.x;

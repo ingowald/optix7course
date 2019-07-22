@@ -73,6 +73,15 @@ namespace osc {
                         count*sizeof(T), cudaMemcpyHostToDevice));
     }
     
+    template<typename T>
+    void download(T *t, size_t count)
+    {
+      assert(d_ptr != nullptr);
+      assert(sizeInBytes == count*sizeof(T));
+      CUDA_CHECK(Memcpy((void *)t, d_ptr,
+                        count*sizeof(T), cudaMemcpyDeviceToHost));
+    }
+    
     size_t sizeInBytes { 0 };
     void  *d_ptr { nullptr };
   };

@@ -23,6 +23,9 @@
 // our helper library for window handling
 #include "glfWindow/GLFWindow.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "3rdParty/stb_image_write.h"
+
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
 
@@ -35,6 +38,13 @@ namespace osc {
     virtual void render() override
     {
       sample.render();
+
+      std::vector<uint32_t> pixels(fbSize.x*fbSize.y);
+      sample.downloadPixels(pixels.data());
+      stbi_write_png("osc_example2.png",fbSize.x,fbSize.y,4,
+                     pixels.data(),fbSize.x*sizeof(uint32_t));
+      PING;
+      exit(0);
     }
     
     virtual void draw() override
@@ -44,9 +54,11 @@ namespace osc {
     
     virtual void resize(const vec2i &newSize) 
     {
+      fbSize = newSize;
       sample.resize(newSize);
     }
 
+    vec2i          fbSize;
     SampleRenderer sample;
   };
   

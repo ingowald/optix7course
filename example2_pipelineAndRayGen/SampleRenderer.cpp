@@ -392,4 +392,11 @@ namespace osc {
     launchParams.colorBuffer = (uint32_t*)colorBuffer.d_ptr;
   }
 
+  /*! download the rendered color buffer */
+  void SampleRenderer::downloadPixels(uint32_t h_pixels[])
+  {
+    colorBuffer.download(h_pixels,
+                         launchParams.fbSize.x*launchParams.fbSize.y);
+  }
+  
 } // ::osc
