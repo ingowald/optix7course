@@ -61,6 +61,15 @@ add_subdirectory(common/glfWindow EXCLUDE_FROM_ALL)
 # and final build rules for the project
 # ------------------------------------------------------------------
 
+# a first, simple, hello-world applicaion that creates a context, and
+# says hello...
 add_subdirectory(example1_helloOptix)
+
+# the first example that sets up an entire optix 7 pipeline, renders a
+# test image, and saves that in a png file.
 add_subdirectory(example2_pipelineAndRayGen)
+
+# the same rendering example, but in a glfwindow with continuous
+# rendering
+add_subdirectory(example3_inGLFWindow)
 

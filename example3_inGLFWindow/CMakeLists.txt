@@ -22,7 +22,7 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 
-add_executable(ex2_pipelineAndRayGen
+add_executable(ex3_testFrameInWindow
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
@@ -30,8 +30,11 @@ add_executable(ex2_pipelineAndRayGen
   SampleRenderer.cpp
   main.cpp
   )
-target_link_libraries(ex2_pipelineAndRayGen
+
+target_link_libraries(ex3_testFrameInWindow
   gdt
+  glfWindow
+  glfw
   ${optix_LIBRARY}
   ${CUDA_LIBRARIES}
   ${CUDA_CUDA_LIBRARY}

@@ -20,34 +20,50 @@
 
 #include "SampleRenderer.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "3rdParty/stb_image_write.h"
+// our helper library for window handling
+#include "glfWindow/GLFWindow.h"
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
 
+  struct SampleWindow : public GLFWindow
+  {
+    SampleWindow(const std::string &title)
+      : GLFWindow(title)
+    {}
+    
+    virtual void render() override
+    {
+      sample.render();
+    }
+    
+    virtual void draw() override
+    {
+      sample.downloadPixels(pixels.data());
+      
+    }
+    
+    virtual void resize(const vec2i &newSize) 
+    {
+      fbSize = newSize;
+      sample.resize(newSize);
+      pixels.resize(newSize.x*newSize.y);
+    }
+
+    vec2i                 fbSize;
+    SampleRenderer        sample;
+    std::vector<uint32_t> pixels;
+  };
+  
+  
   /*! main entry point to this example - initialy optix, print hello
     world, then exit */
   extern "C" int main(int ac, char **av)
   {
     try {
-      SampleRenderer sample;
-
-      const vec2i fbSize(vec2i(1200,1024));
-      sample.resize(fbSize);
-      sample.render();
-
-      std::vector<uint32_t> pixels(fbSize.x*fbSize.y);
-      sample.downloadPixels(pixels.data());
-
-      const std::string fileName = "osc_example2.png";
-      stbi_write_png(fileName.c_str(),fbSize.x,fbSize.y,4,
-                     pixels.data(),fbSize.x*sizeof(uint32_t));
-      std::cout << GDT_TERMINAL_GREEN
-                << std::endl
-                << "Image rendered, and saved to " << fileName << " ... done." << std::endl
-                << GDT_TERMINAL_DEFAULT
-                << std::endl;
+      SampleWindow *window = new SampleWindow("Optix 7 Course Example");
+      window->run();
+      
     } catch (std::runtime_error e) {
       std::cout << GDT_TERMINAL_RED << "FATAL ERROR: " << e.what()
                 << GDT_TERMINAL_DEFAULT << std::endl;
