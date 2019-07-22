@@ -69,7 +69,7 @@ namespace osc {
       triangleMesh */
   void TriangleMesh::addUnitCube(const affine3f &xfm)
   {
-    int firstVertexID = vertex.size();
+    int firstVertexID = (int)vertex.size();
     vertex.push_back(xfmPoint(xfm,vec3f(0.f,0.f,0.f)));
     vertex.push_back(xfmPoint(xfm,vec3f(1.f,0.f,0.f)));
     vertex.push_back(xfmPoint(xfm,vec3f(0.f,1.f,0.f)));
@@ -142,10 +142,10 @@ namespace osc {
     // ==================================================================
     // triangle inputs
     // ==================================================================
-    std::vector<OptixBuildInput> triangleInput(meshes.size());
-	std::vector<CUdeviceptr> d_vertices(meshes.size());
+	std::vector<OptixBuildInput> triangleInput(meshes.size());
+    std::vector<CUdeviceptr> d_vertices(meshes.size());
 	std::vector<CUdeviceptr> d_indices(meshes.size());
-    std::vector<uint32_t> triangleInputFlags(meshes.size());
+	std::vector<uint32_t> triangleInputFlags(meshes.size());
 
     for (int meshID=0;meshID<meshes.size();meshID++) {
     // upload the model to the device: the builder
@@ -178,7 +178,7 @@ namespace osc {
     // materials:
     triangleInput[meshID].triangleArray.flags               = &triangleInputFlags[meshID];
     triangleInput[meshID].triangleArray.numSbtRecords               = 1;
-    triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 1; 
+    triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 0; 
     triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
     triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0; 
     }
@@ -198,7 +198,7 @@ namespace osc {
                 (optixContext,
                  &accelOptions,
                  triangleInput.data(),
-					(int)meshes.size(),  // num_build_inputs
+                 (int)meshes.size(),  // num_build_inputs
                  &blasBufferSizes
                  ));
     
