@@ -77,4 +77,6 @@ add_subdirectory(example2_pipelineAndRayGen)
 add_subdirectory(example3_inGLFWindow)
 
 add_subdirectory(example4_firstTriangleMesh)
+add_subdirectory(example5_multipleObjectsAndSBTData)
+
 

@@ -1,6 +1,7 @@
 *~
 *#
 bin
+build
 *.autosave
 *.gz
 *.zip
