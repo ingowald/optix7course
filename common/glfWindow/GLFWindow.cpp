@@ -51,7 +51,7 @@ namespace osc {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
       
-    handle = glfwCreateWindow(640, 480, title.c_str(), NULL, NULL);
+    handle = glfwCreateWindow(1200, 800, title.c_str(), NULL, NULL);
     if (!handle) {
       glfwTerminate();
       exit(EXIT_FAILURE);

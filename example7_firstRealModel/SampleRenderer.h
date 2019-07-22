@@ -49,7 +49,7 @@ namespace osc {
   public:
     /*! constructor - performs asll setup, inlucuding initializing
       optix, creates module, pipeline, programs, SBT, etc. */
-    SampleRenderer(const std::vector<TriangleMesh> &meshes);
+    SampleRenderer(const Model *model);
 
     /*! render one frame */
     void render();
@@ -141,7 +141,8 @@ namespace osc {
     Camera lastSetCamera;
     
     /*! the model we are going to trace rays against */
-    std::vector<TriangleMesh> meshes;
+    const Model *model;
+    
     /*! one buffer per input mesh */
     std::vector<CUDABuffer> vertexBuffer;
     /*! one buffer per input mesh */

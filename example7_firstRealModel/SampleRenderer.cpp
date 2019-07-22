@@ -53,10 +53,10 @@ namespace osc {
   };
 
 
-    /*! constructor - performs asll setup, inlucuding initializing
-      optix, creates module, pipeline, programs, SBT, etc. */
-  SampleRenderer::SampleRenderer(const std::vector<TriangleMesh> &meshes)
-    : meshes(meshes)
+  /*! constructor - performs asll setup, inlucuding initializing
+    optix, creates module, pipeline, programs, SBT, etc. */
+  SampleRenderer::SampleRenderer(const Model *model)
+    : model(model)
   {
     initOptix();
       
@@ -91,55 +91,56 @@ namespace osc {
 
   OptixTraversableHandle SampleRenderer::buildAccel()
   {
-    // meshes.resize(1);
-
-    vertexBuffer.resize(meshes.size());
-    indexBuffer.resize(meshes.size());
+    PING;
+    PRINT(model->meshes.size());
+    
+    vertexBuffer.resize(model->meshes.size());
+    indexBuffer.resize(model->meshes.size());
     
     OptixTraversableHandle asHandle { 0 };
     
     // ==================================================================
     // triangle inputs
     // ==================================================================
-	std::vector<OptixBuildInput> triangleInput(meshes.size());
-    std::vector<CUdeviceptr> d_vertices(meshes.size());
-	std::vector<CUdeviceptr> d_indices(meshes.size());
-	std::vector<uint32_t> triangleInputFlags(meshes.size());
+    std::vector<OptixBuildInput> triangleInput(model->meshes.size());
+    std::vector<CUdeviceptr> d_vertices(model->meshes.size());
+    std::vector<CUdeviceptr> d_indices(model->meshes.size());
+    std::vector<uint32_t> triangleInputFlags(model->meshes.size());
 
-    for (int meshID=0;meshID<meshes.size();meshID++) {
-    // upload the model to the device: the builder
-    TriangleMesh &model = meshes[meshID];
-    vertexBuffer[meshID].alloc_and_upload(model.vertex);
-    indexBuffer[meshID].alloc_and_upload(model.index);
+    for (int meshID=0;meshID<model->meshes.size();meshID++) {
+      // upload the model to the device: the builder
+      TriangleMesh &mesh = *model->meshes[meshID];
+      vertexBuffer[meshID].alloc_and_upload(mesh.vertex);
+      indexBuffer[meshID].alloc_and_upload(mesh.index);
 
-    triangleInput[meshID] = {};
-    triangleInput[meshID].type
-      = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+      triangleInput[meshID] = {};
+      triangleInput[meshID].type
+        = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
 
-    // create local variables, because we need a *pointer* to the
-    // device pointers
-    d_vertices[meshID] = vertexBuffer[meshID].d_pointer();
-    d_indices[meshID]  = indexBuffer[meshID].d_pointer();
+      // create local variables, because we need a *pointer* to the
+      // device pointers
+      d_vertices[meshID] = vertexBuffer[meshID].d_pointer();
+      d_indices[meshID]  = indexBuffer[meshID].d_pointer();
       
-    triangleInput[meshID].triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
-    triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(vec3f);
-    triangleInput[meshID].triangleArray.numVertices         = (int)model.vertex.size();
-    triangleInput[meshID].triangleArray.vertexBuffers       = &d_vertices[meshID];
+      triangleInput[meshID].triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
+      triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(vec3f);
+      triangleInput[meshID].triangleArray.numVertices         = (int)mesh.vertex.size();
+      triangleInput[meshID].triangleArray.vertexBuffers       = &d_vertices[meshID];
     
-    triangleInput[meshID].triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-    triangleInput[meshID].triangleArray.indexStrideInBytes  = sizeof(vec3i);
-    triangleInput[meshID].triangleArray.numIndexTriplets    = (int)model.index.size();
-    triangleInput[meshID].triangleArray.indexBuffer         = d_indices[meshID];
+      triangleInput[meshID].triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+      triangleInput[meshID].triangleArray.indexStrideInBytes  = sizeof(vec3i);
+      triangleInput[meshID].triangleArray.numIndexTriplets    = (int)mesh.index.size();
+      triangleInput[meshID].triangleArray.indexBuffer         = d_indices[meshID];
     
-    triangleInputFlags[meshID] = 0 ;
+      triangleInputFlags[meshID] = 0 ;
     
-    // in this example we have one SBT entry, and no per-primitive
-    // materials:
-    triangleInput[meshID].triangleArray.flags               = &triangleInputFlags[meshID];
-    triangleInput[meshID].triangleArray.numSbtRecords               = 1;
-    triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 0; 
-    triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
-    triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0; 
+      // in this example we have one SBT entry, and no per-primitive
+      // materials:
+      triangleInput[meshID].triangleArray.flags               = &triangleInputFlags[meshID];
+      triangleInput[meshID].triangleArray.numSbtRecords               = 1;
+      triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 0; 
+      triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
+      triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0; 
     }
     // ==================================================================
     // BLAS setup
@@ -157,7 +158,7 @@ namespace osc {
                 (optixContext,
                  &accelOptions,
                  triangleInput.data(),
-                 (int)meshes.size(),  // num_build_inputs
+                 (int)model->meshes.size(),  // num_build_inputs
                  &blasBufferSizes
                  ));
     
@@ -186,7 +187,7 @@ namespace osc {
                                 /* stream */0,
                                 &accelOptions,
                                 triangleInput.data(),
-		(int)meshes.size(),
+                                (int)model->meshes.size(),
                                 tempBuffer.d_pointer(),
                                 tempBuffer.sizeInBytes,
                                 
@@ -257,7 +258,7 @@ namespace osc {
   }
 
   /*! creates and configures a optix device context (in this simple
-      example, only for the primary GPU device) */
+    example, only for the primary GPU device) */
   void SampleRenderer::createContext()
   {
     // for this sample, do everything on one device
@@ -280,8 +281,8 @@ namespace osc {
 
 
   /*! creates the module that contains all the programs we are going
-      to use. in this simple example, we use a single module from a
-      single .cu file, using a single embedded ptx string */
+    to use. in this simple example, we use a single module from a
+    single .cu file, using a single embedded ptx string */
   void SampleRenderer::createModule()
   {
     moduleCompileOptions.maxRegisterCount  = 100;
@@ -316,7 +317,7 @@ namespace osc {
     
 
 
-    /*! does all setup for the raygen program(s) we are going to use */
+  /*! does all setup for the raygen program(s) we are going to use */
   void SampleRenderer::createRaygenPrograms()
   {
     // we do a single ray gen program in this example:
@@ -341,7 +342,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the miss program(s) we are going to use */
+  /*! does all setup for the miss program(s) we are going to use */
   void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
@@ -366,13 +367,13 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the hitgroup program(s) we are going to use */
+  /*! does all setup for the hitgroup program(s) we are going to use */
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
-    hitgroupPGs.resize(meshes.size());
+    hitgroupPGs.resize(model->meshes.size());
 
-    for (int meshID=0;meshID<meshes.size();meshID++) {
+    for (int meshID=0;meshID<model->meshes.size();meshID++) {
       OptixProgramGroupOptions pgOptions = {};
       OptixProgramGroupDesc pgDesc    = {};
       pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
@@ -412,7 +413,7 @@ namespace osc {
                                     &pipelineCompileOptions,
                                     &pipelineLinkOptions,
                                     programGroups.data(),
-		(int)programGroups.size(),
+                                    (int)programGroups.size(),
                                     log,&sizeof_log,
                                     &pipeline
                                     ));
@@ -474,12 +475,12 @@ namespace osc {
     // we don't actually have any objects in this example, but let's
     // create a dummy one so the SBT doesn't have any null pointers
     // (which the sanity checks in compilation would compain about)
-    int numObjects = (int)meshes.size();
+    int numObjects = (int)model->meshes.size();
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int meshID=0;meshID<numObjects;meshID++) {
       HitgroupRecord rec;
       OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[meshID],&rec));
-      rec.data.color  = meshes[meshID].kd;
+      rec.data.color  = model->meshes[meshID]->diffuse;
       rec.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
       rec.data.index  = (vec3i*)indexBuffer[meshID].d_pointer();
       hitgroupRecords.push_back(rec);

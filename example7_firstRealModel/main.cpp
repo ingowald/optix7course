@@ -30,7 +30,7 @@ namespace osc {
   struct SampleWindow : public GLFWindow
   {
     SampleWindow(const std::string &title,
-                 const std::vector<TriangleMesh> &model,
+                 const Model *model,
                  const Camera &camera)
       : GLFWindow(title),
         sample(model)
@@ -111,21 +111,29 @@ namespace osc {
   extern "C" int main(int ac, char **av)
   {
     try {
-      Model *model = loadOBJ(av[1]);
-      exit(0);
+      Model *model = loadOBJ(
+#ifdef _WIN32
+      // on windows, visual studio creates _two_ levels of build dir
+      // (x86/Release)
+      "../../sponza.obj"
+#else
+      // on linux, common practice is to have ONE level of build dir
+      // (say, <project>/build/)...
+      "../sponza.obj"
+#endif
+                             );
       
-      std::vector<TriangleMesh> meshes(2);
-
-      Camera camera = { /*from*/vec3f(-10.f,2.f,-12.f),
-                        /* at */vec3f(0.f,0.f,0.f),
+      Camera camera = { /*from*/vec3f(-1293.07f, 154.681f, -0.7304f),
+                        /* at */vec3f(-907.108f, 205.875f, -0.0267f),
                         /* up */vec3f(0.f,1.f,0.f) };
       SampleWindow *window = new SampleWindow("Optix 7 Course Example",
-                                              meshes,camera);
+                                              model,camera);
       window->run();
       
     } catch (std::runtime_error e) {
       std::cout << GDT_TERMINAL_RED << "FATAL ERROR: " << e.what()
                 << GDT_TERMINAL_DEFAULT << std::endl;
+      std::cout << "Did you forget to copy sponza.obj and sponza.mtl into your project dir?"
       exit(1);
     }
     return 0;

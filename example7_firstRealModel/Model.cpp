@@ -57,17 +57,21 @@ namespace osc {
     if (knownVertices.find(idx) != knownVertices.end())
       return knownVertices[idx];
 
+    const vec3f *vertex_array   = (const vec3f*)attributes.vertices.data();
+    const vec3f *normal_array   = (const vec3f*)attributes.normals.data();
+    const vec2f *texcoord_array = (const vec2f*)attributes.texcoords.data();
+    
     int newID = mesh->vertex.size();
     knownVertices[idx] = newID;
 
-    mesh->vertex.push_back((const vec3f&)attributes.vertices[3*idx.vertex_index]);
+    mesh->vertex.push_back(vertex_array[idx.vertex_index]);
     if (idx.normal_index >= 0) {
       while (mesh->normal.size() < mesh->vertex.size())
-        mesh->normal.push_back((const vec3f&)attributes.normals[3*idx.normal_index]);
+        mesh->normal.push_back(normal_array[idx.normal_index]);
     }
     if (idx.texcoord_index >= 0) {
       while (mesh->texcoord.size() < mesh->vertex.size())
-        mesh->texcoord.push_back((const vec2f&)attributes.texcoords[2*idx.texcoord_index]);
+        mesh->texcoord.push_back(texcoord_array[idx.texcoord_index]);
     }
 
     // just for sanity's sake:
@@ -105,6 +109,9 @@ namespace osc {
       throw std::runtime_error("Could not read OBJ model from "+objFile+":"+mtlDir+" : "+err);
     }
 
+    for (auto vtx : attributes.vertices)
+      model->bounds.extend(vtx);
+    
     if (materials.empty())
       throw std::runtime_error("could not parse materials ...");
 
@@ -130,9 +137,9 @@ namespace osc {
           vec3i idx(addVertex(mesh, attributes, idx0, knownVertices),
                     addVertex(mesh, attributes, idx1, knownVertices),
                     addVertex(mesh, attributes, idx2, knownVertices));
-          
           mesh->index.push_back(idx);
-          mesh->kd = (const vec3f&)materials[materialID].diffuse;
+          mesh->diffuse = (const vec3f&)materials[materialID].diffuse;
+          mesh->diffuse = gdt::randomColor(materialID);
         }
 
         if (mesh->vertex.empty())
