@@ -21,7 +21,6 @@
 #include "SampleRenderer.h"
 
 // our helper library for window handling
-#include "glfWindow/CUDAFrameBuffer.h"
 #include "glfWindow/GLFWindow.h"
 
 /*! \namespace osc - Optix Siggraph Course */
