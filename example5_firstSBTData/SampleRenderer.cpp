@@ -51,7 +51,7 @@ namespace osc {
     __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
     // just a dummy value - later examples will use more interesting
     // data here
-    int objectID;
+    TriangleMeshSBTData data;
   };
 
 
@@ -98,6 +98,7 @@ namespace osc {
   /*! constructor - performs asll setup, inlucuding initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const TriangleMesh &model)
+    : model(model)
   {
     initOptix();
       
@@ -249,7 +250,7 @@ namespace osc {
     outputBuffer.free(); // << the UNcompacted, temporary output buffer
     tempBuffer.free();
     compactedSizeBuffer.free();
-
+    
     return asHandle;
   }
   
@@ -507,7 +508,9 @@ namespace osc {
       int objectType = 0;
       HitgroupRecord rec;
       OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType],&rec));
-      rec.objectID = i;
+      rec.data.vertex = (vec3f*)vertexBuffer.d_pointer();
+      rec.data.index  = (vec3i*)indexBuffer.d_pointer();
+      rec.data.color  = model.color;
       hitgroupRecords.push_back(rec);
     }
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
