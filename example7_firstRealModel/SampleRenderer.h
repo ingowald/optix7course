@@ -23,7 +23,7 @@
 // our own classes, partly shared between host and device
 #include "CUDABuffer.h"
 #include "LaunchParams.h"
-#include "gdt/math/AffineSpace.h"
+#include "Model.h"
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
@@ -35,21 +35,6 @@ namespace osc {
     vec3f at;
     /*! general up-vector */
     vec3f up;
-  };
-  
-  /*! a simple indexed triangle mesh that our sample renderer will
-      render */
-  struct TriangleMesh {
-    /*! add a unit cube (subject to given xfm matrix) to the current
-        triangleMesh */
-    void addUnitCube(const affine3f &xfm);
-    
-    //! add aligned cube aith front-lower-left corner and size
-    void addCube(const vec3f &center, const vec3f &size);
-    
-    std::vector<vec3f> vertex;
-    std::vector<vec3i> index;
-    vec3f              color;
   };
   
   /*! a sample OptiX-7 renderer that demonstrates how to set up

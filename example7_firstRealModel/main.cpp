@@ -111,19 +111,16 @@ namespace osc {
   extern "C" int main(int ac, char **av)
   {
     try {
-      std::vector<TriangleMesh> model(2);
-      // 100x100 thin ground plane
-      model[0].color = vec3f(0.f, 1.f, 0.f);
-      model[0].addCube(vec3f(0.f,-1.5f, 0.f),vec3f(10.f,.1f,10.f));
-      // a unit cube centered on top of that
-      model[1].color = vec3f(0.f,1.f,1.f);
-      model[1].addCube(vec3f(0.f,0.f,0.f),vec3f(2.f,2.f,2.f));
+      Model *model = loadOBJ(av[1]);
+      exit(0);
+      
+      std::vector<TriangleMesh> meshes(2);
 
       Camera camera = { /*from*/vec3f(-10.f,2.f,-12.f),
                         /* at */vec3f(0.f,0.f,0.f),
                         /* up */vec3f(0.f,1.f,0.f) };
       SampleWindow *window = new SampleWindow("Optix 7 Course Example",
-                                              model,camera);
+                                              meshes,camera);
       window->run();
       
     } catch (std::runtime_error e) {

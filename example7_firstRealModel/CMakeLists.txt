@@ -30,6 +30,7 @@ add_executable(ex7_firstRealModel
   CUDABuffer.h
   SampleRenderer.h
   SampleRenderer.cpp
+  Model.cpp
   main.cpp
   )
 
