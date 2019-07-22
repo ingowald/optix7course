@@ -27,6 +27,7 @@ namespace osc {
   
   struct LaunchParams
   {
+    int       frameID { 0 };
     uint32_t *colorBuffer;
     vec2i     fbSize;
   };

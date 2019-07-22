@@ -30,7 +30,7 @@
 extern "C" char embedded_ptx_code[];
 
 /*! SBT record for a raygen program */
-struct RaygenRecord
+struct __align__( OPTIX_SBT_RECORD_ALIGNMENT ) RaygenRecord
 {
   __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
   // just a dummy value - later examples will use more interesting
@@ -39,7 +39,7 @@ struct RaygenRecord
 };
 
 /*! SBT record for a miss program */
-struct MissRecord
+struct __align__( OPTIX_SBT_RECORD_ALIGNMENT ) MissRecord
 {
   __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
   // just a dummy value - later examples will use more interesting
@@ -48,7 +48,7 @@ struct MissRecord
 };
 
 /*! SBT record for a hitgroup program */
-struct HitgroupRecord
+struct __align__( OPTIX_SBT_RECORD_ALIGNMENT ) HitgroupRecord
 {
   __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
   // just a dummy value - later examples will use more interesting
@@ -82,7 +82,7 @@ namespace osc {
     void alloc_and_upload(const std::vector<T> &vt)
     {
       alloc(vt.size()*sizeof(T));
-      upload(vt.data(),vt.size());
+      upload((const T*)vt.data(),vt.size());
     }
     
     template<typename T>
@@ -90,7 +90,7 @@ namespace osc {
     {
       assert(d_ptr != nullptr);
       assert(sizeInBytes == count*sizeof(T));
-      CUDA_CHECK(Memcpy(d_ptr, (void *)&t,
+      CUDA_CHECK(Memcpy(d_ptr, (void *)t,
                         count*sizeof(T), cudaMemcpyHostToDevice));
     }
     
@@ -102,6 +102,8 @@ namespace osc {
   {
     SampleRenderer()
     {
+      initOptix();
+      
       std::cout << "#osc: creating optix context ..." << std::endl;
       createContext();
       
@@ -123,16 +125,42 @@ namespace osc {
 
       launchParamsBuffer.alloc(sizeof(launchParams));
       std::cout << "#osc: context, module, pipline, etc, all set up ..." << std::endl;
+
+      std::cout << GDT_TERMINAL_GREEN;
+      std::cout << "#osc: Optix 7 Sample fully set up" << std::endl;
+      std::cout << GDT_TERMINAL_DEFAULT;
     }
 
+  /*! helper function that initializes optix, and checks for errors */
+  void initOptix()
+  {
+    std::cout << "#osc: initializing optix..." << std::endl;
+      
+    // -------------------------------------------------------
+    // check for available optix7 capable devices
+    // -------------------------------------------------------
+    cudaFree(0);
+    int numDevices;
+    cudaGetDeviceCount(&numDevices);
+    if (numDevices == 0)
+      throw std::runtime_error("#osc: no CUDA capable devices found!");
+    std::cout << "#osc: found " << numDevices << " CUDA devices" << std::endl;
+
+    // -------------------------------------------------------
+    // initialize optix
+    // -------------------------------------------------------
+    OPTIX_CHECK( optixInit() );
+    std::cout << GDT_TERMINAL_GREEN
+              << "#osc: successfully initialized optix... yay!"
+              << GDT_TERMINAL_DEFAULT << std::endl;
+  }
+  
     void buildSBT()
     {
       // ------------------------------------------------------------------
       // build raygen records
       // ------------------------------------------------------------------
       std::vector<RaygenRecord> raygenRecords;
-      PING;
-      PRINT(raygenPGs.size());
       for (int i=0;i<raygenPGs.size();i++) {
         RaygenRecord rec;
         OPTIX_CHECK(optixSbtRecordPackHeader(raygenPGs[i],&rec));
@@ -146,8 +174,6 @@ namespace osc {
       // build miss records
       // ------------------------------------------------------------------
       std::vector<MissRecord> missRecords;
-      PING;
-      PRINT(missPGs.size());
       for (int i=0;i<missPGs.size();i++) {
         MissRecord rec;
         OPTIX_CHECK(optixSbtRecordPackHeader(missPGs[i],&rec));
@@ -167,9 +193,7 @@ namespace osc {
       // create a dummy one so the SBT doesn't have any null pointers
       // (which the sanity checks in compilation would compain about)
       int numObjects = 1;
-      PRINT(hitgroupPGs.size());
       std::vector<HitgroupRecord> hitgroupRecords;
-      PING;
       for (int i=0;i<numObjects;i++) {
         int objectType = 0;
         HitgroupRecord rec;
@@ -185,7 +209,6 @@ namespace osc {
     
     void createRaygenPrograms()
     {
-      PING;
       // we do a single ray gen program in this example:
       raygenPGs.resize(1);
       
@@ -198,7 +221,6 @@ namespace osc {
       // OptixProgramGroup raypg;
       char log[2048];
       size_t sizeof_log = sizeof( log );
-      PING;
       OPTIX_CHECK(optixProgramGroupCreate(optixContext,
                                           &pgDesc,
                                           1,
@@ -206,13 +228,11 @@ namespace osc {
                                           log,&sizeof_log,
                                           &raygenPGs[0]
                                           ));
-      PRINT(log);
-      PING;
+      if (sizeof_log > 1) PRINT(log);
     }
     
     void createMissPrograms()
     {
-      PING;
       // we do a single ray gen program in this example:
       missPGs.resize(1);
       
@@ -225,7 +245,6 @@ namespace osc {
       // OptixProgramGroup raypg;
       char log[2048];
       size_t sizeof_log = sizeof( log );
-      PING;
       OPTIX_CHECK(optixProgramGroupCreate(optixContext,
                                           &pgDesc,
                                           1,
@@ -233,13 +252,11 @@ namespace osc {
                                           log,&sizeof_log,
                                           &missPGs[0]
                                           ));
-      PRINT(log);
-      PING;
+      if (sizeof_log > 1) PRINT(log);
     }
     
     void createHitgroupPrograms()
     {
-      PING;
       // for this simple example, we set up a single hit group
       hitgroupPGs.resize(1);
       
@@ -251,10 +268,8 @@ namespace osc {
       pgDesc.hitgroup.moduleAH            = module;           
       pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
 
-      // OptixProgramGroup raypg;
       char log[2048];
       size_t sizeof_log = sizeof( log );
-      PING;
       OPTIX_CHECK(optixProgramGroupCreate(optixContext,
                                           &pgDesc,
                                           1,
@@ -262,20 +277,18 @@ namespace osc {
                                           log,&sizeof_log,
                                           &hitgroupPGs[0]
                                           ));
-      PRINT(log);
-      PING;
+      if (sizeof_log > 1) PRINT(log);
     }
     
     void render()
     {
+      // sanity check: make sure we launch only after first resize is
+      // already done:
       if (launchParams.fbSize.x == 0) return;
       
-      PING;
       launchParamsBuffer.upload(&launchParams,1);
-      PING;
-      PRINT(launchParams.fbSize);
-      PRINT((void*)launchParamsBuffer.d_pointer());
-      PRINT(launchParamsBuffer.sizeInBytes);
+      launchParams.frameID++;
+      
       OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
                               pipeline,stream,
                               /*! parameters and SBT */
@@ -287,15 +300,21 @@ namespace osc {
                               launchParams.fbSize.y,
                               1
                               ));
-      PING;
+      // sync - make sure the frame is rendered before we download and
+      // display (obviously, for a high-performance application you
+      // want to use streams and double-buffering, but for this simple
+      // example, this will have to do)
       CUDA_SYNC_CHECK();
-      PING;
     }
 
     void resize(const vec2i &newSize)
     {
+      // resize our cuda frame buffer
       fb.resize(newSize);
-      launchParams.fbSize = newSize;
+
+      // update the launch paramters that we'll pass to the optix
+      // launch:
+      launchParams.fbSize      = newSize;
       launchParams.colorBuffer = fb.d_colorBuffer;
     }
 
@@ -313,7 +332,7 @@ namespace osc {
       const int deviceID = 0;
       CUDA_CHECK(SetDevice(deviceID));
       CUDA_CHECK(StreamCreate(&stream));
-
+      
       cudaGetDeviceProperties(&deviceProps, deviceID);
       std::cout << "#osc: running on device device: " << deviceProps.name << std::endl;
       
@@ -340,9 +359,11 @@ namespace osc {
       pipelineCompileOptions.exceptionFlags     = OPTIX_EXCEPTION_FLAG_NONE;
       pipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
       
-      PING;
+      pipelineLinkOptions.overrideUsesMotionBlur = false;
+      pipelineLinkOptions.maxTraceDepth          = 2;
+      
       const std::string ptxCode = embedded_ptx_code;
-      PRINT(ptxCode);
+      
       char log[2048];
       size_t sizeof_log = sizeof( log );
       OPTIX_CHECK(optixModuleCreateFromPTX(optixContext,
@@ -353,14 +374,11 @@ namespace osc {
                                            log,&sizeof_log,
                                            &module
                                            ));
-      if (sizeof_log > 0)
-        PRINT(log);
-      PING;
+      if (sizeof_log > 1) PRINT(log);
     }
     
     void createPipeline()
     {
-      PING;
       std::vector<OptixProgramGroup> programGroups;
       for (auto pg : raygenPGs)
         programGroups.push_back(pg);
@@ -368,9 +386,6 @@ namespace osc {
         programGroups.push_back(pg);
       for (auto pg : hitgroupPGs)
         programGroups.push_back(pg);
-      
-      pipelineLinkOptions.overrideUsesMotionBlur = false;
-      pipelineLinkOptions.maxTraceDepth          = 2;
       
       char log[2048];
       size_t sizeof_log = sizeof( log );
@@ -382,7 +397,8 @@ namespace osc {
                                       log,&sizeof_log,
                                       &pipeline
                                       ));
-      PRINT(log);
+      if (sizeof_log > 1) PRINT(log);
+
       OPTIX_CHECK(optixPipelineSetStackSize
                   (/* [in] The pipeline to configure the stack size for */
                    pipeline, 
@@ -397,7 +413,7 @@ namespace osc {
                    /* [in] The maximum depth of a traversable graph
                       passed to trace. */
                    3));
-        PRINT(log);
+      if (sizeof_log > 1) PRINT(log);
     }
     
     /*! @{ CUDA device context and stream that optix pipeline will run
@@ -454,7 +470,7 @@ namespace osc {
     
     virtual void draw() override
     {
-      PING;
+      
     }
     
     virtual void resize(const vec2i &newSize) 
@@ -466,37 +482,11 @@ namespace osc {
   };
   
   
-  /*! helper function that initializes optix, and checks for errors */
-  void initOptix()
-  {
-    std::cout << "#osc: initializing optix..." << std::endl;
-      
-    // -------------------------------------------------------
-    // check for available optix7 capable devices
-    // -------------------------------------------------------
-    cudaFree(0);
-    int numDevices;
-    cudaGetDeviceCount(&numDevices);
-    if (numDevices == 0)
-      throw std::runtime_error("#osc: no CUDA capable devices found!");
-    std::cout << "#osc: found " << numDevices << " CUDA devices" << std::endl;
-
-    // -------------------------------------------------------
-    // initialize optix
-    // -------------------------------------------------------
-    OPTIX_CHECK( optixInit() );
-    std::cout << GDT_TERMINAL_GREEN
-              << "#osc: successfully initialized optix... yay!"
-              << GDT_TERMINAL_DEFAULT << std::endl;
-  }
-  
   /*! main entry point to this example - initialy optix, print hello
     world, then exit */
   extern "C" int main(int ac, char **av)
   {
     try {
-      initOptix();
-      
       SampleWindow *window = new SampleWindow("Optix 7 Course Example");
       window->run();
       
