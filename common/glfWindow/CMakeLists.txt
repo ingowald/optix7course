@@ -19,7 +19,6 @@
 # ======================================================================================
 
 add_library(glfWindow
-  CUDAFrameBuffer.h
   GLFWindow.h
   GLFWindow.cpp
   )
