@@ -82,5 +82,6 @@ add_subdirectory(example06_multipleObjects)
 add_subdirectory(example07_firstRealModel)
 add_subdirectory(example08_addingTextures)
 add_subdirectory(example09_shadowRays)
+add_subdirectory(example10_softShadows)
 
 
