@@ -89,18 +89,27 @@ namespace osc {
     // compute normal, using either shading normal (if avail), or
     // geometry normal (fallback)
     // ------------------------------------------------------------------
-    vec3f N;
-    if (sbtData.normal) {
-      N = (1.f-u-v) * sbtData.normal[index.x]
-        +         u * sbtData.normal[index.y]
-        +         v * sbtData.normal[index.z];
-    } else {
-      const vec3f &A     = sbtData.vertex[index.x];
-      const vec3f &B     = sbtData.vertex[index.y];
-      const vec3f &C     = sbtData.vertex[index.z];
-      N                  = normalize(cross(B-A,C-A));
-    }
-    N = normalize(N);
+    const vec3f &A     = sbtData.vertex[index.x];
+    const vec3f &B     = sbtData.vertex[index.y];
+    const vec3f &C     = sbtData.vertex[index.z];
+    vec3f Ng = cross(B-A,C-A);
+    vec3f Ns = (sbtData.normal)
+      ? ((1.f-u-v) * sbtData.normal[index.x]
+         +       u * sbtData.normal[index.y]
+         +       v * sbtData.normal[index.z])
+      : Ng;
+    
+    // ------------------------------------------------------------------
+    // face-forward and normalize normals
+    // ------------------------------------------------------------------
+    const vec3f rayDir = optixGetWorldRayDirection();
+    
+    if (dot(rayDir,Ng) > 0.f) Ng = -Ng;
+    Ng = normalize(Ng);
+    
+    if (dot(Ng,Ns) < 0.f)
+      Ns -= 2.f*dot(Ng,Ns)*Ng;
+    Ns = normalize(Ns);
 
     // ------------------------------------------------------------------
     // compute diffuse material color, including diffuse texture, if
@@ -118,14 +127,44 @@ namespace osc {
     }
     
     // ------------------------------------------------------------------
-    // perform some simple "NdotD" shading
+    // compute shadow
     // ------------------------------------------------------------------
-    const vec3f rayDir = optixGetWorldRayDirection();
-    const float cosDN  = 0.2f + .8f*fabsf(dot(rayDir,N));
+    const vec3f surfPos
+      = (1.f-u-v) * sbtData.vertex[index.x]
+      +         u * sbtData.vertex[index.y]
+      +         v * sbtData.vertex[index.z];
+    const vec3f lightPos(-907.108f, 2205.875f, -400.0267f);
+    const vec3f lightDir = lightPos - surfPos;
+    
+    // trace shadow ray:
+    vec3f lightVisibility = 1.f;
+    // the values we store the PRD pointer in:
+    uint32_t u0, u1;
+    packPointer( &lightVisibility, u0, u1 );
+    optixTrace(optixLaunchParams.traversable,
+               surfPos + 1e-3f * Ng,
+               lightDir,
+               1e-3f,      // tmin
+               1.f-1e-3f,  // tmax
+               0.0f,       // rayTime
+               OptixVisibilityMask( 255 ),
+               // anyhit ON for shadow rays:
+               OPTIX_RAY_FLAG_NONE,
+               SHADOW_RAY_TYPE,            // SBT offset
+               RAY_TYPE_COUNT,               // SBT stride
+               SHADOW_RAY_TYPE,            // missSBTIndex 
+               u0, u1 );
+
+    // ------------------------------------------------------------------
+    // final shading: a bit of ambient, a bit of directional ambient,
+    // and directional component based on shadowing
+    // ------------------------------------------------------------------
+    const float cosDN
+      = 0.1f
+      + .8f*fabsf(dot(rayDir,Ns));
     
     vec3f &prd = *(vec3f*)getPRD<vec3f>();
-    prd = cosDN * diffuseColor;
-
+    prd = (.1f + (.2f + .8f*lightVisibility) * cosDN) * diffuseColor;
   }
   
   extern "C" __global__ void __anyhit__radiance()
