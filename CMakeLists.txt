@@ -80,5 +80,6 @@ add_subdirectory(example4_firstTriangleMesh)
 add_subdirectory(example5_firstSBTData)
 add_subdirectory(example6_multipleObjects)
 add_subdirectory(example7_firstRealModel)
+add_subdirectory(example8_addingTextures)
 
 
