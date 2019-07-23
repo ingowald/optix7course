@@ -24,7 +24,7 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 
-add_executable(ex3_testFrameInWindow
+add_executable(ex03_testFrameInWindow
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
@@ -33,7 +33,7 @@ add_executable(ex3_testFrameInWindow
   main.cpp
   )
 
-target_link_libraries(ex3_testFrameInWindow
+target_link_libraries(ex03_testFrameInWindow
   gdt
   # optix dependencies, for rendering
   ${optix_LIBRARY}

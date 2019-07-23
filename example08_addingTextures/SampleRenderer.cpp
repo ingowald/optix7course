@@ -431,7 +431,7 @@ namespace osc {
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
-    hitgroupPGs.resize(model->meshes.size());
+    hitgroupPGs.resize(1);
 
     for (int meshID=0;meshID<model->meshes.size();meshID++) {
       OptixProgramGroupOptions pgOptions = {};
@@ -449,7 +449,7 @@ namespace osc {
                                           1,
                                           &pgOptions,
                                           log,&sizeof_log,
-                                          &hitgroupPGs[meshID]
+                                          &hitgroupPGs[0]
                                           ));
       if (sizeof_log > 1) PRINT(log);
     }
@@ -541,7 +541,8 @@ namespace osc {
       auto mesh = model->meshes[meshID];
       
       HitgroupRecord rec;
-      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[meshID],&rec));
+      // all meshes use the same code, so all same hit group
+      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[0],&rec));
       rec.data.color   = mesh->diffuse;
       if (mesh->diffuseTextureID >= 0) {
         rec.data.hasTexture = true;

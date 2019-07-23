@@ -24,7 +24,7 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 
-add_executable(ex4_firstTriangleMesh
+add_executable(ex04_firstTriangleMesh
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
@@ -33,7 +33,7 @@ add_executable(ex4_firstTriangleMesh
   main.cpp
   )
 
-target_link_libraries(ex4_firstTriangleMesh
+target_link_libraries(ex04_firstTriangleMesh
   gdt
   # optix dependencies, for rendering
   ${optix_LIBRARY}

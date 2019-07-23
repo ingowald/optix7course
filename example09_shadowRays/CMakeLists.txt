@@ -24,7 +24,7 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 
-add_executable(ex07_firstRealModel
+add_executable(ex09_shadowRays
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
@@ -34,7 +34,7 @@ add_executable(ex07_firstRealModel
   main.cpp
   )
 
-target_link_libraries(ex07_firstRealModel
+target_link_libraries(ex09_shadowRays
   gdt
   # optix dependencies, for rendering
   ${optix_LIBRARY}

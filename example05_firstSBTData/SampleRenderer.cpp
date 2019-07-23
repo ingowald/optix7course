@@ -505,6 +505,7 @@ namespace osc {
     int numObjects = 1;
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int i=0;i<numObjects;i++) {
+      // we only have a single object type so far
       int objectType = 0;
       HitgroupRecord rec;
       OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType],&rec));

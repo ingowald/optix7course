@@ -20,11 +20,11 @@
 
 include_directories(${OptiX_INCLUDE})
 
-add_executable(ex1_helloOptix
+add_executable(ex01_helloOptix
   optix7.h
   main.cpp
   )
-target_link_libraries(ex1_helloOptix
+target_link_libraries(ex01_helloOptix
   gdt
   ${optix_LIBRARY}
   ${CUDA_LIBRARIES}
