@@ -74,24 +74,56 @@ namespace osc {
   {
     const TriangleMeshSBTData &sbtData
       = *(const TriangleMeshSBTData*)optixGetSbtDataPointer();
-
-    // compute normal:
+    
+    // ------------------------------------------------------------------
+    // gather some basic hit information
+    // ------------------------------------------------------------------
     const int   primID = optixGetPrimitiveIndex();
     const vec3i index  = sbtData.index[primID];
-    const vec3f &A     = sbtData.vertex[index.x];
-    const vec3f &B     = sbtData.vertex[index.y];
-    const vec3f &C     = sbtData.vertex[index.z];
-    const vec3f Ng     = normalize(cross(B-A,C-A));
+    const float u = optixGetTriangleBarycentrics().x;
+    const float v = optixGetTriangleBarycentrics().y;
 
+    // ------------------------------------------------------------------
+    // compute normal, using either shading normal (if avail), or
+    // geometry normal (fallback)
+    // ------------------------------------------------------------------
+    vec3f N;
+    if (sbtData.normal) {
+      N = (1.f-u-v) * sbtData.normal[index.x]
+        +         u * sbtData.normal[index.y]
+        +         v * sbtData.normal[index.z];
+    } else {
+      const vec3f &A     = sbtData.vertex[index.x];
+      const vec3f &B     = sbtData.vertex[index.y];
+      const vec3f &C     = sbtData.vertex[index.z];
+      N                  = normalize(cross(B-A,C-A));
+    }
+    N = normalize(N);
+
+    // ------------------------------------------------------------------
+    // compute diffuse material color, including diffuse texture, if
+    // available
+    // ------------------------------------------------------------------
+    vec3f diffuseColor = sbtData.color;
+    if (sbtData.hasTexture && sbtData.texcoord) {
+      const vec2f tc
+        = (1.f-u-v) * sbtData.texcoord[index.x]
+        +         u * sbtData.texcoord[index.y]
+        +         v * sbtData.texcoord[index.z];
+      
+      vec4f fromTexture = tex2D<float4>(sbtData.texture,tc.x,tc.y);
+      diffuseColor *= (vec3f)fromTexture;
+    }
+    
+    // ------------------------------------------------------------------
+    // perform some simple "NdotD" shading
+    // ------------------------------------------------------------------
     const vec3f rayDir = optixGetWorldRayDirection();
-    const float cosDN  = 0.2f + .8f*fabsf(dot(rayDir,Ng));
+    const float cosDN  = 0.2f + .8f*fabsf(dot(rayDir,N));
     
     vec3f &prd = *(vec3f*)getPRD<vec3f>();
-    vec2f texcoord(optixGetTriangleBarycentrics().x,
-                   optixGetTriangleBarycentrics().y);
-    prd = cosDN * sbtData.color * vec3f(vec4f(tex2D<float4>(sbtData.texture,
-                                                            texcoord.x,
-                                                            texcoord.y)));
+    prd = cosDN * diffuseColor;
+
   }
   
   extern "C" __global__ void __anyhit__radiance()
