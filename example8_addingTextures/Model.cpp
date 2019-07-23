@@ -65,7 +65,7 @@ namespace osc {
     const vec3f *normal_array   = (const vec3f*)attributes.normals.data();
     const vec2f *texcoord_array = (const vec2f*)attributes.texcoords.data();
     
-    int newID = mesh->vertex.size();
+    int newID = (int)mesh->vertex.size();
     knownVertices[idx] = newID;
 
     mesh->vertex.push_back(vertex_array[idx.vertex_index]);
