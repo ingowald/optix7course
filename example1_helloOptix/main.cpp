@@ -60,7 +60,7 @@ namespace osc {
 
       // for this simple hello-world example, don't do anything else
       // ...
-      std::cout << "#osc: done. clea exit." << std::endl;
+      std::cout << "#osc: done. clean exit." << std::endl;
       
     } catch (std::runtime_error e) {
       std::cout << GDT_TERMINAL_RED << "FATAL ERROR: " << e.what()
