@@ -73,10 +73,10 @@ Detailed steps below:
 ## Example 1: Hello World 
 
 This is how this should look like in Linux:
-![Ex1 Linux output](./example01_helloOptix/ex01-linux.png "Linux Output")
+![Example 1 Linux output](./example01_helloOptix/ex01-linux.png "Example 1 Linux Output")
 
 And here, in Windows:
-!(./example01_helloOptix/ex01-windows.png)
+!(./example01_helloOptix/ex01-windows.png "Example 1 Windows Output")
 
 ## Example 1: Hello World 
 
