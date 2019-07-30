@@ -73,7 +73,7 @@ Detailed steps below:
 ## Example 1: Hello World 
 
 This is how this should look like in Linux:
-!(./example01_helloOptix/ex01-linux.png)
+![Ex1 Linux output](./example01_helloOptix/ex01-linux.png "Linux Output")
 
 And here, in Windows:
 !(./example01_helloOptix/ex01-windows.png)
