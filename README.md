@@ -76,7 +76,7 @@ This is how this should look like in Linux:
 ![Example 1 Linux output](./example01_helloOptix/ex01-linux.png "Example 1 Linux Output")
 
 And here, in Windows:
-!(./example01_helloOptix/ex01-windows.png "Example 1 Windows Output")
+![Example 1 Linux output](./example01_helloOptix/ex01-windows.png)
 
 ## Example 1: Hello World 
 
