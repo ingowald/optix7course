@@ -96,7 +96,7 @@ Detailed steps below:
 	- click 'open project' (this should open the project in visual studio)
 
 
-# Examples Overview Overview
+# Examples Overview
 	
 ## Example 1: Hello World 
 
