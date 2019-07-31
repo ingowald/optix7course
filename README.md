@@ -187,13 +187,38 @@ suddently starts to take shape:
 
 ## Example 8: Adding Textures via CUDA Texture Objects
 
+This example shows how to create and set up CUDA texture objects on
+the host, host to pass those to the device via the SBT, and how to use
+those texture objects on the device.
+
 ![Adding Textures](./example08_addingTextures/ex08.png)
 
 ## Example 9: Adding a second ray type: Shadows
 
+This is the last example that focusses on host-side setup, in this
+case adding a second ray type (for shadow rays), which also requires
+to change the way the SBT is being built. 
+
+This sample also shows how to shoot secondary rays (the shadow rays)
+in device programs, how to use an any-hit program for the shadow rays,
+how to call *optixTerminateRay* from within an anyhit program, and how
+to use the optixTrace call's SBT index/offset values to specify the
+ray type.
+
 ![Adding Shadow Rays](./example09_shadowRays/ex09.png)
 
 ## Example 10: Soft Shadows
+
+Whereas the first 9 examples focussed on how to perform all the
+required host-side setup for various incremental features, this
+example can now start to focus more on the "ray tracing 101" style
+additions that focus what rays to trace to add certain rendering
+effects. 
+
+This simple example intentionally only adds soft shadows from area lights, but extending this to add reflections, refraction, diffuse bounces, better material models/BRDFs etc show from now on be rather straightforward. 
+
+Please feel free to play with adding these examples... and share what
+you did!
 
 ![Soft Shadows](./example10_softShadows/ex10.png)
 
