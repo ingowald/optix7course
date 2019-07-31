@@ -80,9 +80,9 @@ macro(OPTIX_find_api_library name version)
   endif()
 endmacro()
 
-OPTIX_find_api_library(optix 7.0.0)
-OPTIX_find_api_library(optixu 7.0.0)
-OPTIX_find_api_library(optix_prime 7.0.0)
+#OPTIX_find_api_library(optix 7.0.0)
+#OPTIX_find_api_library(optixu 7.0.0)
+#OPTIX_find_api_library(optix_prime 7.0.0)
 
 # Include
 find_path(OptiX_INCLUDE
@@ -105,15 +105,15 @@ function(OptiX_report_error error_message required)
   endif()
 endfunction()
 
-if(NOT optix_LIBRARY)
-  OptiX_report_error("optix library not found.  Please locate before proceeding." TRUE)
-endif()
+#if(NOT optix_LIBRARY)
+#  OptiX_report_error("optix library not found.  Please locate before proceeding." TRUE)
+#endif()
 if(NOT OptiX_INCLUDE)
   OptiX_report_error("OptiX headers (optix.h and friends) not found.  Please locate before proceeding." TRUE)
 endif()
-if(NOT optix_prime_LIBRARY)
-  OptiX_report_error("optix Prime library not found.  Please locate before proceeding." FALSE)
-endif()
+#if(NOT optix_prime_LIBRARY)
+#  OptiX_report_error("optix Prime library not found.  Please locate before proceeding." FALSE)
+#endif()
 
 # Macro for setting up dummy targets
 function(OptiX_add_imported_library name lib_location dll_lib dependent_libs)
@@ -152,9 +152,9 @@ function(OptiX_add_imported_library name lib_location dll_lib dependent_libs)
 endfunction()
 
 # Sets up a dummy target
-OptiX_add_imported_library(optix "${optix_LIBRARY}" "${optix_DLL}" "${OPENGL_LIBRARIES}")
-OptiX_add_imported_library(optixu   "${optixu_LIBRARY}"   "${optixu_DLL}"   "")
-OptiX_add_imported_library(optix_prime "${optix_prime_LIBRARY}"  "${optix_prime_DLL}"  "")
+#OptiX_add_imported_library(optix "${optix_LIBRARY}" "${optix_DLL}" "${OPENGL_LIBRARIES}")
+#OptiX_add_imported_library(optixu   "${optixu_LIBRARY}"   "${optixu_DLL}"   "")
+#OptiX_add_imported_library(optix_prime "${optix_prime_LIBRARY}"  "${optix_prime_DLL}"  "")
 
 macro(OptiX_check_same_path libA libB)
   if(_optix_path_to_${libA})

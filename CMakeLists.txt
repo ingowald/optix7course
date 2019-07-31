@@ -65,6 +65,8 @@ add_subdirectory(common/glfWindow EXCLUDE_FROM_ALL)
 # and final build rules for the project
 # ------------------------------------------------------------------
 
+set(optix_LIBRARY "")
+
 # a first, simple, hello-world applicaion that creates a context, and
 # says hello...
 add_subdirectory(example01_helloOptix)
