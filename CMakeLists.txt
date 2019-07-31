@@ -50,7 +50,8 @@ add_subdirectory(${gdt_dir} EXCLUDE_FROM_ALL)
 # build glfw
 # ------------------------------------------------------------------
 if (WIN32)
-  set(glfw_dir ${PROJECT_SOURCE_DIR}/submodules/glfw/)
+#  set(glfw_dir ${PROJECT_SOURCE_DIR}/submodules/glfw/)
+  set(glfw_dir ${PROJECT_SOURCE_DIR}/common/3rdParty/glfw/)
   include_directories(${glfw_dir}/include)
   add_subdirectory(${glfw_dir} EXCLUDE_FROM_ALL)
 else()
