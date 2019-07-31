@@ -230,13 +230,12 @@ performance, kind and complexity of geometry, etc. In no particular
 order, and just to serve as an inspiration:
 
 - Performance
-
    - Multi-GPU
    - Denoising
+   - Better random numbers, better sampling, importance sampling, ...
    - ...
 
 - Shading Effects
-
    - More/better light sources (eventually with importance sampling for multiple lights!)
    - Better camera model, with depth of field 
    - Alpha/Transparency Textures for Cut-outs (Tip: often used in landscape scenes)
@@ -245,14 +244,12 @@ order, and just to serve as an inspiration:
    - ...
    
 - Geometry-related Capabilities
-
    - Instancing, possibly multi-level instancing
    - Animation
    - Motion Blur
    - ...
 
 - Viewer/app extensions
-
    - Camera motion based on user input
    - More importers (PBRT parser?)
    - Picking and editing
