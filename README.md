@@ -222,3 +222,41 @@ you did!
 
 ![Soft Shadows](./example10_softShadows/ex10.png)
 
+## Example 11: It's up to you ...
+
+From here on, there are multiple different avenues of how to add to
+this very simple viewer, both in terms of visual features,
+performance, kind and complexity of geometry, etc. In no particular
+order, and just to serve as an inspiration:
+
+- Performance
+
+   - Multi-GPU
+   - Denoising
+   - ...
+
+- Shading Effects
+
+   - More/better light sources (eventually with importance sampling for multiple lights!)
+   - Better camera model, with depth of field 
+   - Alpha/Transparency Textures for Cut-outs (Tip: often used in landscape scenes)
+   - Better material model / BRDF
+   - Indirect Illumination / path tracing
+   - ...
+   
+- Geometry-related Capabilities
+
+   - Instancing, possibly multi-level instancing
+   - Animation
+   - Motion Blur
+   - ...
+
+- Viewer/app extensions
+
+   - Camera motion based on user input
+   - More importers (PBRT parser?)
+   - Picking and editing
+   - ...
+
+Whichever of these - or other - features you might want to play around with: Let me know how it works out ... and have fun doing it!
+
