@@ -49,16 +49,13 @@ most recent NVIDIA developer driver).
   - on Linux, suggest to put `/usr/local/cuda/bin` into your `PATH`
 
 - latest NVIDIA developer driver that comes with the SDK
-	- download from http://developer.intel.com/optix
+  - download from http://developer.intel.com/optix
 
 - Optix 7 SDK
-	- download from http://developer.intel.com/optix
-	- on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.
-```
-    export OptiX_INSTALL_DIR=<wherever you installed Optix 7.0 SDK>
-```
-
-	- on windows, the installer shuld automatically put it into the right directory
+  - download from http://developer.intel.com/optix
+  - on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.  
+  `export OptiX_INSTALL_DIR=<wherever you installed Optix 7.0 SDK>`
+  - on windows, the installer shuld automatically put it into the right directory
 
 The literally only *external* library we use is GLFW for windowing, and
 even this one we actually build on the fly under Windows, so installing
@@ -79,17 +76,20 @@ Detailed steps below:
 ```
 
 - create (and enter) a build directory
-
+```
     mkdir build
     cd build
+```
 
 - configure with cmake
-
+```
     ccmake ..
+```
 
 - and build
-
+```
     make
+```
 
 ## Buiding under Windows
 
