@@ -43,17 +43,20 @@ most recent NVIDIA developer driver).
 - a compiler
 	- On windows, tested with Visual Studio 2019 community edition
 	- On Linux, tested with Ubuntu 18 and Ubuntu 19 default gcc installs
+
 - CUDA 10.1
 	- Download from developer.nvidia.com
 	- on Linux, suggest to put `/usr/local/cuda/bin` into your `PATH`
+
 - latest NVIDIA developer driver that comes with the SDK
 	- download from http://developer.intel.com/optix
+
 - Optix 7 SDK
 	- download from http://developer.intel.com/optix
 	- on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.
-
+```
     export OptiX_INSTALL_DIR=<wherever you installed Optix 7.0 SDK>
-
+```
 	- on windows, the installer shuld automatically put it into the right directory
 
 The literally only *external* library we use is GLFW for windowing, and
@@ -65,13 +68,14 @@ Detailed steps below:
 ## Building under Linux
 
 - Install required packages
-
+```
     sudo apt install libglfw3-dev cmake-curses-gui
-
+```
 - Clone the code
-
+```
     git clone http://gitlab.com/ingowald/optix7course
     cd optix7course
+```
 
 - create (and enter) a build directory
 
