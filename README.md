@@ -41,12 +41,12 @@ most recent NVIDIA developer driver).
 ## Dependencies
 
 - a compiler
-	- On windows, tested with Visual Studio 2019 community edition
-	- On Linux, tested with Ubuntu 18 and Ubuntu 19 default gcc installs
+  - On windows, tested with Visual Studio 2019 community edition
+  - On Linux, tested with Ubuntu 18 and Ubuntu 19 default gcc installs
 
 - CUDA 10.1
-	- Download from developer.nvidia.com
-	- on Linux, suggest to put `/usr/local/cuda/bin` into your `PATH`
+  - Download from developer.nvidia.com
+  - on Linux, suggest to put `/usr/local/cuda/bin` into your `PATH`
 
 - latest NVIDIA developer driver that comes with the SDK
 	- download from http://developer.intel.com/optix
