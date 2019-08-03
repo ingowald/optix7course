@@ -57,6 +57,7 @@ most recent NVIDIA developer driver).
 ```
     export OptiX_INSTALL_DIR=<wherever you installed Optix 7.0 SDK>
 ```
+
 	- on windows, the installer shuld automatically put it into the right directory
 
 The literally only *external* library we use is GLFW for windowing, and
@@ -74,7 +75,7 @@ Detailed steps below:
 - Clone the code
 ```
     git clone http://gitlab.com/ingowald/optix7course
-    cd optix7course
+    cd optix6course
 ```
 
 - create (and enter) a build directory
