@@ -38,8 +38,6 @@ namespace osc {
       sample.render();
     }
     
-    GLuint fbTexture {0};
-    
     virtual void draw() override
     {
       sample.downloadPixels(pixels.data());
@@ -96,6 +94,7 @@ namespace osc {
     }
 
     vec2i                 fbSize;
+    GLuint                fbTexture {0};
     SampleRenderer        sample;
     std::vector<uint32_t> pixels;
   };

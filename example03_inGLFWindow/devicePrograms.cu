@@ -68,7 +68,8 @@ namespace osc {
   //------------------------------------------------------------------------------
   extern "C" __global__ void __raygen__renderFrame()
   {
-    if (optixLaunchParams.frameID == 0 &&
+    const int frameID = optixLaunchParams.frameID;
+    if (frameID == 0 &&
         optixGetLaunchIndex().x == 0 &&
         optixGetLaunchIndex().y == 0) {
       // we could of course also have used optixGetLaunchDims to query
@@ -90,9 +91,9 @@ namespace osc {
     const int ix = optixGetLaunchIndex().x;
     const int iy = optixGetLaunchIndex().y;
 
-    const int r = (ix % 256);
-    const int g = (iy % 256);
-    const int b = ((ix+iy) % 256);
+    const int r = ((ix+frameID) % 256);
+    const int g = ((iy+frameID) % 256);
+    const int b = ((ix+iy+frameID) % 256);
 
     // convert to 32-bit rgba value (we explicitly set alpha to 0xff
     // to make stb_image_write happy ...

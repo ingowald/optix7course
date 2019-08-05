@@ -358,7 +358,7 @@ namespace osc {
     // sanity check: make sure we launch only after first resize is
     // already done:
     if (launchParams.fbSize.x == 0) return;
-      
+
     launchParamsBuffer.upload(&launchParams,1);
     launchParams.frameID++;
       

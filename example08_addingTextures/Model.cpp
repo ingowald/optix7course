@@ -165,9 +165,6 @@ namespace osc {
       throw std::runtime_error("Could not read OBJ model from "+objFile+" : "+err);
     }
 
-    for (auto vtx : attributes.vertices)
-      model->bounds.extend(vtx);
-    
     if (materials.empty())
       throw std::runtime_error("could not parse materials ...");
 
@@ -208,6 +205,12 @@ namespace osc {
           model->meshes.push_back(mesh);
       }
     }
+
+    // of course, you shold be using tbb::parallel_for for stuff
+    // like this:
+    for (auto mesh : model->meshes)
+      for (auto vtx : mesh->vertex)
+        model->bounds.extend(vtx);
 
     std::cout << "created a total of " << model->meshes.size() << " meshes" << std::endl;
     return model;
