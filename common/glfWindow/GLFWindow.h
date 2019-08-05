@@ -58,7 +58,7 @@ namespace osc {
     {
       double x,y;
       glfwGetCursorPos(handle,&x,&y);
-      return vec2i(x,y);
+      return vec2i((int)x, (int)y);
     }
     
     /*! re-render the frame - typically part of draw(), but we keep

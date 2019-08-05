@@ -83,7 +83,7 @@ namespace osc {
   {
     GLFWindow *gw = static_cast<GLFWindow*>(glfwGetWindowUserPointer(window));
     assert(gw);
-    gw->mouseMotion(vec2i(x,y));
+    gw->mouseMotion(vec2i((int)x, (int)y));
   }
 
   /*! callback for pressing _or_ releasing a mouse button*/
