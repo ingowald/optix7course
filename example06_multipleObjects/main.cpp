@@ -27,12 +27,13 @@
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
 
-  struct SampleWindow : public GLFWindow
+  struct SampleWindow : public GLFCameraWindow
   {
     SampleWindow(const std::string &title,
                  const std::vector<TriangleMesh> &model,
-                 const Camera &camera)
-      : GLFWindow(title),
+                 const Camera &camera,
+                 const float worldScale)
+      : GLFCameraWindow(title,camera.from,camera.at,camera.up,worldScale),
         sample(model)
     {
       sample.setCamera(camera);
@@ -40,10 +41,14 @@ namespace osc {
     
     virtual void render() override
     {
+      if (cameraFrame.modified) {
+        sample.setCamera(Camera{ cameraFrame.get_from(),
+                                 cameraFrame.get_at(),
+                                 cameraFrame.get_up() });
+        cameraFrame.modified = false;
+      }
       sample.render();
     }
-    
-    GLuint fbTexture {0};
     
     virtual void draw() override
     {
@@ -100,6 +105,7 @@ namespace osc {
       pixels.resize(newSize.x*newSize.y);
     }
 
+    GLuint                fbTexture {0};
     vec2i                 fbSize;
     SampleRenderer        sample;
     std::vector<uint32_t> pixels;
@@ -122,8 +128,12 @@ namespace osc {
       Camera camera = { /*from*/vec3f(-10.f,2.f,-12.f),
                         /* at */vec3f(0.f,0.f,0.f),
                         /* up */vec3f(0.f,1.f,0.f) };
+      // something approximating the scale of the world, so the
+      // camera knows how much to move for any given user interaction:
+      const float worldScale = 10.f;
+
       SampleWindow *window = new SampleWindow("Optix 7 Course Example",
-                                              model,camera);
+                                              model,camera,worldScale);
       window->run();
       
     } catch (std::runtime_error e) {

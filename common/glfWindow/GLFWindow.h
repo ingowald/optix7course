@@ -473,7 +473,6 @@ namespace osc {
     FlyModeManip(CameraFrame *cameraFrame)
       : CameraFrameManip(cameraFrame)
     {}
-
       
   private:
     /*! helper function: rotate camera frame by given degrees, then
