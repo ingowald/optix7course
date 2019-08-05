@@ -27,24 +27,29 @@
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
 
-  struct SampleWindow : public GLFWindow
+  struct SampleWindow : public GLFCameraWindow
   {
     SampleWindow(const std::string &title,
                  const Model *model,
                  const Camera &camera,
-                 const QuadLight &light)
-      : GLFWindow(title),
+                 const QuadLight &light,
+                 const float worldScale)
+      : GLFCameraWindow(title,camera.from,camera.at,camera.up,worldScale),
         sample(model,light)
     {
       sample.setCamera(camera);
     }
-    
+
     virtual void render() override
     {
+      if (cameraFrame.modified) {
+        sample.setCamera(Camera{ cameraFrame.get_from(),
+                                 cameraFrame.get_at(),
+                                 cameraFrame.get_up() });
+        cameraFrame.modified = false;
+      }
       sample.render();
     }
-    
-    GLuint fbTexture {0};
     
     virtual void draw() override
     {
@@ -101,6 +106,7 @@ namespace osc {
       pixels.resize(newSize.x*newSize.y);
     }
 
+    GLuint                fbTexture {0};
     vec2i                 fbSize;
     SampleRenderer        sample;
     std::vector<uint32_t> pixels;
@@ -125,7 +131,7 @@ namespace osc {
                              );
       
       Camera camera = { /*from*/vec3f(-1293.07f, 154.681f, -0.7304f),
-                        /* at */vec3f(-907.108f, 205.875f, -0.0267f),
+                        /* at */model->bounds.center()-vec3f(0,400,0),
                         /* up */vec3f(0.f,1.f,0.f) };
 
       // some simple, hard-coded light ... obviously, only works for sponza
@@ -135,8 +141,12 @@ namespace osc {
                           /* edge 2 */ vec3f(0,0,2.f*light_size),
                           /* power */  vec3f(3000000.f) };
                       
+      // something approximating the scale of the world, so the
+      // camera knows how much to move for any given user interaction:
+      const float worldScale = length(model->bounds.span());
+
       SampleWindow *window = new SampleWindow("Optix 7 Course Example",
-                                              model,camera,light);
+                                              model,camera,light,worldScale);
       window->run();
       
     } catch (std::runtime_error e) {
