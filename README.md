@@ -1,8 +1,9 @@
 # Siggraph 2019 Optix 7 Course Tutorial Code
 
 This tutorial was created to accompany the 2019 Siggraph course on
-"RTX Accelerated Ray Tracing with OptiX" (slides will soon be added
-below). 
+"RTX Accelerated Ray Tracing with OptiX" 
+(slides available on
+https://drive.google.com/open?id=1_IYHwAZ4EoMcDmS0TknP-TZd7Cwmab_I ). 
 
 The aim of this repo is to serve as a "tutorial" in how to set
 up a full Scene - ie, Optix Context, Module, Programs, Pipeline,
