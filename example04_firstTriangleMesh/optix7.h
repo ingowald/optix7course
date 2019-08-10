@@ -17,7 +17,6 @@
 #pragma once
 
 // optix 7
-#define OPTIX_COMPATIBILITY 7
 #include <cuda_runtime.h>
 #include <optix.h>
 #include <optix_stubs.h>
