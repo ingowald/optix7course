@@ -425,7 +425,6 @@ namespace osc {
       float rad_u = -M_PI/180.f*deg_u;
       float rad_v = -M_PI/180.f*deg_v;
 
-      assert(widget);
       CameraFrame &fc = *cameraFrame;
       
       const vec3f poi  = fc.getPOI();
@@ -479,7 +478,6 @@ namespace osc {
       float rad_u = -M_PI/180.f*deg_u;
       float rad_v = -M_PI/180.f*deg_v;
 
-      assert(widget);
       CameraFrame &fc = *cameraFrame;
       
       const vec3f poi  = fc.getPOI();
