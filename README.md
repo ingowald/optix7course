@@ -107,7 +107,7 @@ Detailed steps below:
 ## Example 1: Hello World 
 
 This is simplest example, that only initializes the OptiX Library,
-prints "hello world", and exits. It's pretty much only testing whether
+prints "hello world", and exits. It's pretty much testing only whether
 your SDK, driver, and PATH/LD_LIBRARY_PATH are properly set up to
 build, link, and run this tutorial.
 
@@ -116,6 +116,14 @@ This is how this should look like in Linux:
 
 And here, in Windows:
 ![Example 1 Linux output](./example01_helloOptix/ex01-windows.png)
+
+Note: if you do not see this output file, you may have a driver that
+does not work properly with OptiX 7 or some other cause. Normally the
+console window will disappear before you can see the error. To run and
+see the console window's messages, use the Visual Studio option "Start
+Without Debugging" (or hit Ctrl+F5), which will keep the console window
+visible after exit. The other option (or for Linux) is to run the program
+in a console window, e.g., run `build\Debug\ex01_helloOptix.exe`
 
 ## Example 2: First Pipeline Setup and Raygen Program
 
