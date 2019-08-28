@@ -49,7 +49,7 @@ namespace osc {
   };
 
 
-  //! add aligned cube aith front-lower-left corner and size
+  //! add aligned cube with front-lower-left corner and size
   void TriangleMesh::addCube(const vec3f &center, const vec3f &size)
   {
     PING; 
@@ -80,7 +80,7 @@ namespace osc {
                      5,7,6, 5,6,4,
                      0,4,5, 0,5,1,
                      2,3,7, 2,7,6,
-                     1,5,6, 1,7,3,
+                     1,5,7, 1,7,3,
                      4,0,2, 4,2,6
                      };
     for (int i=0;i<12;i++)
@@ -90,8 +90,8 @@ namespace osc {
   }
     
   
-    /*! constructor - performs asll setup, inlucuding initializing
-      optix, creates module, pipeline, programs, SBT, etc. */
+  /*! constructor - performs all setup, including initializing
+    optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const std::vector<TriangleMesh> &meshes)
     : meshes(meshes)
   {
@@ -223,7 +223,7 @@ namespace osc {
                                 /* stream */0,
                                 &accelOptions,
                                 triangleInput.data(),
-		(int)meshes.size(),
+                                (int)meshes.size(),
                                 tempBuffer.d_pointer(),
                                 tempBuffer.sizeInBytes,
                                 
@@ -261,7 +261,7 @@ namespace osc {
     return asHandle;
   }
   
-  /*! helper function that initializes optix, and checks for errors */
+  /*! helper function that initializes optix and checks for errors */
   void SampleRenderer::initOptix()
   {
     std::cout << "#osc: initializing optix..." << std::endl;
@@ -294,7 +294,7 @@ namespace osc {
   }
 
   /*! creates and configures a optix device context (in this simple
-      example, only for the primary GPU device) */
+    example, only for the primary GPU device) */
   void SampleRenderer::createContext()
   {
     // for this sample, do everything on one device
@@ -303,7 +303,7 @@ namespace osc {
     CUDA_CHECK(StreamCreate(&stream));
       
     cudaGetDeviceProperties(&deviceProps, deviceID);
-    std::cout << "#osc: running on device device: " << deviceProps.name << std::endl;
+    std::cout << "#osc: running on device: " << deviceProps.name << std::endl;
       
     CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
     if( cuRes != CUDA_SUCCESS ) 
@@ -317,8 +317,8 @@ namespace osc {
 
 
   /*! creates the module that contains all the programs we are going
-      to use. in this simple example, we use a single module from a
-      single .cu file, using a single embedded ptx string */
+    to use. in this simple example, we use a single module from a
+    single .cu file, using a single embedded ptx string */
   void SampleRenderer::createModule()
   {
     moduleCompileOptions.maxRegisterCount  = 100;
@@ -353,7 +353,7 @@ namespace osc {
     
 
 
-    /*! does all setup for the raygen program(s) we are going to use */
+  /*! does all setup for the raygen program(s) we are going to use */
   void SampleRenderer::createRaygenPrograms()
   {
     // we do a single ray gen program in this example:
@@ -378,7 +378,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the miss program(s) we are going to use */
+  /*! does all setup for the miss program(s) we are going to use */
   void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
@@ -403,7 +403,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the hitgroup program(s) we are going to use */
+  /*! does all setup for the hitgroup program(s) we are going to use */
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
@@ -449,7 +449,7 @@ namespace osc {
                                     &pipelineCompileOptions,
                                     &pipelineLinkOptions,
                                     programGroups.data(),
-		(int)programGroups.size(),
+                                    (int)programGroups.size(),
                                     log,&sizeof_log,
                                     &pipeline
                                     ));
@@ -507,10 +507,6 @@ namespace osc {
     // ------------------------------------------------------------------
     // build hitgroup records
     // ------------------------------------------------------------------
-    
-    // we don't actually have any objects in this example, but let's
-    // create a dummy one so the SBT doesn't have any null pointers
-    // (which the sanity checks in compilation would compain about)
     int numObjects = (int)meshes.size();
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int meshID=0;meshID<numObjects;meshID++) {
@@ -579,7 +575,7 @@ namespace osc {
     // resize our cuda frame buffer
     colorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
 
-    // update the launch paramters that we'll pass to the optix
+    // update the launch parameters that we'll pass to the optix
     // launch:
     launchParams.frame.size  = newSize;
     launchParams.frame.colorBuffer = (uint32_t*)colorBuffer.d_pointer();

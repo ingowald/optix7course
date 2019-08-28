@@ -45,13 +45,11 @@ namespace osc {
   struct __align__( OPTIX_SBT_RECORD_ALIGNMENT ) HitgroupRecord
   {
     __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-    // just a dummy value - later examples will use more interesting
-    // data here
     TriangleMeshSBTData data;
   };
 
 
-  //! add aligned cube aith front-lower-left corner and size
+  //! add aligned cube with front-lower-left corner and size
   void TriangleMesh::addCube(const vec3f &center, const vec3f &size)
   {
     affine3f xfm;
@@ -81,7 +79,7 @@ namespace osc {
                      5,7,6, 5,6,4,
                      0,4,5, 0,5,1,
                      2,3,7, 2,7,6,
-                     1,5,6, 1,7,3,
+                     1,5,7, 1,7,3,
                      4,0,2, 4,2,6
                      };
     for (int i=0;i<12;i++)
@@ -91,7 +89,7 @@ namespace osc {
   }
     
   
-  /*! constructor - performs asll setup, inlucuding initializing
+  /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const TriangleMesh &model)
     : model(model)
@@ -246,11 +244,11 @@ namespace osc {
     outputBuffer.free(); // << the UNcompacted, temporary output buffer
     tempBuffer.free();
     compactedSizeBuffer.free();
-    
+
     return asHandle;
   }
   
-  /*! helper function that initializes optix, and checks for errors */
+  /*! helper function that initializes optix and checks for errors */
   void SampleRenderer::initOptix()
   {
     std::cout << "#osc: initializing optix..." << std::endl;
@@ -292,7 +290,7 @@ namespace osc {
     CUDA_CHECK(StreamCreate(&stream));
       
     cudaGetDeviceProperties(&deviceProps, deviceID);
-    std::cout << "#osc: running on device device: " << deviceProps.name << std::endl;
+    std::cout << "#osc: running on device: " << deviceProps.name << std::endl;
       
     CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
     if( cuRes != CUDA_SUCCESS ) 
@@ -342,7 +340,7 @@ namespace osc {
     
 
 
-    /*! does all setup for the raygen program(s) we are going to use */
+  /*! does all setup for the raygen program(s) we are going to use */
   void SampleRenderer::createRaygenPrograms()
   {
     // we do a single ray gen program in this example:
@@ -367,7 +365,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the miss program(s) we are going to use */
+  /*! does all setup for the miss program(s) we are going to use */
   void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
@@ -392,7 +390,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the hitgroup program(s) we are going to use */
+  /*! does all setup for the hitgroup program(s) we are going to use */
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
@@ -494,10 +492,6 @@ namespace osc {
     // ------------------------------------------------------------------
     // build hitgroup records
     // ------------------------------------------------------------------
-
-    // we don't actually have any objects in this example, but let's
-    // create a dummy one so the SBT doesn't have any null pointers
-    // (which the sanity checks in compilation would compain about)
     int numObjects = 1;
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int i=0;i<numObjects;i++) {
@@ -567,7 +561,7 @@ namespace osc {
     // resize our cuda frame buffer
     colorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
 
-    // update the launch paramters that we'll pass to the optix
+    // update the launch parameters that we'll pass to the optix
     // launch:
     launchParams.frame.size  = newSize;
     launchParams.frame.colorBuffer = (uint32_t*)colorBuffer.d_pointer();

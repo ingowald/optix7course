@@ -50,7 +50,7 @@ namespace osc {
     int objectID;
   };
 
-  /*! constructor - performs asll setup, inlucuding initializing
+  /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer()
   {
@@ -83,7 +83,7 @@ namespace osc {
     std::cout << GDT_TERMINAL_DEFAULT;
   }
 
-  /*! helper function that initializes optix, and checks for errors */
+  /*! helper function that initializes optix and checks for errors */
   void SampleRenderer::initOptix()
   {
     std::cout << "#osc: initializing optix..." << std::endl;
@@ -125,7 +125,7 @@ namespace osc {
     CUDA_CHECK(StreamCreate(&stream));
       
     cudaGetDeviceProperties(&deviceProps, deviceID);
-    std::cout << "#osc: running on device device: " << deviceProps.name << std::endl;
+    std::cout << "#osc: running on device: " << deviceProps.name << std::endl;
       
     CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
     if( cuRes != CUDA_SUCCESS ) 
@@ -175,7 +175,7 @@ namespace osc {
     
 
 
-    /*! does all setup for the raygen program(s) we are going to use */
+  /*! does all setup for the raygen program(s) we are going to use */
   void SampleRenderer::createRaygenPrograms()
   {
     // we do a single ray gen program in this example:
@@ -200,7 +200,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the miss program(s) we are going to use */
+  /*! does all setup for the miss program(s) we are going to use */
   void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
@@ -225,7 +225,7 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
   }
     
-    /*! does all setup for the hitgroup program(s) we are going to use */
+  /*! does all setup for the hitgroup program(s) we are going to use */
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
@@ -330,7 +330,7 @@ namespace osc {
 
     // we don't actually have any objects in this example, but let's
     // create a dummy one so the SBT doesn't have any null pointers
-    // (which the sanity checks in compilation would compain about)
+    // (which the sanity checks in compilation would complain about)
     int numObjects = 1;
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int i=0;i<numObjects;i++) {
@@ -382,7 +382,7 @@ namespace osc {
     // resize our cuda frame buffer
     colorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
 
-    // update the launch paramters that we'll pass to the optix
+    // update the launch parameters that we'll pass to the optix
     // launch:
     launchParams.fbSize      = newSize;
     launchParams.colorBuffer = (uint32_t*)colorBuffer.d_ptr;

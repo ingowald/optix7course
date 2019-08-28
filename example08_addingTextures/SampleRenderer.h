@@ -43,7 +43,7 @@ namespace osc {
     // publicly accessible interface
     // ------------------------------------------------------------------
   public:
-    /*! constructor - performs asll setup, inlucuding initializing
+    /*! constructor - performs all setup, including initializing
       optix, creates module, pipeline, programs, SBT, etc. */
     SampleRenderer(const Model *model);
 
@@ -63,7 +63,7 @@ namespace osc {
     // internal helper functions
     // ------------------------------------------------------------------
 
-    /*! helper function that initializes optix, and checks for errors */
+    /*! helper function that initializes optix and checks for errors */
     void initOptix();
   
     /*! creates and configures a optix device context (in this simple

@@ -35,7 +35,7 @@ namespace osc {
     {
       sample.setCamera(camera);
     }
-
+    
     virtual void render() override
     {
       if (cameraFrame.modified) {
@@ -102,8 +102,8 @@ namespace osc {
       pixels.resize(newSize.x*newSize.y);
     }
 
-    GLuint                fbTexture {0};
     vec2i                 fbSize;
+    GLuint                fbTexture {0};
     SampleRenderer        sample;
     std::vector<uint32_t> pixels;
   };
@@ -125,7 +125,6 @@ namespace osc {
       "../models/sponza.obj"
 #endif
                              );
-      
       Camera camera = { /*from*/vec3f(-1293.07f, 154.681f, -0.7304f),
                         /* at */model->bounds.center()-vec3f(0,400,0),
                         /* up */vec3f(0.f,1.f,0.f) };

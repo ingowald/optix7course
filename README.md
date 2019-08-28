@@ -6,7 +6,7 @@ This tutorial was created to accompany the 2019 Siggraph course on
 https://drive.google.com/open?id=1_IYHwAZ4EoMcDmS0TknP-TZd7Cwmab_I ). 
 
 The aim of this repo is to serve as a "tutorial" in how to set
-up a full Scene - i.e.,, OptiX Context, Module, Programs, Pipeline,
+up a full Scene - i.e., OptiX Context, Module, Programs, Pipeline,
 Shader Binding Table (SBT), Accel Struct (AS), Build Inputs, Texture
 Samplers, etc., in the newly introduced OptiX 7. 
 
@@ -14,7 +14,7 @@ To do this, this repo intentionally does not provide *one* example
 that has the final code, but instead is split into 10 smaller
 examples, each of which modifies and extends the previous one,
 hopefully in a way that it is relatively easy to spot the differences
-(i.e.,, to spot what exactly had to be added to go from "A" to "B").
+(i.e., to spot what exactly had to be added to go from "A" to "B").
 
 Note this tutorial does (intentionally) not end in a overwhelming
 wow-factor full-featured renderer - it's aim is to *only* help you get
@@ -27,16 +27,15 @@ out of the box in both Linux and Windows. However, I assume it's safe
 to expect that some one or other bug has crept in somewhere that I
 haven't found yet. If you do find one, please feel free to let me know
 via email or bug report, or send a push request, so others will be
-spared from finding it again. Of course, any other feedback is
-welcome, too!
+spared from finding it again. Any other feedback is welcome, too!
 
 
 # Building the Code
 
 This code was intentionally written with minimal dependencies,
-requiring pretty much only CMake (as a build system), your favorite
-compiler (tested with Visual Studio under Windows, and GCC under
-Linux), and of course the OptiX 7 SDK (including CUDA 10.1 and the
+requiring only CMake (as a build system), your favorite
+compiler (tested with Visual Studio 2017 under Windows, and GCC under
+Linux), and the OptiX 7 SDK (including CUDA 10.1 and the
 most recent NVIDIA developer driver).
 
 ## Dependencies
@@ -55,8 +54,8 @@ most recent NVIDIA developer driver).
   `export OptiX_INSTALL_DIR=<wherever you installed OptiX 7.0 SDK>`
   - on windows, the installer should automatically put it into the right directory
 
-The literally only *external* library we use is GLFW for windowing, and
-even this one we actually build on the fly under Windows, so installing
+The only *external* library we use is GLFW for windowing, and
+even this one we build on the fly under Windows, so installing
 it is required only under Linux. 
 
 Detailed steps below:
@@ -97,7 +96,7 @@ Detailed steps below:
 - Open `CMake GUI` from your start menu
 	- point "source directory" to the downloaded source directory
 	- point "build directory" to <source directory>/build (agree to create this directory when prompted)
-	- click 'configure', then specify the generator as Visual Studio 15 2017, and the Optional platform as x64. If CUDA, SDK, and compiler are all properly installed this should enable the 'generate' button. If not, make sure all dependencies are properly installed, "clear cache", and re-configure.
+	- click 'configure', then specify the generator as Visual Studio 2017 (Version 15), and the Optional platform as x64. If CUDA, SDK, and compiler are all properly installed this should enable the 'generate' button. If not, make sure all dependencies are properly installed, "clear cache", and re-configure.
 	- click 'generate' (this creates a visual studio project and solutions)
 	- click 'open project' (this should open the project in visual studio)
 
@@ -128,11 +127,11 @@ in a console window, e.g., run `build\Debug\ex01_helloOptix.exe`
 ## Example 2: First Pipeline Setup and Raygen Program
 
 This is the first "real" OptiX example, and maybe somewhat
-surprisingly, the biggest "step" in all of the examples. 
+surprisingly, the biggest "step" in all the examples. 
 
 The actual raygen program that this example launches is actually
-very(!) small, and pretty much trivial; and there are no other programs,
-not even geometry, nor a single ray being traced... but to launch
+very (!) small, and pretty much trivial; and there are no other programs,
+not even geometry, nor a single ray being traced ... but to launch
 this simple raygen program we nevertheless have to go through the
 entire process of creating Modules, Programs, and, in particular, a
 valid "Shader Binding Table" (SBT), before we can launch our little
@@ -148,9 +147,8 @@ On the upside: Once this initial setup is done, everything will get
 Rendering to files is nice and well, but *probably* you want to
 eventually do some online rendering; so this example moves the
 previous raygen example into a 3D viewer window (created and run using
-GLFW). For now this viewer just displays the rendered images (i.e.,,
-nothing changes from frame to frame); I'm going to add some user
-interaction after Siggraph is over.
+GLFW). For now this viewer just displays the rendered images, with no
+user interaction.
 
 ![Same Raygen example, in GLFL Window (Linux)](./example03_inGLFWindow/ex03-linux.png)
 ![Same Raygen example, in GLFL Window (Windows)](./example03_inGLFWindow/ex03-windows.png)
@@ -163,17 +161,18 @@ real geometry.
 
 This example introduces how to create some Triangle Mesh Geometry (in
 this example, two simple, hardcoded, cubes), how to build an
-Acceleration structure over this "BuildInput", and how to trace rays
-against. To do this it also needs to introduce a simple camera model.
+Acceleration Structure over this "BuildInput", and how to trace rays
+against it. To do this we also need to introduce a simple camera model.
 
 ![First Triangle Mesh and Accel Struct](./example04_firstTriangleMesh/ex04.png)
 
 ## Example 5: First Shader Binding Table (SBT) Data 
 
 The earlier examples *created* an SBT (they had to, else they couldn't
-have executed any OptiX launch); but didn't actually put any data into
+have executed any OptiX launch), but didn't actually put any data into
 the SBT. This example introduces how to do that, by putting just some
-simple constant per-object color into the mesh's SBT entry.
+simple constant per-object color into the mesh's SBT entry, then shading
+it based on the surface normal's angle to the view ray.
 
 ![First SBT Data](./example05_firstSBTData/ex05.png)
 
@@ -204,21 +203,21 @@ suddenly starts to take shape:
 ## Example 8: Adding Textures via CUDA Texture Objects
 
 This example shows how to create and set up CUDA texture objects on
-the host, host to pass those to the device via the SBT, and how to use
+the host, with the host passing those to the device via the SBT, and how to use
 those texture objects on the device. This one will take a bit of time
-to load in Debug - it's worth the wait!
+to load in Debug - it's worth the wait! Or simply build and run in Release.
 
 ![Adding Textures](./example08_addingTextures/ex08.png)
 
 ## Example 9: Adding a second ray type: Shadows
 
-This is the last example that focusses on host-side setup, in this
+This is the last example that focuses on host-side setup, in this
 case adding a second ray type (for shadow rays), which also requires
-to change the way the SBT is being built. 
+changing the way the SBT is being built. 
 
 This sample also shows how to shoot secondary rays (the shadow rays)
 in device programs, how to use an any-hit program for the shadow rays,
-how to call *optixTerminateRay* from within an anyhit program, and how
+how to call *optixTerminateRay* from within an any-hit program, and how
 to use the optixTrace call's SBT index/offset values to specify the
 ray type.
 
@@ -232,9 +231,12 @@ example can now start to focus more on the "ray tracing 101" style
 additions that focus what rays to trace to add certain rendering
 effects. 
 
-This simple example intentionally only adds soft shadows from area lights, but extending this to add reflections, refraction, diffuse bounces, better material models/BRDFs, etc., show from now on be rather straightforward. 
+This simple example intentionally only adds soft shadows from area
+lights, but extending this to add reflections, refraction, diffuse
+bounces, better material models/BRDFs, etc., should from now on be
+straightforward. 
 
-Please feel free to play with adding these examples... and share what
+Please feel free to play with adding these examples ... and share what
 you did!
 
 ![Soft Shadows](./example10_softShadows/ex10.png)
@@ -242,9 +244,9 @@ you did!
 ## Example 11: It's up to you ...
 
 From here on, there are multiple different avenues of how to add to
-this very simple viewer, both in terms of visual features,
-performance, kind and complexity of geometry, etc. In no particular
-order, and just to serve as an inspiration:
+this simple viewer, in terms of visual features, performance, kind
+and complexity of geometry, etc. In no particular order, and just
+to serve as inspiration:
 
 - Performance
    - Multi-GPU

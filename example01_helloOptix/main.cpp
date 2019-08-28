@@ -21,7 +21,7 @@
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
 
-  /*! helper function that initializes optix, and checks for errors */
+  /*! helper function that initializes optix and checks for errors */
   void initOptix()
   {
     // -------------------------------------------------------

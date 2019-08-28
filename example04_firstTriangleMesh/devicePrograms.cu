@@ -66,7 +66,7 @@ namespace osc {
   
   extern "C" __global__ void __closesthit__radiance()
   {
-    const int   primID   = optixGetPrimitiveIndex();
+    const int   primID = optixGetPrimitiveIndex();
     vec3f &prd = *(vec3f*)getPRD<vec3f>();
     prd = gdt::randomColor(primID);
   }
@@ -141,7 +141,7 @@ namespace osc {
     // to make stb_image_write happy ...
     const uint32_t rgba = 0xff000000
       | (r<<0) | (g<<8) | (b<<16);
-    
+
     // and write to frame buffer ...
     const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.size.x;
     optixLaunchParams.frame.colorBuffer[fbIndex] = rgba;

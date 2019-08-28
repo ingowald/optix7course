@@ -101,8 +101,8 @@ namespace osc {
       pixels.resize(newSize.x*newSize.y);
     }
 
-    GLuint                fbTexture {0};
     vec2i                 fbSize;
+    GLuint                fbTexture {0};
     SampleRenderer        sample;
     std::vector<uint32_t> pixels;
   };

@@ -50,7 +50,7 @@ namespace osc {
   };
 
 
-  /*! constructor - performs asll setup, inlucuding initializing
+  /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const Model *model, const QuadLight &light)
     : model(model)
@@ -287,7 +287,7 @@ namespace osc {
     return asHandle;
   }
   
-  /*! helper function that initializes optix, and checks for errors */
+  /*! helper function that initializes optix and checks for errors */
   void SampleRenderer::initOptix()
   {
     std::cout << "#osc: initializing optix..." << std::endl;
@@ -329,7 +329,7 @@ namespace osc {
     CUDA_CHECK(StreamCreate(&stream));
       
     cudaGetDeviceProperties(&deviceProps, deviceID);
-    std::cout << "#osc: running on device device: " << deviceProps.name << std::endl;
+    std::cout << "#osc: running on device: " << deviceProps.name << std::endl;
       
     CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
     if( cuRes != CUDA_SUCCESS ) 
@@ -571,10 +571,6 @@ namespace osc {
     // ------------------------------------------------------------------
     // build hitgroup records
     // ------------------------------------------------------------------
-    
-    // we don't actually have any objects in this example, but let's
-    // create a dummy one so the SBT doesn't have any null pointers
-    // (which the sanity checks in compilation would compain about)
     int numObjects = (int)model->meshes.size();
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int meshID=0;meshID<numObjects;meshID++) {
@@ -655,7 +651,7 @@ namespace osc {
     // resize our cuda frame buffer
     colorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
 
-    // update the launch paramters that we'll pass to the optix
+    // update the launch parameters that we'll pass to the optix
     // launch:
     launchParams.frame.size  = newSize;
     launchParams.frame.colorBuffer = (uint32_t*)colorBuffer.d_pointer();
