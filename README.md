@@ -34,14 +34,14 @@ spared from finding it again. Any other feedback is welcome, too!
 
 This code was intentionally written with minimal dependencies,
 requiring only CMake (as a build system), your favorite
-compiler (tested with Visual Studio 2017 under Windows, and GCC under
+compiler (tested with Visual Studio 2017 and 2019 under Windows, and GCC under
 Linux), and the OptiX 7 SDK (including CUDA 10.1 and the
 most recent NVIDIA developer driver).
 
 ## Dependencies
 
 - a compiler
-  - On windows, tested with Visual Studio 2019 community edition
+  - On Windows, tested with Visual Studio 2017 and 2019 community editions
   - On Linux, tested with Ubuntu 18 and Ubuntu 19 default gcc installs
 - CUDA 10.1
   - Download from developer.nvidia.com
@@ -96,9 +96,9 @@ Detailed steps below:
 - Open `CMake GUI` from your start menu
 	- point "source directory" to the downloaded source directory
 	- point "build directory" to <source directory>/build (agree to create this directory when prompted)
-	- click 'configure', then specify the generator as Visual Studio 2017 (Version 15), and the Optional platform as x64. If CUDA, SDK, and compiler are all properly installed this should enable the 'generate' button. If not, make sure all dependencies are properly installed, "clear cache", and re-configure.
-	- click 'generate' (this creates a visual studio project and solutions)
-	- click 'open project' (this should open the project in visual studio)
+	- click 'configure', then specify the generator as Visual Studio 2017 or 2019, and the Optional platform as x64. If CUDA, SDK, and compiler are all properly installed this should enable the 'generate' button. If not, make sure all dependencies are properly installed, "clear cache", and re-configure.
+	- click 'generate' (this creates a Visual Studio project and solutions)
+	- click 'open project' (this should open the project in Visual Studio)
 
 
 # Examples Overview
