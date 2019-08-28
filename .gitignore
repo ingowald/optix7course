@@ -7,3 +7,4 @@ build
 *.gz
 *.zip
 Session.vim
+/models/*

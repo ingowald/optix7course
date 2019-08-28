@@ -117,11 +117,11 @@ namespace osc {
 #ifdef _WIN32
       // on windows, visual studio creates _two_ levels of build dir
       // (x86/Release)
-      "../../sponza.obj"
+      "../../models/sponza.obj"
 #else
       // on linux, common practice is to have ONE level of build dir
       // (say, <project>/build/)...
-      "../sponza.obj"
+      "../models/sponza.obj"
 #endif
                              );
       Camera camera = { /*from*/vec3f(-1293.07f, 154.681f, -0.7304f),
@@ -138,8 +138,8 @@ namespace osc {
     } catch (std::runtime_error e) {
       std::cout << GDT_TERMINAL_RED << "FATAL ERROR: " << e.what()
                 << GDT_TERMINAL_DEFAULT << std::endl;
-      std::cout << "Did you forget to copy sponza.obj and sponza.mtl into your project dir?" << std::endl;
-        exit(1);
+	  std::cout << "Did you forget to copy sponza.obj and sponza.mtl into your optix7course/models directory?" << std::endl;
+	  exit(1);
     }
     return 0;
   }

@@ -57,7 +57,7 @@ most recent NVIDIA developer driver).
 
 The literally only *external* library we use is GLFW for windowing, and
 even this one we actually build on the fly under Windows, so installing
-it is only required under Linux. 
+it is required only under Linux. 
 
 Detailed steps below:
 
@@ -117,7 +117,7 @@ This is how this should look like in Linux:
 And here, in Windows:
 ![Example 1 Linux output](./example01_helloOptix/ex01-windows.png)
 
-Note: if you do not see this output file, you may have a driver that
+**Note:** if you do not see this output file, you may have a driver that
 does not work properly with OptiX 7 or some other cause. Normally the
 console window will disappear before you can see the error. To run and
 see the console window's messages, use the Visual Studio option "Start
@@ -131,8 +131,8 @@ This is the first "real" OptiX example, and maybe somewhat
 surprisingly, the biggest "step" in all of the examples. 
 
 The actual raygen program that this example launches is actually
-very(!) small, and pretty much trivial; and there's no other programs,
-not even geometry, nor a single ray being traced ... but to launch
+very(!) small, and pretty much trivial; and there are no other programs,
+not even geometry, nor a single ray being traced... but to launch
 this simple raygen program we nevertheless have to go through the
 entire process of creating Modules, Programs, and, in particular, a
 valid "Shader Binding Table" (SBT), before we can launch our little
@@ -190,9 +190,11 @@ meshes with one cube (and one color) each.
 ## Example 7: First Real Model
 
 This example takes the previous "multiple meshes" code unmodified, but
-introduces a simple OBJ file format parser (using Syoyo Fuyita's
-tinyobj [https://github.com/syoyo/tinyobjloader]), and hooks the resulting triangle meshes up to
+introduces a simple OBJ file format parser (using [Syoyo Fuyita's
+tinyobj](https://github.com/syoyo/tinyobjloader), and hooks the resulting triangle meshes up to
 the previous example's render code.
+
+For this example, you must download the [Crytek Sponza model](https://casual-effects.com/data/) and unzip it to the (non-existent, until you create it) subdirectory `optix7course/models`.
 
 And la-voila, with exactly the same render code from Sample 6, it
 suddenly starts to take shape:
@@ -203,7 +205,8 @@ suddenly starts to take shape:
 
 This example shows how to create and set up CUDA texture objects on
 the host, host to pass those to the device via the SBT, and how to use
-those texture objects on the device.
+those texture objects on the device. This one will take a bit of time
+to load in Debug - it's worth the wait!
 
 ![Adding Textures](./example08_addingTextures/ex08.png)
 
