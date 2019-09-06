@@ -409,26 +409,24 @@ namespace osc {
     // for this simple example, we set up a single hit group
     hitgroupPGs.resize(1);
 
-    for (int meshID=0;meshID<meshes.size();meshID++) {
-      OptixProgramGroupOptions pgOptions = {};
-      OptixProgramGroupDesc pgDesc    = {};
-      pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
-      pgDesc.hitgroup.moduleCH            = module;           
-      pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
-      pgDesc.hitgroup.moduleAH            = module;           
-      pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
+    OptixProgramGroupOptions pgOptions = {};
+    OptixProgramGroupDesc pgDesc    = {};
+    pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
+    pgDesc.hitgroup.moduleCH            = module;
+    pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
+    pgDesc.hitgroup.moduleAH            = module;
+    pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
 
-      char log[2048];
-      size_t sizeof_log = sizeof( log );
-      OPTIX_CHECK(optixProgramGroupCreate(optixContext,
-                                          &pgDesc,
-                                          1,
-                                          &pgOptions,
-                                          log,&sizeof_log,
-                                          &hitgroupPGs[0]
-                                          ));
-      if (sizeof_log > 1) PRINT(log);
-    }
+    char log[2048];
+    size_t sizeof_log = sizeof( log );
+    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
+                                        &pgDesc,
+                                        1,
+                                        &pgOptions,
+                                        log,&sizeof_log,
+                                        &hitgroupPGs[0]
+                                        ));
+    if (sizeof_log > 1) PRINT(log);
   }
     
 
