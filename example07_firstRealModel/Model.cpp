@@ -98,7 +98,8 @@ namespace osc {
                          &shapes,
                          &materials,
                          &err,
-                         objFile.c_str(),
+                         &err,
+						 objFile.c_str(),
                          mtlDir.c_str(),
                          /* triangulate */true);
     if (!readOK) {

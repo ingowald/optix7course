@@ -154,6 +154,7 @@ namespace osc {
                          &shapes,
                          &materials,
                          &err,
+                         &err,
                          objFile.c_str(),
                          modelDir.c_str(),
                          /* triangulate */true);
