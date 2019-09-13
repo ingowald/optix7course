@@ -473,7 +473,9 @@ namespace osc {
     if (sizeof_log > 1) PRINT(log);
 
     // -------------------------------------------------------
-    // shadow rays
+    // shadow rays: technically we don't need this hit group,
+    // since we just use the miss shader to check if we were not
+    // in shadow
     // -------------------------------------------------------
     pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__shadow";
     pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__shadow";

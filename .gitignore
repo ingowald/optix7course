@@ -8,3 +8,4 @@ build
 *.zip
 Session.vim
 /models/*
+*.swp

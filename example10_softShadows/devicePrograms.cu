@@ -160,7 +160,7 @@ namespace osc {
       // trace shadow ray:
       const float NdotL = dot(lightDir,Ns);
       if (NdotL >= 0.f) {
-        vec3f lightVisibility = 1.f;
+        vec3f lightVisibility = 0.f;
         // the values we store the PRD pointer in:
         uint32_t u0, u1;
         packPointer( &lightVisibility, u0, u1 );
@@ -171,8 +171,12 @@ namespace osc {
                    lightDist * (1.f-1e-3f),  // tmax
                    0.0f,       // rayTime
                    OptixVisibilityMask( 255 ),
-                   // anyhit ON for shadow rays:
-                   OPTIX_RAY_FLAG_NONE,
+                   // For shadow rays: skip any/closest hit shaders and terminate on first
+                   // intersection with anything. The miss shader is used to mark if the
+                   // light was visible.
+                   OPTIX_RAY_FLAG_DISABLE_ANYHIT
+                   | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
+                   | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
                    SHADOW_RAY_TYPE,            // SBT offset
                    RAY_TYPE_COUNT,               // SBT stride
                    SHADOW_RAY_TYPE,            // missSBTIndex 
@@ -192,14 +196,7 @@ namespace osc {
   { /*! for this simple example, this will remain empty */ }
 
   extern "C" __global__ void __anyhit__shadow()
-  {
-    // in this simple example, we terminate on ANY hit
-    vec3f &prd = *getPRD<vec3f>();
-    prd = vec3f(0.f);
-    optixTerminateRay();
-  }
-  
-
+  { /*! not going to be used */ }
   
   //------------------------------------------------------------------------------
   // miss program that gets called for any ray that did not have a
@@ -218,7 +215,9 @@ namespace osc {
 
   extern "C" __global__ void __miss__shadow()
   {
-    // misses shouldn't mess with shadow opacity - do nothing
+    // we didn't hit anything, so the light is visible
+    vec3f &prd = *(vec3f*)getPRD<vec3f>();
+    prd = vec3f(1.f);
   }
 
   //------------------------------------------------------------------------------
