@@ -166,7 +166,7 @@ namespace gdt {
     const double absVal = abs(val);
     char result[1000];
 
-    if      (absVal >= 1e+15f) osp_snprintf(result,1000,"%.1f%c",val/1e18f,'E');
+    if      (absVal >= 1e+18f) osp_snprintf(result,1000,"%.1f%c",val/1e18f,'E');
     else if (absVal >= 1e+15f) osp_snprintf(result,1000,"%.1f%c",val/1e15f,'P');
     else if (absVal >= 1e+12f) osp_snprintf(result,1000,"%.1f%c",val/1e12f,'T');
     else if (absVal >= 1e+09f) osp_snprintf(result,1000,"%.1f%c",val/1e09f,'G');

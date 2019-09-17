@@ -862,10 +862,8 @@ namespace tinyobj {
 				read++;
 				end_not_reached = (curr != s_end);
 			}
-		}
 
-		// We must make sure we actually got something.
-		if (!leading_decimal_dots) {
+			// We must make sure we actually got something.
 			if (read == 0) goto fail;
 		}
 

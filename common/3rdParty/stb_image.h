@@ -5111,7 +5111,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
    }
 
    s->img_n = ma ? 4 : 3;
-   if (req_comp && req_comp >= 3) // we can directly decode 3 or 4
+   if (req_comp >= 3) // we can directly decode 3 or 4
       target = req_comp;
    else
       target = s->img_n; // if they want monochrome, we'll post-convert

@@ -480,7 +480,7 @@ namespace osc {
 
       CameraFrame &fc = *cameraFrame;
       
-      const vec3f poi  = fc.getPOI();
+      //const vec3f poi  = fc.getPOI();
       fc.frame
         = linear3f::rotate(fc.frame.vy,rad_u)
         * linear3f::rotate(fc.frame.vx,rad_v)

@@ -144,7 +144,7 @@ namespace osc {
                                               model,camera,light,worldScale);
       window->run();
       
-    } catch (std::runtime_error e) {
+    } catch (std::runtime_error& e) {
       std::cout << GDT_TERMINAL_RED << "FATAL ERROR: " << e.what()
                 << GDT_TERMINAL_DEFAULT << std::endl;
 	  std::cout << "Did you forget to copy sponza.obj and sponza.mtl into your optix7course/models directory?" << std::endl;

@@ -278,7 +278,7 @@ namespace osc {
                              const char *message,
                              void *)
   {
-    fprintf( stderr, "[%2d][%12s]: %s\n", level, tag, message );
+    fprintf( stderr, "[%2d][%12s]: %s\n", (int)level, tag, message );
   }
 
   /*! creates and configures a optix device context (in this simple
