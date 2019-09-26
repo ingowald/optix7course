@@ -87,7 +87,7 @@ namespace osc {
     buildSBT();
 
     launchParamsBuffer.alloc(sizeof(launchParams));
-    std::cout << "#osc: context, module, pipline, etc, all set up ..." << std::endl;
+    std::cout << "#osc: context, module, pipeline, etc, all set up ..." << std::endl;
 
     std::cout << GDT_TERMINAL_GREEN;
     std::cout << "#osc: Optix 7 Sample fully set up" << std::endl;

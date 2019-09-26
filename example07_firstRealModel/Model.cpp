@@ -143,7 +143,7 @@ namespace osc {
       }
     }
 
-    // of course, you shold be using tbb::parallel_for for stuff
+    // of course, you should be using tbb::parallel_for for stuff
     // like this:
     for (auto mesh : model->meshes)
       for (auto vtx : mesh->vertex)

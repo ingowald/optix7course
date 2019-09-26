@@ -41,7 +41,7 @@ namespace osc {
   }
 
   
-  /*! main entry point to this example - initialy optix, print hello
+  /*! main entry point to this example - initially optix, print hello
     world, then exit */
   extern "C" int main(int ac, char **av)
   {

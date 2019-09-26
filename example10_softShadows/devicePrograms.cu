@@ -34,7 +34,7 @@ namespace osc {
       optixLaunch) */
   extern "C" __constant__ LaunchParams optixLaunchParams;
 
-  /*! per-ray data now captures random numebr generator, so programs
+  /*! per-ray data now captures random number generator, so programs
       can access RNG state */
   struct PRD {
     Random random;

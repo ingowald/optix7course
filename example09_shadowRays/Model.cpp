@@ -115,7 +115,7 @@ namespace osc {
       texture->resolution = res;
       texture->pixel      = (uint32_t*)image;
 
-      /* iw - actually, it seems that stbi loads the picutures
+      /* iw - actually, it seems that stbi loads the pictures
          mirrored along the y axis - mirror them here */
       for (int y=0;y<res.y/2;y++) {
         uint32_t *line_y = texture->pixel + y * res.x;
@@ -203,7 +203,7 @@ namespace osc {
       }
     }
 
-    // of course, you shold be using tbb::parallel_for for stuff
+    // of course, you should be using tbb::parallel_for for stuff
     // like this:
     for (auto mesh : model->meshes)
       for (auto vtx : mesh->vertex)
