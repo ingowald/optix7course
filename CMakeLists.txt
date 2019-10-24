@@ -83,6 +83,6 @@ add_subdirectory(example07_firstRealModel)
 add_subdirectory(example08_addingTextures)
 add_subdirectory(example09_shadowRays)
 add_subdirectory(example10_softShadows)
-add_subdirectory(example11_denoise)
+add_subdirectory(example11_denoiseColorOnly)
 
 
