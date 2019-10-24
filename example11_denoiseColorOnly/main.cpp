@@ -112,6 +112,18 @@ namespace osc {
         sample.accumulate = !sample.accumulate;
         std::cout << "accumulation/progressive refinement now " << (sample.accumulate?"ON":"OFF") << std::endl;
       }
+      if (key == ',') {
+        sample.launchParams.numPixelSamples
+          = std::max(1,sample.launchParams.numPixelSamples-1);
+        std::cout << "num samples/pixel now "
+                  << sample.launchParams.numPixelSamples << std::endl;
+      }
+      if (key == '.') {
+        sample.launchParams.numPixelSamples
+          = std::max(1,sample.launchParams.numPixelSamples+1);
+        std::cout << "num samples/pixel now "
+                  << sample.launchParams.numPixelSamples << std::endl;
+      }
     }
     
 
@@ -155,9 +167,12 @@ namespace osc {
 
       SampleWindow *window = new SampleWindow("Optix 7 Course Example",
                                               model,camera,light,worldScale);
-
+      window->enableFlyMode();
+      
       std::cout << "Press 'a' to enable/disable accumulation/progressive refinement" << std::endl;
       std::cout << "Press ' ' to enable/disable denoising" << std::endl;
+      std::cout << "Press ',' to reduce the number of paths/pixel" << std::endl;
+      std::cout << "Press '.' to increase the number of paths/pixel" << std::endl;
       window->run();
       
     } catch (std::runtime_error& e) {

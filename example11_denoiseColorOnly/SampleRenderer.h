@@ -133,7 +133,9 @@ namespace osc {
 
     /*! @{ our launch parameters, on the host, and the buffer to store
         them on the device */
+  public:
     LaunchParams launchParams;
+  protected:
     CUDABuffer   launchParamsBuffer;
     /*! @} */
 

@@ -630,7 +630,7 @@ namespace osc {
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
     denoiserParams.hdrIntensity = (CUdeviceptr)0;
-    denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID+1.f);
+    denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
     
     // -------------------------------------------------------
     OptixImage2D inputLayer;
@@ -729,10 +729,6 @@ namespace osc {
     OptixDenoiserSizes denoiserReturnSizes;
     OPTIX_CHECK(optixDenoiserComputeMemoryResources(denoiser,newSize.x,newSize.y,
                                                     &denoiserReturnSizes));
-    PRINT(denoiserReturnSizes.stateSizeInBytes);
-    PRINT(denoiserReturnSizes.minimumScratchSizeInBytes);
-    PRINT(denoiserReturnSizes.recommendedScratchSizeInBytes);
-    PRINT(denoiserReturnSizes.overlapWindowSizeInPixels);
 
     denoiserScratch.resize(denoiserReturnSizes.recommendedScratchSizeInBytes);
     denoiserState.resize(denoiserReturnSizes.stateSizeInBytes);
@@ -755,15 +751,7 @@ namespace osc {
     // and re-set the camera, since aspect may have changed
     setCamera(lastSetCamera);
 
-    // size_t       stateSizeInBytes;
-    // size_t       minimumScratchSizeInBytes;
-    // size_t       recommendedScratchSizeInBytes;
-    // unsigned int overlapWindowSizeInPixels;
-
-
     // ------------------------------------------------------------------
-    PRINT(denoisedSize);
-    PRINT(renderSize);
     OPTIX_CHECK(optixDenoiserSetup(denoiser,0,
                                    denoisedSize.x,denoisedSize.y,
                                    denoiserState.d_pointer(),
