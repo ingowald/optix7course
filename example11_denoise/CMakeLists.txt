@@ -20,7 +20,7 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 
-add_executable(ex11_denoise
+add_executable(ex11_denoiseColorOnly
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
@@ -30,7 +30,7 @@ add_executable(ex11_denoise
   main.cpp
   )
 
-target_link_libraries(ex11_denoise
+target_link_libraries(ex11_denoiseColorOnly
   gdt
   # optix dependencies, for rendering
   ${optix_LIBRARY}

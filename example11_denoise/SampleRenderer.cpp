@@ -609,9 +609,11 @@ namespace osc {
     // sanity check: make sure we launch only after first resize is
     // already done:
     if (launchParams.frame.renderSize.x == 0) return;
-      
+
+    if (!accumulate)
+      launchParams.frame.frameID = 0;
     launchParamsBuffer.upload(&launchParams,1);
-    // launchParams.frame.accumID++;
+    launchParams.frame.frameID++;
     
     OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
                             pipeline,stream,
@@ -628,7 +630,7 @@ namespace osc {
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
     denoiserParams.hdrIntensity = (CUdeviceptr)0;
-    denoiserParams.blendFactor  = .2f;
+    denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID+1.f);
     
     // -------------------------------------------------------
     OptixImage2D inputLayer;
@@ -690,6 +692,8 @@ namespace osc {
   void SampleRenderer::setCamera(const Camera &camera)
   {
     lastSetCamera = camera;
+    // reset accumulation
+    launchParams.frame.frameID = 0;
     launchParams.camera.position  = camera.from;
     launchParams.camera.direction = normalize(camera.at-camera.from);
     const float cosFovy = 0.66f;

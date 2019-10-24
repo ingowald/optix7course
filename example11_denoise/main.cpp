@@ -104,9 +104,13 @@ namespace osc {
 
     virtual void key(int key, int mods)
     {
-      if (key == ' ') {
+      if (key == 'D' || key == ' ' || key == 'd') {
         sample.denoiserOn = !sample.denoiserOn;
         std::cout << "denoising now " << (sample.denoiserOn?"ON":"OFF") << std::endl;
+      }
+      if (key == 'A' || key == 'a') {
+        sample.accumulate = !sample.accumulate;
+        std::cout << "accumulation/progressive refinement now " << (sample.accumulate?"ON":"OFF") << std::endl;
       }
     }
     
@@ -151,6 +155,9 @@ namespace osc {
 
       SampleWindow *window = new SampleWindow("Optix 7 Course Example",
                                               model,camera,light,worldScale);
+
+      std::cout << "Press 'a' to enable/disable accumulation/progressive refinement" << std::endl;
+      std::cout << "Press ' ' to enable/disable denoising" << std::endl;
       window->run();
       
     } catch (std::runtime_error& e) {

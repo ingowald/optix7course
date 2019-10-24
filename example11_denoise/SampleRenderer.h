@@ -60,6 +60,7 @@ namespace osc {
     void setCamera(const Camera &camera);
 
     bool denoiserOn = true;
+    bool accumulate = true;
   protected:
     // ------------------------------------------------------------------
     // internal helper functions

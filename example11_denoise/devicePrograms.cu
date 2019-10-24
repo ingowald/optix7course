@@ -281,8 +281,15 @@ namespace osc {
     }
 
     vec4f rgba(pixelColor/numPixelSamples,1.f);
-    // and write to frame buffer ...
+
+    // and write/accumulate to frame buffer ...
     const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.renderSize.x;
+    if (optixLaunchParams.frame.frameID > 0) {
+      rgba
+        += float(optixLaunchParams.frame.frameID)
+        *  vec4f(optixLaunchParams.frame.colorBuffer[fbIndex]);
+      rgba /= (optixLaunchParams.frame.frameID+1.f);
+    }
     optixLaunchParams.frame.colorBuffer[fbIndex] = (float4)rgba;
   }
   
