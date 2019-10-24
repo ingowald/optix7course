@@ -582,7 +582,7 @@ namespace osc {
         HitgroupRecord rec;
         OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[rayID],&rec));
         rec.data.color   = mesh->diffuse;
-        if (mesh->diffuseTextureID >= 0) {
+        if (mesh->diffuseTextureID >= 0 && mesh->diffuseTextureID < textureObjects.size()) {
           rec.data.hasTexture = true;
           rec.data.texture    = textureObjects[mesh->diffuseTextureID];
         } else {
@@ -608,10 +608,10 @@ namespace osc {
   {
     // sanity check: make sure we launch only after first resize is
     // already done:
-    if (launchParams.frame.size.x == 0) return;
+    if (launchParams.frame.renderSize.x == 0) return;
       
     launchParamsBuffer.upload(&launchParams,1);
-    launchParams.frame.accumID++;
+    // launchParams.frame.accumID++;
     
     OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
                             pipeline,stream,
@@ -620,10 +620,65 @@ namespace osc {
                             launchParamsBuffer.sizeInBytes,
                             &sbt,
                             /*! dimensions of the launch: */
-                            launchParams.frame.size.x,
-                            launchParams.frame.size.y,
+                            launchParams.frame.renderSize.x,
+                            launchParams.frame.renderSize.y,
                             1
                             ));
+
+    OptixDenoiserParams denoiserParams;
+    denoiserParams.denoiseAlpha = 1;
+    denoiserParams.hdrIntensity = (CUdeviceptr)0;
+    denoiserParams.blendFactor  = .2f;
+    
+    // -------------------------------------------------------
+    OptixImage2D inputLayer;
+    inputLayer.data = renderBuffer.d_pointer();
+    /// Width of the image (in pixels)
+    inputLayer.width = launchParams.frame.renderSize.x;
+    /// Height of the image (in pixels)
+    inputLayer.height = launchParams.frame.renderSize.y;
+    /// Stride between subsequent rows of the image (in bytes).
+    inputLayer.rowStrideInBytes = launchParams.frame.renderSize.x * sizeof(float4);
+    /// Stride between subsequent pixels of the image (in bytes).
+    /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
+    inputLayer.pixelStrideInBytes = sizeof(float4);
+    /// Pixel format.
+    inputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    // -------------------------------------------------------
+    OptixImage2D outputLayer;
+    outputLayer.data = denoisedBuffer.d_pointer();
+    /// Width of the image (in pixels)
+    outputLayer.width = launchParams.frame.denoisedSize.x;
+    /// Height of the image (in pixels)
+    outputLayer.height = launchParams.frame.denoisedSize.y;
+    /// Stride between subsequent rows of the image (in bytes).
+    outputLayer.rowStrideInBytes = launchParams.frame.denoisedSize.x * sizeof(float4);
+    /// Stride between subsequent pixels of the image (in bytes).
+    /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
+    outputLayer.pixelStrideInBytes = sizeof(float4);
+    /// Pixel format.
+    outputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    // -------------------------------------------------------
+    if (denoiserOn) {
+      OPTIX_CHECK(optixDenoiserInvoke(denoiser,
+                                      /*stream*/0,
+                                      &denoiserParams,
+                                      denoiserState.d_pointer(),
+                                      denoiserState.size(),
+                                      &inputLayer,1,
+                                      /*inputOffsetX*/0,
+                                      /*inputOffsetY*/0,
+                                      &outputLayer,
+                                      denoiserScratch.d_pointer(),
+                                      denoiserScratch.size()));
+    } else {
+      cudaMemcpy((void*)outputLayer.data,(void*)inputLayer.data,
+                 outputLayer.width*outputLayer.height*sizeof(float4),
+                 cudaMemcpyDeviceToDevice);
+    }
+    
     // sync - make sure the frame is rendered before we download and
     // display (obviously, for a high-performance application you
     // want to use streams and double-buffering, but for this simple
@@ -638,7 +693,9 @@ namespace osc {
     launchParams.camera.position  = camera.from;
     launchParams.camera.direction = normalize(camera.at-camera.from);
     const float cosFovy = 0.66f;
-    const float aspect = launchParams.frame.size.x / float(launchParams.frame.size.y);
+    const float aspect
+      = float(launchParams.frame.renderSize.x)
+      / float(launchParams.frame.renderSize.y);
     launchParams.camera.horizontal
       = cosFovy * aspect * normalize(cross(launchParams.camera.direction,
                                            camera.up));
@@ -650,23 +707,72 @@ namespace osc {
   /*! resize frame buffer to given resolution */
   void SampleRenderer::resize(const vec2i &newSize)
   {
-    // resize our cuda frame buffer
-    colorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
+    if (denoiser) {
+      OPTIX_CHECK(optixDenoiserDestroy(denoiser));
+    };
 
+
+    // ------------------------------------------------------------------
+    // create the denoiser:
+    OptixDenoiserOptions denoiserOptions;
+    denoiserOptions.inputKind   = OPTIX_DENOISER_INPUT_RGB;
+    denoiserOptions.pixelFormat = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    OPTIX_CHECK(optixDenoiserCreate(optixContext,&denoiserOptions,&denoiser));
+    OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_LDR,NULL,0));
+    
+    // .. then compute and allocate memory resources for the denoiser
+    OptixDenoiserSizes denoiserReturnSizes;
+    OPTIX_CHECK(optixDenoiserComputeMemoryResources(denoiser,newSize.x,newSize.y,
+                                                    &denoiserReturnSizes));
+    PRINT(denoiserReturnSizes.stateSizeInBytes);
+    PRINT(denoiserReturnSizes.minimumScratchSizeInBytes);
+    PRINT(denoiserReturnSizes.recommendedScratchSizeInBytes);
+    PRINT(denoiserReturnSizes.overlapWindowSizeInPixels);
+
+    denoiserScratch.resize(denoiserReturnSizes.recommendedScratchSizeInBytes);
+    denoiserState.resize(denoiserReturnSizes.stateSizeInBytes);
+    
+    // ------------------------------------------------------------------
+    // resize our cuda frame buffer
+    const vec2i denoisedSize = newSize;
+    const vec2i renderSize
+      = denoisedSize
+      + 2*vec2i(denoiserReturnSizes.overlapWindowSizeInPixels);
+    denoisedBuffer.resize(denoisedSize.x*denoisedSize.y*sizeof(float4));
+    renderBuffer.resize(renderSize.x*renderSize.y*sizeof(float4));
+    
     // update the launch parameters that we'll pass to the optix
     // launch:
-    launchParams.frame.size  = newSize;
-    launchParams.frame.colorBuffer = (uint32_t*)colorBuffer.d_pointer();
+    launchParams.frame.renderSize    = renderSize;
+    launchParams.frame.denoisedSize  = denoisedSize;
+    launchParams.frame.colorBuffer   = (float4*)renderBuffer.d_pointer();
 
     // and re-set the camera, since aspect may have changed
     setCamera(lastSetCamera);
+
+    // size_t       stateSizeInBytes;
+    // size_t       minimumScratchSizeInBytes;
+    // size_t       recommendedScratchSizeInBytes;
+    // unsigned int overlapWindowSizeInPixels;
+
+
+    // ------------------------------------------------------------------
+    PRINT(denoisedSize);
+    PRINT(renderSize);
+    OPTIX_CHECK(optixDenoiserSetup(denoiser,0,
+                                   denoisedSize.x,denoisedSize.y,
+                                   denoiserState.d_pointer(),
+                                   denoiserState.size(),
+                                   denoiserScratch.d_pointer(),
+                                   denoiserScratch.size()));
   }
 
   /*! download the rendered color buffer */
-  void SampleRenderer::downloadPixels(uint32_t h_pixels[])
+  void SampleRenderer::downloadPixels(vec4f h_pixels[])
   {
-    colorBuffer.download(h_pixels,
-                         launchParams.frame.size.x*launchParams.frame.size.y);
+    denoisedBuffer.download(h_pixels,
+                            launchParams.frame.denoisedSize.x*launchParams.frame.denoisedSize.y);
   }
   
 } // ::osc

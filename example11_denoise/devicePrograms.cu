@@ -228,12 +228,11 @@ namespace osc {
     // compute a test pattern based on pixel ID
     const int ix = optixGetLaunchIndex().x;
     const int iy = optixGetLaunchIndex().y;
-    const int accumID  = optixLaunchParams.frame.accumID;
     const auto &camera = optixLaunchParams.camera;
     
     PRD prd;
-    prd.random.init(ix+accumID*optixLaunchParams.frame.size.x,
-                 iy+accumID*optixLaunchParams.frame.size.y);
+    prd.random.init(ix+optixLaunchParams.frame.renderSize.x*iy,
+                    optixLaunchParams.frame.frameID);
     prd.pixelColor = vec3f(0.f);
 
     // the values we store the PRD pointer in:
@@ -245,9 +244,22 @@ namespace osc {
     vec3f pixelColor = 0.f;
     for (int sampleID=0;sampleID<numPixelSamples;sampleID++) {
       // normalized screen plane position, in [0,1]^2
-      const vec2f screen(vec2f(ix+prd.random(),iy+prd.random())
-                         / vec2f(optixLaunchParams.frame.size));
-    
+
+      // iw: note for denoising that's not actually correct - if we
+      // assume that the camera should only(!) cover the denoised
+      // screen then the actual screen plane we shuld be using during
+      // rendreing is slightly larger than [0,1]^2
+      vec2f screen(vec2f(ix+prd.random(),iy+prd.random())
+                   / vec2f(optixLaunchParams.frame.renderSize));
+      // screen
+      //   = screen
+      //   * vec2f(optixLaunchParams.frame.denoisedSize)
+      //   * vec2f(optixLaunchParams.frame.renderSize)
+      //   - 0.5f*(vec2f(optixLaunchParams.frame.renderSize)
+      //           -
+      //           vec2f(optixLaunchParams.frame.denoisedSize)
+      //           );
+      
       // generate ray direction
       vec3f rayDir = normalize(camera.direction
                                + (screen.x - 0.5f) * camera.horizontal
@@ -267,19 +279,11 @@ namespace osc {
                  u0, u1 );
       pixelColor += prd.pixelColor;
     }
-    
-    const int r = int(255.99f*min(pixelColor.x / numPixelSamples,1.f));
-    const int g = int(255.99f*min(pixelColor.y / numPixelSamples,1.f));
-    const int b = int(255.99f*min(pixelColor.z / numPixelSamples,1.f));
 
-    // convert to 32-bit rgba value (we explicitly set alpha to 0xff
-    // to make stb_image_write happy ...
-    const uint32_t rgba = 0xff000000
-      | (r<<0) | (g<<8) | (b<<16);
-
+    vec4f rgba(pixelColor/numPixelSamples,1.f);
     // and write to frame buffer ...
-    const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.size.x;
-    optixLaunchParams.frame.colorBuffer[fbIndex] = rgba;
+    const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.renderSize.x;
+    optixLaunchParams.frame.colorBuffer[fbIndex] = (float4)rgba;
   }
   
 } // ::osc

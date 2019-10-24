@@ -165,6 +165,13 @@ namespace osc {
     if (materials.empty())
       throw std::runtime_error("could not parse materials ...");
 
+
+    int maxShapes = 200;
+    if (shapes.size() > maxShapes) {
+      std::cout << "debug - loading only 10 shapes!!!!" << std::endl;
+      shapes.resize(maxShapes);
+    }
+    
     std::cout << "Done loading obj file - found " << shapes.size() << " shapes with " << materials.size() << " materials" << std::endl;
     for (int shapeID=0;shapeID<(int)shapes.size();shapeID++) {
       tinyobj::shape_t &shape = shapes[shapeID];

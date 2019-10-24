@@ -54,10 +54,12 @@ namespace osc {
     void resize(const vec2i &newSize);
 
     /*! download the rendered color buffer */
-    void downloadPixels(uint32_t h_pixels[]);
+    void downloadPixels(vec4f h_pixels[]);
 
     /*! set camera to render with */
     void setCamera(const Camera &camera);
+
+    bool denoiserOn = true;
   protected:
     // ------------------------------------------------------------------
     // internal helper functions
@@ -95,6 +97,7 @@ namespace osc {
 
     /*! upload textures, and create cuda texture objects for them */
     void createTextures();
+
   protected:
     /*! @{ CUDA device context and stream that optix pipeline will run
         on, as well as device properties for this device */
@@ -133,8 +136,19 @@ namespace osc {
     CUDABuffer   launchParamsBuffer;
     /*! @} */
 
-    CUDABuffer colorBuffer;
+    /*! the color buffer we use during _rendering_, which is a bit
+        larger than the actual displayed frame buffer (to account for
+        the border), and in float4 format (the denoiser requires
+        floats) */
+    CUDABuffer renderBuffer;
+    
+    /*! the actual final color buffer used for display, in rgba8 */
+    CUDABuffer denoisedBuffer;
 
+    OptixDenoiser denoiser = nullptr;
+    CUDABuffer    denoiserScratch;
+    CUDABuffer    denoiserState;
+    
     /*! the camera we are to render with. */
     Camera lastSetCamera;
     

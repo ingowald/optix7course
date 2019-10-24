@@ -77,7 +77,8 @@ namespace osc {
       CUDA_CHECK(Memcpy((void *)t, d_ptr,
                         count*sizeof(T), cudaMemcpyDeviceToHost));
     }
-    
+
+    inline size_t size() const { return sizeInBytes; }
     size_t sizeInBytes { 0 };
     void  *d_ptr { nullptr };
   };

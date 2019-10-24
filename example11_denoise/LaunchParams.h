@@ -38,9 +38,15 @@ namespace osc {
   struct LaunchParams
   {
     struct {
-      uint32_t *colorBuffer;
-      vec2i     size;
-      int       accumID { 0 };
+      int       frameID = 0;
+      float4   *colorBuffer;
+      
+      /*! the final denoised output buffer size */
+      vec2i     denoisedSize;
+      
+      /*! the size we use during rendering, *before* denoising, which
+          is slightly larger than the final denoised buffer */
+      vec2i     renderSize;
     } frame;
     
     struct {
