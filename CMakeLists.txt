@@ -15,7 +15,7 @@
 # ======================================================================== #
 
 if (POLICY CMP0048)
-  cmake_policy(SET CMP0048 OLD)
+  cmake_policy(SET CMP0048 NEW)
 endif (POLICY CMP0048)
 
 project(optix7course)
@@ -45,6 +45,7 @@ add_subdirectory(${gdt_dir} EXCLUDE_FROM_ALL)
 # ------------------------------------------------------------------
 # build glfw
 # ------------------------------------------------------------------
+set(OpenGL_GL_PREFERENCE LEGACY)
 if (WIN32)
 #  set(glfw_dir ${PROJECT_SOURCE_DIR}/submodules/glfw/)
   set(glfw_dir ${PROJECT_SOURCE_DIR}/common/3rdParty/glfw/)
@@ -82,5 +83,6 @@ add_subdirectory(example07_firstRealModel)
 add_subdirectory(example08_addingTextures)
 add_subdirectory(example09_shadowRays)
 add_subdirectory(example10_softShadows)
+add_subdirectory(example11_denoise)
 
 
