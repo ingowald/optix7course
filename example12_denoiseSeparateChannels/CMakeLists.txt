@@ -20,8 +20,11 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
 
+cuda_add_library(toneMap
+  toneMap.cu)
 add_executable(ex12_denoiseSeparateChannels
   ${embedded_ptx_code}
+  devicePrograms.cu
   optix7.h
   CUDABuffer.h
   SampleRenderer.h
@@ -31,6 +34,7 @@ add_executable(ex12_denoiseSeparateChannels
   )
 
 target_link_libraries(ex12_denoiseSeparateChannels
+  toneMap
   gdt
   # optix dependencies, for rendering
   ${optix_LIBRARY}

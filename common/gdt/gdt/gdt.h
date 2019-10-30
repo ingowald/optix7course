@@ -23,7 +23,11 @@
 #include <assert.h>
 #include <string>
 #include <math.h>
-#include <cmath>
+#ifdef __CUDA_ARCH__
+#  include <math_constants.h>
+#else
+#  include <cmath>
+#endif
 #include <algorithm>
 #ifdef __GNUC__
     #include <sys/time.h>
@@ -134,10 +138,10 @@ namespace gdt {
   inline __both__ float rcp(float f)      { return 1.f/f; }
   inline __both__ double rcp(double d)    { return 1./d; }
   
-  inline int32_t divRoundUp(int32_t a, int32_t b) { return (a+b-1)/b; }
-  inline uint32_t divRoundUp(uint32_t a, uint32_t b) { return (a+b-1)/b; }
-  inline int64_t divRoundUp(int64_t a, int64_t b) { return (a+b-1)/b; }
-  inline uint64_t divRoundUp(uint64_t a, uint64_t b) { return (a+b-1)/b; }
+  inline __both__ int32_t divRoundUp(int32_t a, int32_t b) { return (a+b-1)/b; }
+  inline __both__ uint32_t divRoundUp(uint32_t a, uint32_t b) { return (a+b-1)/b; }
+  inline __both__ int64_t divRoundUp(int64_t a, int64_t b) { return (a+b-1)/b; }
+  inline __both__ uint64_t divRoundUp(uint64_t a, uint64_t b) { return (a+b-1)/b; }
   
 #ifdef __CUDACC__
   using ::sin; // this is the double version
@@ -148,12 +152,16 @@ namespace gdt {
   using ::sin; // this is the double version
   using ::cos; // this is the double version
 #endif
-  
-  inline __both__ float rsqrt(const float f)   { return 1.f/sqrtf(f); }
-  inline __both__ double rsqrt(const double d)   { return 1./sqrt(d); }
-  inline __both__ float sqrt(const float f)   { return sqrtf(f); }
-  inline __both__ double sqrt(const double d)   { return sqrt(d); }
 
+// #ifdef __CUDA_ARCH__
+  using ::sqrt;
+  using ::sqrtf;
+// #else
+//   inline __both__ float sqrt(const float f)   { return sqrtf(f); }
+//   inline __both__ double sqrt(const double d)   { return sqrt(d); }
+// #endif
+//   inline __both__ float rsqrt(const float f)   { return 1.f/sqrtf(f); }
+//   inline __both__ double rsqrt(const double d)   { return 1./sqrt(d); }
 
 #ifdef __WIN32__
 #  define osp_snprintf sprintf_s

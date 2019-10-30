@@ -55,7 +55,7 @@ namespace osc {
       
       glBindTexture(GL_TEXTURE_2D, fbTexture);
       GLenum texFormat = GL_RGBA;
-      GLenum texelType = GL_FLOAT;//GL_UNSIGNED_BYTE;
+      GLenum texelType = GL_UNSIGNED_BYTE;
       glTexImage2D(GL_TEXTURE_2D, 0, texFormat, fbSize.x, fbSize.y, 0, GL_RGBA,
                    texelType, pixels.data());
 
@@ -130,7 +130,7 @@ namespace osc {
     vec2i                 fbSize;
     GLuint                fbTexture {0};
     SampleRenderer        sample;
-    std::vector<vec4f> pixels;
+    std::vector<uint32_t> pixels;
   };
   
   

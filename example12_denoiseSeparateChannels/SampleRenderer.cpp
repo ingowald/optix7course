@@ -716,6 +716,7 @@ namespace osc {
                  outputLayer.width*outputLayer.height*sizeof(float4),
                  cudaMemcpyDeviceToDevice);
     }
+    computeFinalPixelColors();
     
     // sync - make sure the frame is rendered before we download and
     // display (obviously, for a high-performance application you
@@ -777,6 +778,7 @@ namespace osc {
     fbColor.resize(newSize.x*newSize.y*sizeof(float4));
     fbNormal.resize(newSize.x*newSize.y*sizeof(float4));
     fbAlbedo.resize(newSize.x*newSize.y*sizeof(float4));
+    finalColorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
     
     // update the launch parameters that we'll pass to the optix
     // launch:
@@ -798,10 +800,10 @@ namespace osc {
   }
   
   /*! download the rendered color buffer */
-  void SampleRenderer::downloadPixels(vec4f h_pixels[])
+  void SampleRenderer::downloadPixels(uint32_t h_pixels[])
   {
-    denoisedBuffer.download(h_pixels,
-                            launchParams.frame.size.x*launchParams.frame.size.y);
+    finalColorBuffer.download(h_pixels,
+                              launchParams.frame.size.x*launchParams.frame.size.y);
   }
   
 } // ::osc

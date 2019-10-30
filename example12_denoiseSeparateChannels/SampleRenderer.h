@@ -54,18 +54,24 @@ namespace osc {
     void resize(const vec2i &newSize);
 
     /*! download the rendered color buffer */
-    void downloadPixels(vec4f h_pixels[]);
+    void downloadPixels(uint32_t h_pixels[]);
 
     /*! set camera to render with */
     void setCamera(const Camera &camera);
 
+    
     bool denoiserOn = true;
     bool accumulate = true;
   protected:
+
+
     // ------------------------------------------------------------------
     // internal helper functions
     // ------------------------------------------------------------------
 
+    /*! runs a cuda kernel that performs gamma correction and float4-to-rgba conversion */
+    void computeFinalPixelColors();
+    
     /*! helper function that initializes optix and checks for errors */
     void initOptix();
   
@@ -147,8 +153,11 @@ namespace osc {
     CUDABuffer fbNormal;
     CUDABuffer fbAlbedo;
     
-    /*! the actual final color buffer used for display, in rgba8 */
+    /*! output of the denoiser pass, in float4 */
     CUDABuffer denoisedBuffer;
+    
+    /* the actual final color buffer used for display, in rgba8 */
+    CUDABuffer finalColorBuffer;
 
     OptixDenoiser denoiser = nullptr;
     CUDABuffer    denoiserScratch;
