@@ -153,6 +153,7 @@ namespace osc {
     OptixDenoiser denoiser = nullptr;
     CUDABuffer    denoiserScratch;
     CUDABuffer    denoiserState;
+    CUDABuffer    denoiserIntensity;
     
     /*! the camera we are to render with. */
     Camera lastSetCamera;

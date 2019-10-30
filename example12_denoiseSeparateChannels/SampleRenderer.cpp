@@ -629,7 +629,7 @@ namespace osc {
 
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
-    denoiserParams.hdrIntensity = (CUdeviceptr)0;
+    denoiserParams.hdrIntensity = denoiserIntensity.d_pointer();
     denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
     
     // -------------------------------------------------------
@@ -692,6 +692,14 @@ namespace osc {
 
     // -------------------------------------------------------
     if (denoiserOn) {
+      OPTIX_CHECK(optixDenoiserComputeIntensity
+                  (denoiser,
+                   /*stream*/0,
+                   &inputLayer[0],
+                   (CUdeviceptr)denoiserIntensity.d_pointer(),
+                   (CUdeviceptr)denoiserScratch.d_pointer(),
+                   denoiserScratch.size()));
+      
       OPTIX_CHECK(optixDenoiserInvoke(denoiser,
                                       /*stream*/0,
                                       &denoiserParams,
@@ -752,13 +760,14 @@ namespace osc {
     denoiserOptions.pixelFormat = OPTIX_PIXEL_FORMAT_FLOAT4;
 
     OPTIX_CHECK(optixDenoiserCreate(optixContext,&denoiserOptions,&denoiser));
-    OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_LDR,NULL,0));
-    
+    OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_HDR,NULL,0));
+
     // .. then compute and allocate memory resources for the denoiser
     OptixDenoiserSizes denoiserReturnSizes;
     OPTIX_CHECK(optixDenoiserComputeMemoryResources(denoiser,newSize.x,newSize.y,
                                                     &denoiserReturnSizes));
 
+    denoiserIntensity.resize(sizeof(float));
     denoiserScratch.resize(denoiserReturnSizes.recommendedScratchSizeInBytes);
     denoiserState.resize(denoiserReturnSizes.stateSizeInBytes);
     
@@ -787,7 +796,7 @@ namespace osc {
                                    denoiserScratch.d_pointer(),
                                    denoiserScratch.size()));
   }
-
+  
   /*! download the rendered color buffer */
   void SampleRenderer::downloadPixels(vec4f h_pixels[])
   {
