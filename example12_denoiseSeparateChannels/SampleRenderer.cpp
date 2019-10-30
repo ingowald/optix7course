@@ -629,23 +629,51 @@ namespace osc {
 
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
-    denoiserParams.hdrIntensity = (CUdeviceptr)0;
+    denoiserParams.hdrIntensity = denoiserIntensity.d_pointer();
     denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
     
     // -------------------------------------------------------
-    OptixImage2D inputLayer;
-    inputLayer.data = renderBuffer.d_pointer();
+    OptixImage2D inputLayer[3];
+    inputLayer[0].data = fbColor.d_pointer();
     /// Width of the image (in pixels)
-    inputLayer.width = launchParams.frame.size.x;
+    inputLayer[0].width = launchParams.frame.size.x;
     /// Height of the image (in pixels)
-    inputLayer.height = launchParams.frame.size.y;
+    inputLayer[0].height = launchParams.frame.size.y;
     /// Stride between subsequent rows of the image (in bytes).
-    inputLayer.rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
+    inputLayer[0].rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
     /// Stride between subsequent pixels of the image (in bytes).
     /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
-    inputLayer.pixelStrideInBytes = sizeof(float4);
+    inputLayer[0].pixelStrideInBytes = sizeof(float4);
     /// Pixel format.
-    inputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+    inputLayer[0].format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    // ..................................................................
+    inputLayer[2].data = fbNormal.d_pointer();
+    /// Width of the image (in pixels)
+    inputLayer[2].width = launchParams.frame.size.x;
+    /// Height of the image (in pixels)
+    inputLayer[2].height = launchParams.frame.size.y;
+    /// Stride between subsequent rows of the image (in bytes).
+    inputLayer[2].rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
+    /// Stride between subsequent pixels of the image (in bytes).
+    /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
+    inputLayer[2].pixelStrideInBytes = sizeof(float4);
+    /// Pixel format.
+    inputLayer[2].format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    // ..................................................................
+    inputLayer[1].data = fbAlbedo.d_pointer();
+    /// Width of the image (in pixels)
+    inputLayer[1].width = launchParams.frame.size.x;
+    /// Height of the image (in pixels)
+    inputLayer[1].height = launchParams.frame.size.y;
+    /// Stride between subsequent rows of the image (in bytes).
+    inputLayer[1].rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
+    /// Stride between subsequent pixels of the image (in bytes).
+    /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
+    inputLayer[1].pixelStrideInBytes = sizeof(float4);
+    /// Pixel format.
+    inputLayer[1].format = OPTIX_PIXEL_FORMAT_FLOAT4;
 
     // -------------------------------------------------------
     OptixImage2D outputLayer;
@@ -664,22 +692,31 @@ namespace osc {
 
     // -------------------------------------------------------
     if (denoiserOn) {
+      OPTIX_CHECK(optixDenoiserComputeIntensity
+                  (denoiser,
+                   /*stream*/0,
+                   &inputLayer[0],
+                   (CUdeviceptr)denoiserIntensity.d_pointer(),
+                   (CUdeviceptr)denoiserScratch.d_pointer(),
+                   denoiserScratch.size()));
+      
       OPTIX_CHECK(optixDenoiserInvoke(denoiser,
                                       /*stream*/0,
                                       &denoiserParams,
                                       denoiserState.d_pointer(),
                                       denoiserState.size(),
-                                      &inputLayer,1,
+                                      &inputLayer[0],2,
                                       /*inputOffsetX*/0,
                                       /*inputOffsetY*/0,
                                       &outputLayer,
                                       denoiserScratch.d_pointer(),
                                       denoiserScratch.size()));
     } else {
-      cudaMemcpy((void*)outputLayer.data,(void*)inputLayer.data,
+      cudaMemcpy((void*)outputLayer.data,(void*)inputLayer[0].data,
                  outputLayer.width*outputLayer.height*sizeof(float4),
                  cudaMemcpyDeviceToDevice);
     }
+    computeFinalPixelColors();
     
     // sync - make sure the frame is rendered before we download and
     // display (obviously, for a high-performance application you
@@ -719,29 +756,36 @@ namespace osc {
     // ------------------------------------------------------------------
     // create the denoiser:
     OptixDenoiserOptions denoiserOptions;
-    denoiserOptions.inputKind   = OPTIX_DENOISER_INPUT_RGB;
+    denoiserOptions.inputKind   = OPTIX_DENOISER_INPUT_RGB_ALBEDO;
+    // denoiserOptions.inputKind   = OPTIX_DENOISER_INPUT_RGB_ALBEDO_NORMAL;
     denoiserOptions.pixelFormat = OPTIX_PIXEL_FORMAT_FLOAT4;
 
     OPTIX_CHECK(optixDenoiserCreate(optixContext,&denoiserOptions,&denoiser));
-    OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_LDR,NULL,0));
-    
+    OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_HDR,NULL,0));
+
     // .. then compute and allocate memory resources for the denoiser
     OptixDenoiserSizes denoiserReturnSizes;
     OPTIX_CHECK(optixDenoiserComputeMemoryResources(denoiser,newSize.x,newSize.y,
                                                     &denoiserReturnSizes));
 
+    denoiserIntensity.resize(sizeof(float));
     denoiserScratch.resize(denoiserReturnSizes.recommendedScratchSizeInBytes);
     denoiserState.resize(denoiserReturnSizes.stateSizeInBytes);
     
     // ------------------------------------------------------------------
     // resize our cuda frame buffer
     denoisedBuffer.resize(newSize.x*newSize.y*sizeof(float4));
-    renderBuffer.resize(newSize.x*newSize.y*sizeof(float4));
+    fbColor.resize(newSize.x*newSize.y*sizeof(float4));
+    fbNormal.resize(newSize.x*newSize.y*sizeof(float4));
+    fbAlbedo.resize(newSize.x*newSize.y*sizeof(float4));
+    finalColorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
     
     // update the launch parameters that we'll pass to the optix
     // launch:
     launchParams.frame.size          = newSize;
-    launchParams.frame.colorBuffer   = (float4*)renderBuffer.d_pointer();
+    launchParams.frame.colorBuffer   = (float4*)fbColor.d_pointer();
+    launchParams.frame.normalBuffer  = (float4*)fbNormal.d_pointer();
+    launchParams.frame.albedoBuffer  = (float4*)fbAlbedo.d_pointer();
 
     // and re-set the camera, since aspect may have changed
     setCamera(lastSetCamera);
@@ -754,12 +798,12 @@ namespace osc {
                                    denoiserScratch.d_pointer(),
                                    denoiserScratch.size()));
   }
-
+  
   /*! download the rendered color buffer */
-  void SampleRenderer::downloadPixels(vec4f h_pixels[])
+  void SampleRenderer::downloadPixels(uint32_t h_pixels[])
   {
-    denoisedBuffer.download(h_pixels,
-                            launchParams.frame.size.x*launchParams.frame.size.y);
+    finalColorBuffer.download(h_pixels,
+                              launchParams.frame.size.x*launchParams.frame.size.y);
   }
   
 } // ::osc

@@ -17,9 +17,10 @@
 #pragma once
 
 #include "gdt/math/vec.h"
-#include <limits>
-#ifdef __CUDACC__
+#ifdef __CUDA_ARCH__
 #include <math_constants.h>
+#else
+#include <limits>
 #endif
 
 #ifndef M_PI
@@ -62,7 +63,7 @@ namespace gdt {
 
   static struct NegInfTy
   {
-#ifdef __CUDACC__
+#ifdef __CUDA_ARCH__
     __device__ operator          double   ( ) const { return -CUDART_INF; }
     __device__ operator          float    ( ) const { return -CUDART_INF_F; }
 #else
@@ -82,7 +83,7 @@ namespace gdt {
   } neg_inf MAYBE_UNUSED;
 
   inline __both__ float infty() {
-#ifdef __CUDACC__
+#ifdef __CUDA_ARCH__
     return CUDART_INF_F; 
 #else
     return std::numeric_limits<float>::infinity(); 
@@ -91,7 +92,7 @@ namespace gdt {
   
   static struct PosInfTy
   {
-#ifdef __CUDACC__
+#ifdef __CUDA_ARCH__
     __device__ operator          double   ( ) const { return CUDART_INF; }
     __device__ operator          float    ( ) const { return CUDART_INF_F; }
 #else
@@ -112,7 +113,7 @@ namespace gdt {
 
   static struct NaNTy
   {
-#ifdef __CUDACC__
+#ifdef __CUDA_ARCH__
     __device__ operator double( ) const { return CUDART_NAN_F; }
     __device__ operator float ( ) const { return CUDART_NAN; }
 #else

@@ -16,48 +16,50 @@
 
 #pragma once
 
-#include "gdt/math/vec.h"
-#include "optix7.h"
+#include "gdt/math/AffineSpace.h"
+#include <vector>
 
+/*! \namespace osc - Optix Siggraph Course */
 namespace osc {
   using namespace gdt;
+  
+  /*! a simple indexed triangle mesh that our sample renderer will
+      render */
+  struct TriangleMesh {
+    std::vector<vec3f> vertex;
+    std::vector<vec3f> normal;
+    std::vector<vec2f> texcoord;
+    std::vector<vec3i> index;
 
-  // for this simple example, we have a single ray type
-  enum { RADIANCE_RAY_TYPE=0, SHADOW_RAY_TYPE, RAY_TYPE_COUNT };
+    // material data:
+    vec3f              diffuse;
+    int                diffuseTextureID { -1 };
+  };
 
-  struct TriangleMeshSBTData {
-    vec3f  color;
-    vec3f *vertex;
-    vec3f *normal;
-    vec2f *texcoord;
-    vec3i *index;
-    bool                hasTexture;
-    cudaTextureObject_t texture;
+  struct QuadLight {
+    vec3f origin, du, dv, power;
   };
   
-  struct LaunchParams
-  {
-    int numPixelSamples = 1;
-    struct {
-      int       frameID = 0;
-      float4   *colorBuffer;
-      
-      /*! the size of the frame buffer to render */
-      vec2i     size;
-    } frame;
+  struct Texture {
+    ~Texture()
+    { if (pixel) delete[] pixel; }
     
-    struct {
-      vec3f position;
-      vec3f direction;
-      vec3f horizontal;
-      vec3f vertical;
-    } camera;
-
-    struct {
-      vec3f origin, du, dv, power;
-    } light;
+    uint32_t *pixel      { nullptr };
+    vec2i     resolution { -1 };
+  };
+  
+  struct Model {
+    ~Model()
+    {
+      for (auto mesh : meshes) delete mesh;
+      for (auto texture : textures) delete texture;
+    }
     
-    OptixTraversableHandle traversable;
+    std::vector<TriangleMesh *> meshes;
+    std::vector<Texture *>      textures;
+    //! bounding box of all vertices in the model
+    box3f bounds;
   };
 
-} // ::osc
+  Model *loadOBJ(const std::string &objFile);
+}

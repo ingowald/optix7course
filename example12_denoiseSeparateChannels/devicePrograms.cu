@@ -38,6 +38,8 @@ namespace osc {
   struct PRD {
     Random random;
     vec3f  pixelColor;
+    vec3f  pixelNormal;
+    vec3f  pixelAlbedo;
   };
   
   static __forceinline__ __device__
@@ -187,7 +189,9 @@ namespace osc {
           *  (NdotL / (lightDist*lightDist*numLightSamples));
       }
     }
-    
+
+    prd.pixelNormal = Ns;
+    prd.pixelAlbedo = diffuseColor;
     prd.pixelColor = pixelColor;
   }
   
@@ -241,10 +245,25 @@ namespace osc {
     int numPixelSamples = optixLaunchParams.numPixelSamples;
 
     vec3f pixelColor = 0.f;
+    vec3f pixelNormal = 0.f;
+    vec3f pixelAlbedo = 0.f;
     for (int sampleID=0;sampleID<numPixelSamples;sampleID++) {
       // normalized screen plane position, in [0,1]^2
+
+      // iw: note for denoising that's not actually correct - if we
+      // assume that the camera should only(!) cover the denoised
+      // screen then the actual screen plane we shuld be using during
+      // rendreing is slightly larger than [0,1]^2
       vec2f screen(vec2f(ix+prd.random(),iy+prd.random())
                    / vec2f(optixLaunchParams.frame.size));
+      // screen
+      //   = screen
+      //   * vec2f(optixLaunchParams.frame.denoisedSize)
+      //   * vec2f(optixLaunchParams.frame.size)
+      //   - 0.5f*(vec2f(optixLaunchParams.frame.size)
+      //           -
+      //           vec2f(optixLaunchParams.frame.denoisedSize)
+      //           );
       
       // generate ray direction
       vec3f rayDir = normalize(camera.direction
@@ -263,7 +282,9 @@ namespace osc {
                  RAY_TYPE_COUNT,               // SBT stride
                  RADIANCE_RAY_TYPE,            // missSBTIndex 
                  u0, u1 );
-      pixelColor += prd.pixelColor;
+      pixelColor  += prd.pixelColor;
+      pixelNormal += prd.pixelNormal;
+      pixelAlbedo += prd.pixelAlbedo;
     }
 
     vec4f rgba(pixelColor/numPixelSamples,1.f);
