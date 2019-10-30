@@ -241,7 +241,52 @@ you did!
 
 ![Soft Shadows](./example10_softShadows/ex10.png)
 
-## Example 11: It's up to you ...
+
+## Example 11: Simple Denoising (LDR, color only)
+
+This example takes the code from the previous example and simply runs
+the optix denoiser on the final frame (ie, color) buffer computed by
+this optix launch. It does not store any albedo or normal buffers, 
+not compute HDR intensity, etc. 
+
+To fully see the impact of denoising *without* progressive resampling,
+feel free to turn denoising and/or progressive refinemnt on and off
+via the 'd' (denoising) and 'a' (accumulate) keys.
+
+Example 11, single sample per pixel, *no* denoising:
+![Ex11, 1spp, noisy](./example11_denoiseColorOnly/ex11_noisy.png)
+
+The same, with denoiser turned on:
+![Ex11, 1spp, denoised](./example11_denoiseColorOnly/ex11_denoised.png)
+
+
+
+## Example 12: Denoising with HDR and separate Normal Channel
+
+This example improves on the simple denoising by computing
+a separate normal buffer (which improves the denoiser quality), and
+by doing denoising in HDR, with an added gamma pass *after* denoising.
+
+As with example 11, to fully see the impact of denoising *without*
+progressive resampling, feel free to turn denoising and/or progressive
+refinemnt on and off via the 'd' (denoising) and 'a' (accumulate)
+keys.
+
+Example 12, single sample per pixel, *no* denoising:
+![Ex12, 1spp, noisy](./example12_denoiseColorOnly/ex12_noisy.png)
+
+The same, with denoiser turned on:
+![Ex12, 1spp, denoised](./example12_denoiseColorOnly/ex12_denoised.png)
+
+
+
+
+
+
+
+
+
+## Example 13: It's up to you ...
 
 From here on, there are multiple different avenues of how to add to
 this simple viewer, in terms of visual features, performance, kind
