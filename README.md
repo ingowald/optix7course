@@ -273,10 +273,10 @@ refinemnt on and off via the 'd' (denoising) and 'a' (accumulate)
 keys.
 
 Example 12, single sample per pixel, *no* denoising:
-![Ex12, 1spp, noisy](./example12_denoiseColorOnly/ex12_noisy.png)
+![Ex12, 1spp, noisy](./example12_denoiseSeparateChannels/ex12_noisy.png)
 
 The same, with denoiser turned on:
-![Ex12, 1spp, denoised](./example12_denoiseColorOnly/ex12_denoised.png)
+![Ex12, 1spp, denoised](./example12_denoiseSeparateChannels/ex12_denoised.png)
 
 
 
