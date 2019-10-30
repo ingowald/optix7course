@@ -608,7 +608,7 @@ namespace osc {
   {
     // sanity check: make sure we launch only after first resize is
     // already done:
-    if (launchParams.frame.renderSize.x == 0) return;
+    if (launchParams.frame.size.x == 0) return;
 
     if (!accumulate)
       launchParams.frame.frameID = 0;
@@ -622,8 +622,8 @@ namespace osc {
                             launchParamsBuffer.sizeInBytes,
                             &sbt,
                             /*! dimensions of the launch: */
-                            launchParams.frame.renderSize.x,
-                            launchParams.frame.renderSize.y,
+                            launchParams.frame.size.x,
+                            launchParams.frame.size.y,
                             1
                             ));
 
@@ -636,11 +636,11 @@ namespace osc {
     OptixImage2D inputLayer;
     inputLayer.data = renderBuffer.d_pointer();
     /// Width of the image (in pixels)
-    inputLayer.width = launchParams.frame.renderSize.x;
+    inputLayer.width = launchParams.frame.size.x;
     /// Height of the image (in pixels)
-    inputLayer.height = launchParams.frame.renderSize.y;
+    inputLayer.height = launchParams.frame.size.y;
     /// Stride between subsequent rows of the image (in bytes).
-    inputLayer.rowStrideInBytes = launchParams.frame.renderSize.x * sizeof(float4);
+    inputLayer.rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
     /// Stride between subsequent pixels of the image (in bytes).
     /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
     inputLayer.pixelStrideInBytes = sizeof(float4);
@@ -651,11 +651,11 @@ namespace osc {
     OptixImage2D outputLayer;
     outputLayer.data = denoisedBuffer.d_pointer();
     /// Width of the image (in pixels)
-    outputLayer.width = launchParams.frame.denoisedSize.x;
+    outputLayer.width = launchParams.frame.size.x;
     /// Height of the image (in pixels)
-    outputLayer.height = launchParams.frame.denoisedSize.y;
+    outputLayer.height = launchParams.frame.size.y;
     /// Stride between subsequent rows of the image (in bytes).
-    outputLayer.rowStrideInBytes = launchParams.frame.denoisedSize.x * sizeof(float4);
+    outputLayer.rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
     /// Stride between subsequent pixels of the image (in bytes).
     /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
     outputLayer.pixelStrideInBytes = sizeof(float4);
@@ -698,8 +698,8 @@ namespace osc {
     launchParams.camera.direction = normalize(camera.at-camera.from);
     const float cosFovy = 0.66f;
     const float aspect
-      = float(launchParams.frame.renderSize.x)
-      / float(launchParams.frame.renderSize.y);
+      = float(launchParams.frame.size.x)
+      / float(launchParams.frame.size.y);
     launchParams.camera.horizontal
       = cosFovy * aspect * normalize(cross(launchParams.camera.direction,
                                            camera.up));
@@ -735,17 +735,12 @@ namespace osc {
     
     // ------------------------------------------------------------------
     // resize our cuda frame buffer
-    const vec2i denoisedSize = newSize;
-    const vec2i renderSize
-      = denoisedSize
-      + 2*vec2i(denoiserReturnSizes.overlapWindowSizeInPixels);
-    denoisedBuffer.resize(denoisedSize.x*denoisedSize.y*sizeof(float4));
-    renderBuffer.resize(renderSize.x*renderSize.y*sizeof(float4));
+    denoisedBuffer.resize(newSize.x*newSize.y*sizeof(float4));
+    renderBuffer.resize(newSize.x*newSize.y*sizeof(float4));
     
     // update the launch parameters that we'll pass to the optix
     // launch:
-    launchParams.frame.renderSize    = renderSize;
-    launchParams.frame.denoisedSize  = denoisedSize;
+    launchParams.frame.size          = newSize;
     launchParams.frame.colorBuffer   = (float4*)renderBuffer.d_pointer();
 
     // and re-set the camera, since aspect may have changed
@@ -753,7 +748,7 @@ namespace osc {
 
     // ------------------------------------------------------------------
     OPTIX_CHECK(optixDenoiserSetup(denoiser,0,
-                                   denoisedSize.x,denoisedSize.y,
+                                   newSize.x,newSize.y,
                                    denoiserState.d_pointer(),
                                    denoiserState.size(),
                                    denoiserScratch.d_pointer(),
@@ -764,7 +759,7 @@ namespace osc {
   void SampleRenderer::downloadPixels(vec4f h_pixels[])
   {
     denoisedBuffer.download(h_pixels,
-                            launchParams.frame.denoisedSize.x*launchParams.frame.denoisedSize.y);
+                            launchParams.frame.size.x*launchParams.frame.size.y);
   }
   
 } // ::osc

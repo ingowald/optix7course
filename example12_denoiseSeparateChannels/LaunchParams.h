@@ -44,12 +44,8 @@ namespace osc {
       float4   *normalBuffer;
       float4   *albedoBuffer;
       
-      /*! the final denoised output buffer size */
-      vec2i     denoisedSize;
-      
-      /*! the size we use during rendering, *before* denoising, which
-          is slightly larger than the final denoised buffer */
-      vec2i     renderSize;
+      /*! the size of the frame buffer to render */
+      vec2i     size;
     } frame;
     
     struct {

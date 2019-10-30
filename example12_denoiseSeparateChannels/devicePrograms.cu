@@ -234,7 +234,7 @@ namespace osc {
     const auto &camera = optixLaunchParams.camera;
     
     PRD prd;
-    prd.random.init(ix+optixLaunchParams.frame.renderSize.x*iy,
+    prd.random.init(ix+optixLaunchParams.frame.size.x*iy,
                     optixLaunchParams.frame.frameID);
     prd.pixelColor = vec3f(0.f);
 
@@ -255,12 +255,12 @@ namespace osc {
       // screen then the actual screen plane we shuld be using during
       // rendreing is slightly larger than [0,1]^2
       vec2f screen(vec2f(ix+prd.random(),iy+prd.random())
-                   / vec2f(optixLaunchParams.frame.renderSize));
+                   / vec2f(optixLaunchParams.frame.size));
       // screen
       //   = screen
       //   * vec2f(optixLaunchParams.frame.denoisedSize)
-      //   * vec2f(optixLaunchParams.frame.renderSize)
-      //   - 0.5f*(vec2f(optixLaunchParams.frame.renderSize)
+      //   * vec2f(optixLaunchParams.frame.size)
+      //   - 0.5f*(vec2f(optixLaunchParams.frame.size)
       //           -
       //           vec2f(optixLaunchParams.frame.denoisedSize)
       //           );
@@ -290,7 +290,7 @@ namespace osc {
     vec4f rgba(pixelColor/numPixelSamples,1.f);
 
     // and write/accumulate to frame buffer ...
-    const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.renderSize.x;
+    const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.size.x;
     if (optixLaunchParams.frame.frameID > 0) {
       rgba
         += float(optixLaunchParams.frame.frameID)
