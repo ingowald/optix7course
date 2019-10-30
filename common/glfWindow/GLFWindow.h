@@ -225,9 +225,8 @@ namespace osc {
     /*! strafe, in screen space */
     virtual void strafe(const vec2f &howMuch)
     {
-      strafe(howMuch.x*cameraFrame->frame.vx
-             +
-             howMuch.y*cameraFrame->frame.vy);
+      strafe(+howMuch.x*cameraFrame->frame.vx
+             -howMuch.y*cameraFrame->frame.vy);
     }
 
     virtual void move(const float step) = 0;
