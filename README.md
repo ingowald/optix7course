@@ -1,5 +1,12 @@
 # Siggraph 2019 OptiX 7 Course Tutorial Code
 
+## Latest Updates:
+
+* 1/1/2020: Changed all examples to enable full optimization level
+   and most appropriate pipeline config for the specific example (single GAS)
+   
+# About this Tutorial/Repository
+
 This tutorial was created to accompany the 2019 Siggraph course on
 "RTX Accelerated Ray Tracing with OptiX" 
 (slides available on
@@ -11,14 +18,15 @@ Shader Binding Table (SBT), Accel Struct (AS), Build Inputs, Texture
 Samplers, etc., in the newly introduced OptiX 7. 
 
 To do this, this repo intentionally does not provide *one* example
-that has the final code, but instead is split into 10 smaller
+that has the final code, but instead is split into 12 smaller
 examples, each of which modifies and extends the previous one,
 hopefully in a way that it is relatively easy to spot the differences
 (i.e., to spot what exactly had to be added to go from "A" to "B").
 
-Note this tutorial does (intentionally) not end in a overwhelming
-wow-factor full-featured renderer - it's aim is to *only* help you get
-*started* with OptiX 7, exactly up to the point where "Textbook Ray Tracing 101" would usually kick in.  
+Note this tutorial does (intentionally) not end in a
+overwhelming-wow-factor full-featured renderer - its aim is to *only*
+help you get *started* with OptiX 7, exactly up to the point where
+"Textbook Ray Tracing 101" would usually kick in.
 
 With that - enjoy!
 
@@ -35,24 +43,24 @@ spared from finding it again. Any other feedback is welcome, too!
 This code was intentionally written with minimal dependencies,
 requiring only CMake (as a build system), your favorite
 compiler (tested with Visual Studio 2017 and 2019 under Windows, and GCC under
-Linux), and the OptiX 7 SDK (including CUDA 10.1 and the
-most recent NVIDIA developer driver).
+Linux), and the OptiX 7 SDK (including CUDA 10.1 and NVIDIA driver recent
+enough to support OptiX).
 
 ## Dependencies
 
 - a compiler
-  - On Windows, tested with Visual Studio 2017 and 2019 community editions
-  - On Linux, tested with Ubuntu 18 and Ubuntu 19 default gcc installs
+    - On Windows, tested with Visual Studio 2017 and 2019 community editions
+    - On Linux, tested with Ubuntu 18 and Ubuntu 19 default gcc installs
 - CUDA 10.1
-  - Download from developer.nvidia.com
-  - on Linux, suggest to put `/usr/local/cuda/bin` into your `PATH`
+    - Download from developer.nvidia.com
+    - on Linux, suggest to put `/usr/local/cuda/bin` into your `PATH`
 - latest NVIDIA developer driver that comes with the SDK
-  - download from http://developer.nvidia.com/optix and click "Get OptiX"
+    - download from http://developer.nvidia.com/optix and click "Get OptiX"
 - OptiX 7 SDK
-  - download from http://developer.nvidia.com/optix and click "Get OptiX"
-  - on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.  
-  `export OptiX_INSTALL_DIR=<wherever you installed OptiX 7.0 SDK>`
-  - on windows, the installer should automatically put it into the right directory
+    - download from http://developer.nvidia.com/optix and click "Get OptiX"
+    - on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.  
+    `export OptiX_INSTALL_DIR=<wherever you installed OptiX 7.0 SDK>`
+    - on windows, the installer should automatically put it into the right directory
 
 The only *external* library we use is GLFW for windowing, and
 even this one we build on the fly under Windows, so installing

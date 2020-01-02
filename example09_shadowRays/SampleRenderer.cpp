@@ -342,12 +342,12 @@ namespace osc {
     single .cu file, using a single embedded ptx string */
   void SampleRenderer::createModule()
   {
-    moduleCompileOptions.maxRegisterCount  = 100;
-    moduleCompileOptions.optLevel          = OPTIX_COMPILE_OPTIMIZATION_LEVEL_0;
-    moduleCompileOptions.debugLevel        = OPTIX_COMPILE_DEBUG_LEVEL_LINEINFO;
+    moduleCompileOptions.maxRegisterCount  = 50;
+    moduleCompileOptions.optLevel          = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
+    moduleCompileOptions.debugLevel        = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
 
     pipelineCompileOptions = {};
-    pipelineCompileOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_ANY;
+    pipelineCompileOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_GAS;
     pipelineCompileOptions.usesMotionBlur     = false;
     pipelineCompileOptions.numPayloadValues   = 2;
     pipelineCompileOptions.numAttributeValues = 2;
@@ -529,7 +529,7 @@ namespace osc {
                  2*1024,
                  /* [in] The maximum depth of a traversable graph
                     passed to trace. */
-                 3));
+                 1));
     if (sizeof_log > 1) PRINT(log);
   }
 

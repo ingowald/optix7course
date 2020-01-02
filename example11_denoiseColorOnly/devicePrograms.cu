@@ -22,7 +22,7 @@
 
 using namespace osc;
 
-#define NUM_LIGHT_SAMPLES 1
+#define NUM_LIGHT_SAMPLES 4
 
 namespace osc {
 
