@@ -2,6 +2,9 @@
 
 ## Latest Updates:
 
+* 1/3/2020: Several fixes and documentation adds to make project
+  compile with CentOS 7 (ie, oder gcc)
+
 * 1/1/2020: Changed all examples to enable full optimization level
    and most appropriate pipeline config for the specific example (single GAS)
    
@@ -71,8 +74,14 @@ Detailed steps below:
 ## Building under Linux
 
 - Install required packages
+
+    - on Debian/Ubuntu:
 ```
     sudo apt install libglfw3-dev cmake-curses-gui
+```
+    - on RedHat/CentOS/Fedoral (tested CentOS 7.7):
+```
+    sudo yum install cmake3 glfw-devel freeglut-devel
 ```
 - Clone the code
 ```
@@ -87,8 +96,13 @@ Detailed steps below:
 ```
 
 - configure with cmake
+    - Ubuntu:
 ```
-    ccmake ..
+    cmake ..
+```
+    - CentOS 7:
+```
+    cmake3 ..
 ```
 
 - and build

@@ -305,14 +305,14 @@ namespace gdt {
   template<typename T>
   inline __both__ vec_t<T,3> normalize(const vec_t<T,3> &v)
   {
-    return v * 1.f/gdt::sqrt(dot(v,v));
+    return v * 1.f/gdt::overloaded::sqrt(dot(v,v));
   }
 
   /*! vector cross product */
   template<typename T>
   inline __both__ T length(const vec_t<T,3> &v)
   {
-    return gdt::sqrt(dot(v,v));
+    return gdt::overloaded::sqrt(dot(v,v));
   }
 
   template<typename T>

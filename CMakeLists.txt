@@ -21,6 +21,8 @@ endif (POLICY CMP0048)
 project(optix7course)
 
 cmake_minimum_required(VERSION 2.8)
+set (CMAKE_CXX_FLAGS "--std=c++11")
+set (CUDA_PROPAGATE_HOST_FLAGS ON)
 
 # ------------------------------------------------------------------
 # first, include gdt project to do some general configuration stuff

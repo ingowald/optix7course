@@ -30,8 +30,10 @@
 #endif
 #include <algorithm>
 #ifdef __GNUC__
-    #include <sys/time.h>
+#  include <sys/time.h>
+#  include <stdint.h>
 #endif
+#include <stdexcept>
 
 #ifdef _WIN32
     #ifndef WIN32_LEAN_AND_MEAN
@@ -154,11 +156,15 @@ namespace gdt {
 #endif
 
 // #ifdef __CUDA_ARCH__
-  using ::sqrt;
-  using ::sqrtf;
+  // using ::sqrt;
+  // using ::sqrtf;
 // #else
-//   inline __both__ float sqrt(const float f)   { return sqrtf(f); }
-//   inline __both__ double sqrt(const double d)   { return sqrt(d); }
+  namespace overloaded {
+    /* move all those in a special namespace so they will never get
+       included - and thus, conflict with, the default namesapce */
+    inline __both__ float  sqrt(const float f)   { return ::sqrtf(f); }
+    inline __both__ double sqrt(const double d)   { return ::sqrt(d); }
+  }
 // #endif
 //   inline __both__ float rsqrt(const float f)   { return 1.f/sqrtf(f); }
 //   inline __both__ double rsqrt(const double d)   { return 1./sqrt(d); }
