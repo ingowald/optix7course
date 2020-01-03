@@ -75,15 +75,9 @@ Detailed steps below:
 
 - Install required packages
 
-    - on Debian/Ubuntu:
-```
-    sudo apt install libglfw3-dev cmake-curses-gui
-```
+    - on Debian/Ubuntu: `sudo apt install libglfw3-dev cmake-curses-gui`
+    - on RedHat/CentOS/Fedora (tested CentOS 7.7): `sudo yum install cmake3 glfw-devel freeglut-devel`
 
-    - on RedHat/CentOS/Fedora (tested CentOS 7.7):
-```
-    sudo yum install cmake3 glfw-devel freeglut-devel
-```
 - Clone the code
 ```
     git clone https://gitlab.com/ingowald/optix7course.git
@@ -97,14 +91,8 @@ Detailed steps below:
 ```
 
 - configure with cmake
-    - Ubuntu:
-```
-    cmake ..
-```
-    - CentOS 7:
-```
-    cmake3 ..
-```
+    - Ubuntu: `cmake ..`
+    - CentOS 7: `cmake3 ..`
 
 - and build
 ```
