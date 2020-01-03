@@ -76,7 +76,7 @@ Detailed steps below:
 ```
 - Clone the code
 ```
-    git clone http://gitlab.com/ingowald/optix7course
+    git clone https://gitlab.com/ingowald/optix7course.git
     cd optix6course
 ```
 
