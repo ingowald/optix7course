@@ -79,7 +79,8 @@ Detailed steps below:
 ```
     sudo apt install libglfw3-dev cmake-curses-gui
 ```
-    - on RedHat/CentOS/Fedoral (tested CentOS 7.7):
+
+    - on RedHat/CentOS/Fedora (tested CentOS 7.7):
 ```
     sudo yum install cmake3 glfw-devel freeglut-devel
 ```
