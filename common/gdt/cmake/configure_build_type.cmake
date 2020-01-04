@@ -1,5 +1,5 @@
 # ======================================================================== #
-# Copyright 2018-2019 Ingo Wald                                            #
+# Copyright 2018-2020 Ingo Wald                                            #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License");          #
 # you may not use this file except in compliance with the License.         #
@@ -24,7 +24,7 @@ if(NOT SET_UP_CONFIGURATIONS_DONE)
     # No reason to set CMAKE_CONFIGURATION_TYPES if it's not a multiconfig generator
     # Also no reason mess with CMAKE_BUILD_TYPE if it's a multiconfig generator.
     if(CMAKE_CONFIGURATION_TYPES) # multiconfig generator?
-        set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Profile" CACHE STRING "" FORCE) 
+        set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE) 
     else()
         if(NOT CMAKE_BUILD_TYPE)
 #            message("Defaulting to release build.")
@@ -32,7 +32,7 @@ if(NOT SET_UP_CONFIGURATIONS_DONE)
         endif()
         set_property(CACHE CMAKE_BUILD_TYPE PROPERTY HELPSTRING "Choose the type of build")
         # set the valid options for cmake-gui drop-down list
-        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;Profile")
+        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release")
     endif()
 endif()
 

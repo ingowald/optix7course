@@ -21,8 +21,11 @@ endif (POLICY CMP0048)
 project(optix7course)
 
 cmake_minimum_required(VERSION 2.8)
+if (NOT WIN32)
+# visual studio doesn't like these (not need them):
 set (CMAKE_CXX_FLAGS "--std=c++11")
 set (CUDA_PROPAGATE_HOST_FLAGS ON)
+endif()
 
 # ------------------------------------------------------------------
 # first, include gdt project to do some general configuration stuff
