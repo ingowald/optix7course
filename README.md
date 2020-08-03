@@ -86,7 +86,7 @@ Detailed steps below:
 - Clone the code
 ```
     git clone https://gitlab.com/ingowald/optix7course.git
-    cd optix6course
+    cd optix7course
 ```
 
 - create (and enter) a build directory
