@@ -112,13 +112,13 @@ namespace osc {
 
     /*! @{ the pipeline we're building */
     OptixPipeline               pipeline;
-    OptixPipelineCompileOptions pipelineCompileOptions;
-    OptixPipelineLinkOptions    pipelineLinkOptions;
+    OptixPipelineCompileOptions pipelineCompileOptions = {};
+    OptixPipelineLinkOptions    pipelineLinkOptions = {};
     /*! @} */
 
     /*! @{ the module that contains out device programs */
     OptixModule                 module;
-    OptixModuleCompileOptions   moduleCompileOptions;
+    OptixModuleCompileOptions   moduleCompileOptions = {};
     /* @} */
 
     /*! vector of all our program(group)s, and the SBT built around

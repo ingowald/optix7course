@@ -2,6 +2,10 @@
 
 ## Latest Updates:
 
+* 10/21/2020: Bugfix: all moduleCompileOptions and
+  pipelineCompileOptions are now properly zero-initialized by default.
+  Otherwise, variables not set in these struct might have invalid values.
+
 * 8/3/2020: Updated to also compile on OptiX 7.1
 
 * 1/3/2020: Several fixes and documentation adds to make project
