@@ -359,7 +359,6 @@ namespace osc {
     pipelineCompileOptions.exceptionFlags     = OPTIX_EXCEPTION_FLAG_NONE;
     pipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
       
-    pipelineLinkOptions.overrideUsesMotionBlur = false;
     pipelineLinkOptions.maxTraceDepth          = 2;
       
     const std::string ptxCode = embedded_ptx_code;
@@ -718,9 +717,14 @@ namespace osc {
 
     // ------------------------------------------------------------------
     // create the denoiser:
-    OptixDenoiserOptions denoiserOptions;
-    denoiserOptions.inputKind   = OPTIX_DENOISER_INPUT_RGB;
+    OptixDenoiserOptions denoiserOptions = {};
+
+    denoiserOptions.inputKind = OPTIX_DENOISER_INPUT_RGB;
+
+#if OPTIX_VERSION < 70100
+    // these only exist in 7.0, not 7.1
     denoiserOptions.pixelFormat = OPTIX_PIXEL_FORMAT_FLOAT4;
+#endif
 
     OPTIX_CHECK(optixDenoiserCreate(optixContext,&denoiserOptions,&denoiser));
     OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_LDR,NULL,0));
@@ -730,7 +734,12 @@ namespace osc {
     OPTIX_CHECK(optixDenoiserComputeMemoryResources(denoiser,newSize.x,newSize.y,
                                                     &denoiserReturnSizes));
 
+#if OPTIX_VERSION < 70100
     denoiserScratch.resize(denoiserReturnSizes.recommendedScratchSizeInBytes);
+#else
+    denoiserScratch.resize(std::max(denoiserReturnSizes.withOverlapScratchSizeInBytes,
+                                    denoiserReturnSizes.withoutOverlapScratchSizeInBytes));
+#endif
     denoiserState.resize(denoiserReturnSizes.stateSizeInBytes);
     
     // ------------------------------------------------------------------
