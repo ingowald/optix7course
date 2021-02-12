@@ -75,7 +75,7 @@ namespace osc {
              optixLaunchParams.fbSize.x,
              optixLaunchParams.fbSize.y);
       printf("############################################\n");
-  }
+    }
 
     // ------------------------------------------------------------------
     // for this example, produce a simple test pattern:
