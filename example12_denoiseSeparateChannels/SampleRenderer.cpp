@@ -626,6 +626,8 @@ namespace osc {
                             1
                             ));
 
+    denoiserIntensity.resize(sizeof(float));
+
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
     denoiserParams.hdrIntensity = denoiserIntensity.d_pointer();
@@ -755,9 +757,10 @@ namespace osc {
     // ------------------------------------------------------------------
     // create the denoiser:
     OptixDenoiserOptions denoiserOptions = {};
+    denoiserOptions.inputKind = OPTIX_DENOISER_INPUT_RGB_ALBEDO;
+
 #if OPTIX_VERSION < 70100
     // these only exist in 7.0, not 7.1
-    denoiserOptions.inputKind   = OPTIX_DENOISER_INPUT_RGB;
     denoiserOptions.pixelFormat = OPTIX_PIXEL_FORMAT_FLOAT4;
 #endif
     
