@@ -1,6 +1,8 @@
-# Siggraph 2019/2020 OptiX 7/7.1 Course Tutorial Code
+# Siggraph 2019/2020 OptiX 7/7.3 Course Tutorial Code
 
 ## Latest Updates:
+
+* 4/16/2020: Updated to also compile on OptiX 7.3
 
 * 10/21/2020: Bugfix: all moduleCompileOptions and
   pipelineCompileOptions are now properly zero-initialized by default.
