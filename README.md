@@ -69,7 +69,7 @@ enough to support OptiX).
     - download from http://developer.nvidia.com/optix and click "Get OptiX"
 - OptiX 7 SDK
     - download from http://developer.nvidia.com/optix and click "Get OptiX"
-    - on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.  
+    - on linux, set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.
     `export OptiX_INSTALL_DIR=<wherever you installed OptiX 7 SDK>`
     - on windows, the installer should automatically put it into the right directory
 
