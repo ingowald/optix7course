@@ -1,6 +1,8 @@
-# Siggraph 2019/2020 OptiX 7/7.1 Course Tutorial Code
+# Siggraph 2019/2020 OptiX 7/7.3 Course Tutorial Code
 
 ## Latest Updates:
+
+* 4/16/2020: Updated to also compile on OptiX 7.3
 
 * 10/21/2020: Bugfix: all moduleCompileOptions and
   pipelineCompileOptions are now properly zero-initialized by default.
@@ -67,7 +69,7 @@ enough to support OptiX).
     - download from http://developer.nvidia.com/optix and click "Get OptiX"
 - OptiX 7 SDK
     - download from http://developer.nvidia.com/optix and click "Get OptiX"
-    - on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.  
+    - on linux, set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.
     `export OptiX_INSTALL_DIR=<wherever you installed OptiX 7 SDK>`
     - on windows, the installer should automatically put it into the right directory
 

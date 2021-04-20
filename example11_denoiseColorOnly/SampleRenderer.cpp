@@ -663,6 +663,25 @@ namespace osc {
 
     // -------------------------------------------------------
     if (denoiserOn) {
+#if OPTIX_VERSION >= 70300
+    OptixDenoiserGuideLayer denoiserGuideLayer = {};
+
+    OptixDenoiserLayer denoiserLayer = {};
+    denoiserLayer.input = inputLayer;
+    denoiserLayer.output = outputLayer;
+
+      OPTIX_CHECK(optixDenoiserInvoke(denoiser,
+                                      /*stream*/0,
+                                      &denoiserParams,
+                                      denoiserState.d_pointer(),
+                                      denoiserState.size(),
+                                      &denoiserGuideLayer,
+                                      &denoiserLayer,1,
+                                      /*inputOffsetX*/0,
+                                      /*inputOffsetY*/0,
+                                      denoiserScratch.d_pointer(),
+                                      denoiserScratch.size()));
+#else
       OPTIX_CHECK(optixDenoiserInvoke(denoiser,
                                       /*stream*/0,
                                       &denoiserParams,
@@ -674,6 +693,7 @@ namespace osc {
                                       &outputLayer,
                                       denoiserScratch.d_pointer(),
                                       denoiserScratch.size()));
+#endif
     } else {
       cudaMemcpy((void*)outputLayer.data,(void*)inputLayer.data,
                  outputLayer.width*outputLayer.height*sizeof(float4),
@@ -719,6 +739,9 @@ namespace osc {
     // create the denoiser:
     OptixDenoiserOptions denoiserOptions = {};
 
+#if OPTIX_VERSION >= 70300
+    OPTIX_CHECK(optixDenoiserCreate(optixContext,OPTIX_DENOISER_MODEL_KIND_LDR,&denoiserOptions,&denoiser));
+#else
     denoiserOptions.inputKind = OPTIX_DENOISER_INPUT_RGB;
 
 #if OPTIX_VERSION < 70100
@@ -728,6 +751,7 @@ namespace osc {
 
     OPTIX_CHECK(optixDenoiserCreate(optixContext,&denoiserOptions,&denoiser));
     OPTIX_CHECK(optixDenoiserSetModel(denoiser,OPTIX_DENOISER_MODEL_KIND_LDR,NULL,0));
+#endif
     
     // .. then compute and allocate memory resources for the denoiser
     OptixDenoiserSizes denoiserReturnSizes;
