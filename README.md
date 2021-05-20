@@ -1,6 +1,27 @@
-# Siggraph 2019/2020 OptiX 7/7.1 Course Tutorial Code
+# Siggraph 2019/2020 OptiX 7/7.3 Course Tutorial Code
+
+## Note on OWL Version
+
+May 10, 2021: This repo was originally created as sample code
+for the OptiX 7 course at Siggraph 2019/2020. The goal of this
+was to teach OptiX 7 step by step, from first principles, and
+with mininal external dependencies. This makes this particular
+codebase great for learning the basics; however, it is not 
+necessarily the greatest resource to eventually use to build
+your own advanced projects with. If you do want to follow up and
+build your owl OptiX projects, I would suggest to also
+have a look at my other OptiX 7 resource, the OWL project
+(at http://owl-project.github.io), which in particular aims at
+making it easier to write OptiX programs by wrapping all or most
+of the techniques you have learned in this course in some
+much easier to use "convenience layer" API on top of OptiX 7.
+OWL does, in fact, now also contain a sample that reproduces
+exactly this course's final sample within the OWL framework.
+
 
 ## Latest Updates:
+
+* 4/16/2020: Updated to also compile on OptiX 7.3
 
 * 10/21/2020: Bugfix: all moduleCompileOptions and
   pipelineCompileOptions are now properly zero-initialized by default.
@@ -67,7 +88,7 @@ enough to support OptiX).
     - download from http://developer.nvidia.com/optix and click "Get OptiX"
 - OptiX 7 SDK
     - download from http://developer.nvidia.com/optix and click "Get OptiX"
-    - on linux, suggest to set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.  
+    - on linux, set the environment variable `OptiX_INSTALL_DIR` to wherever you installed the SDK.
     `export OptiX_INSTALL_DIR=<wherever you installed OptiX 7 SDK>`
     - on windows, the installer should automatically put it into the right directory
 
