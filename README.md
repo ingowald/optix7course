@@ -21,7 +21,7 @@ exactly this course's final sample within the OWL framework.
 
 ## Latest Updates:
 
-* 4/16/2020: Updated to also compile on OptiX 7.3
+* 4/16/2021: Updated to also compile on OptiX 7.3
 
 * 10/21/2020: Bugfix: all moduleCompileOptions and
   pipelineCompileOptions are now properly zero-initialized by default.
