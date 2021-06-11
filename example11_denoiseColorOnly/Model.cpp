@@ -166,6 +166,7 @@ namespace osc {
       throw std::runtime_error("could not parse materials ...");
 
     std::cout << "Done loading obj file - found " << shapes.size() << " shapes with " << materials.size() << " materials" << std::endl;
+    std::map<std::string, int>      knownTextures;
     for (int shapeID=0;shapeID<(int)shapes.size();shapeID++) {
       tinyobj::shape_t &shape = shapes[shapeID];
 
@@ -174,7 +175,6 @@ namespace osc {
         materialIDs.insert(faceMatID);
       
       std::map<tinyobj::index_t,int> knownVertices;
-      std::map<std::string,int>      knownTextures;
       
       for (int materialID : materialIDs) {
         TriangleMesh *mesh = new TriangleMesh;
