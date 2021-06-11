@@ -783,10 +783,10 @@ namespace osc {
     // ------------------------------------------------------------------
     // create the denoiser:
     OptixDenoiserOptions denoiserOptions = {};
-    denoiserOptions.inputKind = OPTIX_DENOISER_INPUT_RGB_ALBEDO;
 #if OPTIX_VERSION >= 70300
     OPTIX_CHECK(optixDenoiserCreate(optixContext,OPTIX_DENOISER_MODEL_KIND_LDR,&denoiserOptions,&denoiser));
 #else
+    denoiserOptions.inputKind = OPTIX_DENOISER_INPUT_RGB_ALBEDO;
 #if OPTIX_VERSION < 70100
     // these only exist in 7.0, not 7.1
     denoiserOptions.pixelFormat = OPTIX_PIXEL_FORMAT_FLOAT4;
