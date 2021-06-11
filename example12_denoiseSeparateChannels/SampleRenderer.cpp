@@ -629,7 +629,8 @@ namespace osc {
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
 #if OPTIX_VERSION >= 70300
-    denoiserIntensity.alloc(sizeof(float));
+    if (denoiserIntensity.sizeInBytes != sizeof(float))
+        denoiserIntensity.alloc(sizeof(float));
 #endif
     denoiserParams.hdrIntensity = denoiserIntensity.d_pointer();
     denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
