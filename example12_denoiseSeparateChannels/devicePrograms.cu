@@ -288,6 +288,8 @@ namespace osc {
     }
 
     vec4f rgba(pixelColor/numPixelSamples,1.f);
+    vec4f albedo(pixelAlbedo/numPixelSamples,1.f);
+    vec4f normal(pixelNormal/numPixelSamples,1.f);
 
     // and write/accumulate to frame buffer ...
     const uint32_t fbIndex = ix+iy*optixLaunchParams.frame.size.x;
@@ -298,6 +300,8 @@ namespace osc {
       rgba /= (optixLaunchParams.frame.frameID+1.f);
     }
     optixLaunchParams.frame.colorBuffer[fbIndex] = (float4)rgba;
+    optixLaunchParams.frame.albedoBuffer[fbIndex] = (float4)albedo;
+    optixLaunchParams.frame.normalBuffer[fbIndex] = (float4)normal;
   }
   
 } // ::osc

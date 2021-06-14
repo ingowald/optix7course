@@ -21,6 +21,9 @@ exactly this course's final sample within the OWL framework.
 
 ## Latest Updates:
 
+* 6/14/2021: Bugfix - normal and albedo buffer values for denoiser
+  were not correctly set
+
 * 4/16/2021: Updated to also compile on OptiX 7.3
 
 * 10/21/2020: Bugfix: all moduleCompileOptions and
