@@ -635,8 +635,11 @@ namespace osc {
         denoiserIntensity.alloc(sizeof(float));
 #endif
     denoiserParams.hdrIntensity = denoiserIntensity.d_pointer();
-    denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
-    
+    if(accumulate)
+        denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
+    else
+        denoiserParams.blendFactor = 0.0f;
+
     // -------------------------------------------------------
     OptixImage2D inputLayer[3];
     inputLayer[0].data = fbColor.d_pointer();

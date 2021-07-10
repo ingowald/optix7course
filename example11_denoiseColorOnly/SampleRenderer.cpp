@@ -629,7 +629,10 @@ namespace osc {
     OptixDenoiserParams denoiserParams;
     denoiserParams.denoiseAlpha = 1;
     denoiserParams.hdrIntensity = (CUdeviceptr)0;
-    denoiserParams.blendFactor  = 1.f/(launchParams.frame.frameID);
+    if (accumulate)
+        denoiserParams.blendFactor = 1.f / (launchParams.frame.frameID);
+    else
+        denoiserParams.blendFactor = 0.0f;
     
     // -------------------------------------------------------
     OptixImage2D inputLayer;
