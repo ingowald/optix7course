@@ -11,7 +11,7 @@ necessarily the greatest resource to eventually use to build
 your own advanced projects with. If you do want to follow up and
 build your owl OptiX projects, I would suggest to also
 have a look at my other OptiX 7 resource, the OWL project
-(at http://owl-project.github.io), which in particular aims at
+(at http://owl-project.github.io or https://gitee.com/games-assignment/owl), which in particular aims at
 making it easier to write OptiX programs by wrapping all or most
 of the techniques you have learned in this course in some
 much easier to use "convenience layer" API on top of OptiX 7.
@@ -43,7 +43,7 @@ exactly this course's final sample within the OWL framework.
 This tutorial was created to accompany the 2019 Siggraph course on
 "RTX Accelerated Ray Tracing with OptiX" 
 (slides available on
-https://drive.google.com/open?id=1_IYHwAZ4EoMcDmS0TknP-TZd7Cwmab_I ). 
+https://drive.google.com/open?id=1_IYHwAZ4EoMcDmS0TknP-TZd7Cwmab_I), [百度云](https://pan.baidu.com/s/1Smehqan3Oly8y6h1mrVntg )提取码：kadz. 
 
 The aim of this repo is to serve as a "tutorial" in how to set
 up a full Scene - i.e., OptiX Context, Module, Programs, Pipeline,
@@ -110,7 +110,7 @@ Detailed steps below:
 
 - Clone the code
 ```
-    git clone https://gitlab.com/ingowald/optix7course.git
+    git clone https://gitee.com/games-assignment/optix7course.git
     cd optix7course
 ```
 
