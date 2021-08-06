@@ -24,6 +24,7 @@ add_executable(ex05_firstSBTData
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
+  LaunchParams.h
   SampleRenderer.h
   SampleRenderer.cpp
   main.cpp

@@ -22,6 +22,7 @@ add_executable(ex02_pipelineAndRayGen
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
+  LaunchParams.h
   SampleRenderer.h
   SampleRenderer.cpp
   main.cpp

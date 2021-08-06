@@ -24,8 +24,10 @@ add_executable(ex08_addingTextures
   ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
+  LaunchParams.h
   SampleRenderer.h
   SampleRenderer.cpp
+  Model.h
   Model.cpp
   main.cpp
   )
