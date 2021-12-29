@@ -302,7 +302,7 @@ namespace gdt {
   template<typename T> inline __both__ LinearSpace3<T> operator -( const LinearSpace3<T>& a, const LinearSpace3<T>& b ) { return LinearSpace3<T>(a.vx-b.vx,a.vy-b.vy,a.vz-b.vz); }
 
   template<typename T> inline __both__ LinearSpace3<T> operator*(const typename T::scalar_t & a, const LinearSpace3<T>& b) { return LinearSpace3<T>(a*b.vx, a*b.vy, a*b.vz); }
-  template<typename T> inline T               operator*(const LinearSpace3<T>& a, const T              & b) { return b.x*a.vx + b.y*a.vy + b.z*a.vz; }
+  template<typename T> inline __both__ T               operator*(const LinearSpace3<T>& a, const T              & b) { return b.x*a.vx + b.y*a.vy + b.z*a.vz; }
   template<typename T> inline __both__ LinearSpace3<T> operator*(const LinearSpace3<T>& a, const LinearSpace3<T>& b) { return LinearSpace3<T>(a*b.vx, a*b.vy, a*b.vz); }
 
   template<typename T> __both__ inline LinearSpace3<T> operator/(const LinearSpace3<T>& a, const typename T::scalar_t & b) { return LinearSpace3<T>(a.vx/b, a.vy/b, a.vz/b); }
