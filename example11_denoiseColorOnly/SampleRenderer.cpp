@@ -627,7 +627,9 @@ namespace osc {
                             ));
 
     OptixDenoiserParams denoiserParams;
+#if OPTIX_VERSION > 70500
     denoiserParams.denoiseAlpha = OPTIX_DENOISER_ALPHA_MODE_ALPHA_AS_AOV;
+#endif
     denoiserParams.hdrIntensity = (CUdeviceptr)0;
     if (accumulate)
         denoiserParams.blendFactor = 1.f / (launchParams.frame.frameID);
