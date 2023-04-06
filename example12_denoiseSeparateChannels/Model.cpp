@@ -174,9 +174,8 @@ namespace osc {
       for (auto faceMatID : shape.mesh.material_ids)
         materialIDs.insert(faceMatID);
       
-      std::map<tinyobj::index_t,int> knownVertices;
-      
       for (int materialID : materialIDs) {
+        std::map<tinyobj::index_t,int> knownVertices;
         TriangleMesh *mesh = new TriangleMesh;
         
         for (int faceID=0;faceID<shape.mesh.material_ids.size();faceID++) {
