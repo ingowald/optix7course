@@ -118,15 +118,7 @@ namespace gdt {
 #ifdef __CUDACC__
   using ::min;
   using ::max;
-  // inline __both__ float abs(float f)      { return fabsf(f); }
-  // inline __both__ double abs(double f)    { return fabs(f); }
   using std::abs;
-  // inline __both__ float sin(float f) { return ::sinf(f); }
-  // inline __both__ double sin(double f) { return ::sin(f); }
-  // inline __both__ float cos(float f) { return ::cosf(f); }
-  // inline __both__ double cos(double f) { return ::cos(f); }
-
-  using ::saturate;
 #else
   using std::min;
   using std::max;
