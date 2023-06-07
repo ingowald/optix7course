@@ -5,6 +5,9 @@
 
 #include "cuda_runtime.h"
 
+#include "optix_function_table_definition.h"
+#include "optix_stubs.h"
+
 void InitOptix()
 {
 	// check that CUDA works and a CUDA capable device is found
@@ -17,6 +20,14 @@ void InitOptix()
 	}
 
 	std::cout << "Found " << std::to_string(numDevices) << " CUDA capable devices!" << std::endl;
+
+	OptixResult result = optixInit();
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not initialize OptiX!");
+	}
+
+	std::cout << "OptiX initialized!" << std::endl;
 }
 
 int main(int ac, char **av)
