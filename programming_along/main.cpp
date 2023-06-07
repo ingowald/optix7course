@@ -8,6 +8,10 @@
 #include "optix_function_table_definition.h"
 #include "optix_stubs.h"
 
+#include "gdt/math/vec.h"
+
+using namespace gdt;
+
 void InitOptix()
 {
 	// check that CUDA works and a CUDA capable device is found
@@ -34,7 +38,11 @@ int main(int ac, char **av)
 {
 	try
 	{
+		// initialize
 		InitOptix();
+
+		// setup OptiX Framebuffer
+		const vec2i fbSize(1024, 768);
 	}
 	catch (std::runtime_error& e)
 	{
