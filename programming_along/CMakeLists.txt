@@ -8,6 +8,8 @@ add_executable(programming_along
 	${embedded_ptx_code}
 	LaunchParams.h
 	main.cpp
+	Renderer.h
+	Renderer.cpp
 )
 
 target_link_libraries(programming_along
