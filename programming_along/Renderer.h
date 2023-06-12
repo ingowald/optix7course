@@ -4,6 +4,7 @@
 
 #include "cuda_runtime.h"
 #include "cuda.h"
+#include "util/CUDABuffer.h"
 
 #include "optix_types.h"
 
@@ -51,6 +52,11 @@ private:
 	*/
 	void CreatePipeline();
 
+	/**
+	* Builds the shader binding table
+	*/
+	void BuildShaderBindingTable();
+
 
 public:
 
@@ -66,7 +72,11 @@ private:
 	OptixPipelineCompileOptions PipelineCompileOptions;
 	OptixPipelineLinkOptions PipelineLinkOptions;
 
+	OptixShaderBindingTable ShaderBindingTable;
 	std::vector<OptixProgramGroup> RaygenProgramGroups;
+	CUDABuffer RaygenRecordsBuffer;
 	std::vector<OptixProgramGroup> MissProgramGroups;
+	CUDABuffer MissRecordsBuffer;
 	std::vector<OptixProgramGroup> HitgroupProgramGroups;
+	CUDABuffer HitgroupRecordsBuffer;
 };

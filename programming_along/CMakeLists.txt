@@ -9,7 +9,8 @@ set(SOURCE_LIST
 	main.cpp
 	Renderer.h
 	Renderer.cpp
-	SbtStructs/SbtStructs.h
+	util/SbtStructs.h
+	util/CUDABuffer.h
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})

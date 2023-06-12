@@ -5,7 +5,7 @@
 #include "optix_function_table_definition.h"
 #include "optix_stubs.h"
 
-#include "SbtStructs/SbtStructs.h"
+#include "util/SbtStructs.h"
 
 Renderer::Renderer()
 {
@@ -240,4 +240,24 @@ void Renderer::CreatePipeline()
 	{
 		throw std::runtime_error("Could not set pipeline stack size!");
 	}
+}
+
+void Renderer::BuildShaderBindingTable()
+{
+	// rey generation records
+	std::vector<RaygenRecord> raygenRedcords;
+	for (size_t i = 0; i < RaygenProgramGroups.size(); i++)
+	{
+		RaygenRecord rec;
+		OptixResult result = optixSbtRecordPackHeader(RaygenProgramGroups[i], &rec);
+		if (result != OPTIX_SUCCESS)
+		{
+			throw std::runtime_error("Could not build raygen record!");
+		}
+
+		rec.Data = nullptr;
+		raygenRedcords.push_back(rec);
+	}
+
+
 }
