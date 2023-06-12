@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "cuda_runtime.h"
 #include "cuda.h"
 
@@ -29,6 +31,27 @@ private:
 	*/
 	void CreateModule();
 
+	/**
+	* Creates the ray generation program records
+	*/
+	void CreateRaygenPrograms();
+
+	/**
+	* Creates the miss program records
+	*/
+	void CreateMissPrograms();
+
+	/**
+	* Creates the hit group program records
+	*/
+	void CreateHitgroupPrograms();
+
+	/**
+	* Creates the OptiX Pipeline
+	*/
+	void CreatePipeline();
+
+
 public:
 
 private:
@@ -37,4 +60,12 @@ private:
 
 	OptixDeviceContext OptixContext;
 	OptixModule OptixModuleInstance;
+
+	OptixModuleCompileOptions ModuleOptions;
+	OptixPipelineCompileOptions PipelineCompileOptions;
+	OptixPipelineLinkOptions PipelineLinkOptions;
+
+	std::vector<OptixProgramGroup> RaygenProgramGroups;
+	std::vector<OptixProgramGroup> MissProgramGroups;
+	std::vector<OptixProgramGroup> HitgroupProgramGroups;
 };

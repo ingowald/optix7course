@@ -12,10 +12,33 @@ Renderer::Renderer()
 	InitOptix();
 	CreateContext();
 	CreateModule();
+
+	CreateRaygenPrograms();
+	CreateMissPrograms();
+	CreateHitgroupPrograms();
 }
 
 Renderer::~Renderer()
 {
+	for (OptixProgramGroup pg : HitgroupProgramGroups)
+	{
+		optixProgramGroupDestroy(pg);
+	}
+	HitgroupProgramGroups.clear();
+	
+	for (OptixProgramGroup pg : MissProgramGroups)
+	{
+		optixProgramGroupDestroy(pg);
+	}
+	MissProgramGroups.clear();
+
+	for (OptixProgramGroup pg : RaygenProgramGroups)
+	{
+		optixProgramGroupDestroy(pg);
+	}
+	RaygenProgramGroups.clear();
+
+	optixModuleDestroy(OptixModuleInstance);
 	optixDeviceContextDestroy(OptixContext);
 	cudaStreamDestroy(CudaStream);
 }
@@ -77,25 +100,24 @@ extern "C" char embedded_ptx_code[];
 void Renderer::CreateModule()
 {
 	// setup the compile options for the module and the pipeline
-	OptixModuleCompileOptions moduleOptions;
-	OptixPipelineCompileOptions pipelineOptions;
+	ModuleOptions = {};
+	PipelineCompileOptions = {};
+	PipelineLinkOptions = {};
 	{
 		// everything copied mindlessly from example 2
-		moduleOptions.maxRegisterCount = 50;
-		moduleOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
-		moduleOptions.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
+		ModuleOptions.maxRegisterCount = 50;
+		ModuleOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
+		ModuleOptions.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
 
-		pipelineOptions = {};
-		pipelineOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_GAS;
-		pipelineOptions.usesMotionBlur = false;
-		pipelineOptions.numPayloadValues = 2;
-		pipelineOptions.numAttributeValues = 2;
-		pipelineOptions.exceptionFlags = OPTIX_EXCEPTION_FLAG_NONE;
-		pipelineOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
-		
-		// this is used in a different location on example 2, but written here
-		OptixPipelineLinkOptions pipelineLinkOptions;
-		pipelineLinkOptions.maxTraceDepth = 2;
+		PipelineCompileOptions = {};
+		PipelineCompileOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_GAS;
+		PipelineCompileOptions.usesMotionBlur = false;
+		PipelineCompileOptions.numPayloadValues = 2;
+		PipelineCompileOptions.numAttributeValues = 2;
+		PipelineCompileOptions.exceptionFlags = OPTIX_EXCEPTION_FLAG_NONE;
+		PipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
+				
+		PipelineLinkOptions.maxTraceDepth = 2;
 	}// end of option setup
 
 	// convert the device code to a string for ease of use
@@ -105,6 +127,59 @@ void Renderer::CreateModule()
 	char log[2048];
 	size_t logSize = static_cast<size_t>(sizeof(log));
 
-	optixModuleCreateFromPTX(OptixContext, &moduleOptions, &pipelineOptions, deviceCode.c_str(), deviceCode.size(),
+	optixModuleCreateFromPTX(OptixContext, &ModuleOptions, &PipelineCompileOptions, deviceCode.c_str(), deviceCode.size(),
 		log, &logSize, &OptixModuleInstance);
+}
+
+void Renderer::CreateRaygenPrograms()
+{
+	RaygenProgramGroups.resize(1);
+
+	OptixProgramGroupOptions pgOptions = {};
+	OptixProgramGroupDesc pgDescr = {};
+	pgDescr.kind = OPTIX_PROGRAM_GROUP_KIND_RAYGEN;
+	pgDescr.raygen.module = OptixModuleInstance;
+	pgDescr.raygen.entryFunctionName = "__raygen__renderFrame";
+
+	char log[2048];
+	size_t logSize = sizeof(log);
+	OptixResult result = optixProgramGroupCreate(OptixContext,
+		&pgDescr, 1, &pgOptions, log, &logSize, RaygenProgramGroups.data());
+}
+
+void Renderer::CreateMissPrograms()
+{
+	MissProgramGroups.resize(1);
+
+	OptixProgramGroupOptions pgOptions = {};
+	OptixProgramGroupDesc pgDescr = {};
+	pgDescr.kind = OPTIX_PROGRAM_GROUP_KIND_MISS;
+	pgDescr.raygen.module = OptixModuleInstance;
+	pgDescr.raygen.entryFunctionName = "__miss__radiance";
+
+	char log[2048];
+	size_t logSize = sizeof(log);
+	OptixResult result = optixProgramGroupCreate(OptixContext,
+		&pgDescr, 1, &pgOptions, log, &logSize, MissProgramGroups.data());
+}
+
+void Renderer::CreateHitgroupPrograms()
+{
+	HitgroupProgramGroups.resize(1);
+
+	OptixProgramGroupOptions pgOptions = {};
+	OptixProgramGroupDesc pgDescr = {};
+	pgDescr.kind = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
+	pgDescr.raygen.module = OptixModuleInstance;
+	pgDescr.raygen.entryFunctionName = "__hitgroup__radiance";
+
+	char log[2048];
+	size_t logSize = sizeof(log);
+	OptixResult result = optixProgramGroupCreate(OptixContext,
+		&pgDescr, 1, &pgOptions, log, &logSize, HitgroupProgramGroups.data());
+}
+
+void Renderer::CreatePipeline()
+{
+	std::vector<OptixProgramGroup> programGroups;
 }
