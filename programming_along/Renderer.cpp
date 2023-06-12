@@ -5,12 +5,13 @@
 #include "optix_function_table_definition.h"
 #include "optix_stubs.h"
 
-
+#include "SbtStructs/SbtStructs.h"
 
 Renderer::Renderer()
 {
 	InitOptix();
 	CreateContext();
+	CreateModule();
 }
 
 Renderer::~Renderer()

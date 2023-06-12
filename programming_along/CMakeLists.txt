@@ -4,13 +4,18 @@ include_directories(${OptiX_INCLUDE})
 
 cuda_compile_and_embed(embedded_ptx_code deviceCode.cu)
 
-add_executable(programming_along
-	${embedded_ptx_code}
+set(SOURCE_LIST
 	LaunchParams.h
 	main.cpp
 	Renderer.h
 	Renderer.cpp
+	SbtStructs/SbtStructs.h
 )
+
+add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})
+
+# add_subdirectory(SbtStructs)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 target_link_libraries(programming_along
 	gdt
