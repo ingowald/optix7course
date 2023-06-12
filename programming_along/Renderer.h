@@ -60,6 +60,7 @@ private:
 
 	OptixDeviceContext OptixContext;
 	OptixModule OptixModuleInstance;
+	OptixPipeline Pipeline;
 
 	OptixModuleCompileOptions ModuleOptions;
 	OptixPipelineCompileOptions PipelineCompileOptions;

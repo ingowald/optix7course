@@ -16,10 +16,14 @@ Renderer::Renderer()
 	CreateRaygenPrograms();
 	CreateMissPrograms();
 	CreateHitgroupPrograms();
+
+	CreatePipeline();
 }
 
 Renderer::~Renderer()
 {
+	optixPipelineDestroy(Pipeline);
+
 	for (OptixProgramGroup pg : HitgroupProgramGroups)
 	{
 		optixProgramGroupDestroy(pg);
@@ -145,6 +149,11 @@ void Renderer::CreateRaygenPrograms()
 	size_t logSize = sizeof(log);
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, RaygenProgramGroups.data());
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create raygen program!");
+	}
 }
 
 void Renderer::CreateMissPrograms()
@@ -161,6 +170,11 @@ void Renderer::CreateMissPrograms()
 	size_t logSize = sizeof(log);
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, MissProgramGroups.data());
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create miss program!");
+	}
 }
 
 void Renderer::CreateHitgroupPrograms()
@@ -177,9 +191,53 @@ void Renderer::CreateHitgroupPrograms()
 	size_t logSize = sizeof(log);
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, HitgroupProgramGroups.data());
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create hitgroup program!");
+	}
 }
 
 void Renderer::CreatePipeline()
 {
 	std::vector<OptixProgramGroup> programGroups;
+	programGroups.reserve(RaygenProgramGroups.size() + MissProgramGroups.size() + HitgroupProgramGroups.size());
+	programGroups.insert(programGroups.end(), RaygenProgramGroups.begin(), RaygenProgramGroups.end());
+	programGroups.insert(programGroups.end(), MissProgramGroups.begin(), MissProgramGroups.end());
+	programGroups.insert(programGroups.end(), HitgroupProgramGroups.begin(), HitgroupProgramGroups.end());
+
+	char log[2048];
+	size_t logSize = sizeof(log);
+	OptixResult result = optixPipelineCreate(OptixContext, &PipelineCompileOptions,
+		&PipelineLinkOptions, programGroups.data(), (int32_t)programGroups.size(), log, &logSize,
+		&Pipeline);
+
+	// write log before throwing error, as it may contain more useful information
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create OptiX pipeline!");
+	}
+	
+	result = optixPipelineSetStackSize(
+		Pipeline,
+		/* The direct stack size requirement for direct callables invoked from
+		intersection or any hit*/
+		2 * 1024,
+		/* The direct stack size requirement for direct callables invoked from
+		ray generation, miss or closest hit*/
+		2 * 1024,
+		/* the continuation stack requirement*/
+		2 * 1024,
+		/* the maximum depth of a traversable graph passed to trace*/
+		1
+	);
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not set pipeline stack size!");
+	}
 }
