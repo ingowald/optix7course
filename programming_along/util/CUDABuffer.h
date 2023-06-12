@@ -66,6 +66,11 @@ struct CUDABuffer
 		Upload((const T*)vt.data(), vt.size());
 	}
 
+	CUdeviceptr CudaPtr() const
+	{
+		return (CUdeviceptr)(Data);
+	}
+
 	size_t Size_bytes{ 0 };
 	void* Data{ nullptr };
 };

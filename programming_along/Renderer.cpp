@@ -244,8 +244,8 @@ void Renderer::CreatePipeline()
 
 void Renderer::BuildShaderBindingTable()
 {
-	// rey generation records
-	std::vector<RaygenRecord> raygenRedcords;
+	// ray generation records
+	std::vector<RaygenRecord> raygenRecords;
 	for (size_t i = 0; i < RaygenProgramGroups.size(); i++)
 	{
 		RaygenRecord rec;
@@ -256,8 +256,49 @@ void Renderer::BuildShaderBindingTable()
 		}
 
 		rec.Data = nullptr;
-		raygenRedcords.push_back(rec);
+		raygenRecords.push_back(rec);
 	}
+	RaygenRecordsBuffer.AllocAndUpload(raygenRecords);
+	ShaderBindingTable.raygenRecord = RaygenRecordsBuffer.CudaPtr();
 
+	// miss generation records
+	std::vector<MissRecord> missRecords;
+	for (size_t i = 0; i < MissProgramGroups.size(); i++)
+	{
+		MissRecord rec;
+		OptixResult result = optixSbtRecordPackHeader(MissProgramGroups[i], &rec);
+		if (result != OPTIX_SUCCESS)
+		{
+			throw std::runtime_error("Could not build raygen record!");
+		}
 
+		rec.Data = nullptr;
+		missRecords.push_back(rec);
+	}
+	MissRecordsBuffer.AllocAndUpload(missRecords);
+	ShaderBindingTable.missRecordBase = MissRecordsBuffer.CudaPtr();
+	ShaderBindingTable.missRecordStrideInBytes = sizeof(MissRecord);
+	ShaderBindingTable.missRecordCount = (int32_t)missRecords.size();
+
+	// hit group generation records
+	// TODO: nothing yet, add dummy record
+	int32_t numObjects = 1;
+	std::vector<HitgroupRecord> hitgroupRecords;
+	for (size_t i = 0; i < numObjects; i++)
+	{
+		int32_t objectType = 0;
+		HitgroupRecord rec;
+		OptixResult result = optixSbtRecordPackHeader(HitgroupProgramGroups[objectType], &rec);
+		if (result != OPTIX_SUCCESS)
+		{
+			throw std::runtime_error("Could not build raygen record!");
+		}
+
+		rec.ObjectId = i;
+		hitgroupRecords.push_back(rec);
+	}
+	HitgroupRecordsBuffer.AllocAndUpload(hitgroupRecords);
+	ShaderBindingTable.hitgroupRecordBase = HitgroupRecordsBuffer.CudaPtr();
+	ShaderBindingTable.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
+	ShaderBindingTable.hitgroupRecordCount = (int32_t)hitgroupRecords.size();
 }
