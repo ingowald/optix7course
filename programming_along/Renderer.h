@@ -10,11 +10,24 @@
 
 #include "gdt/math/vec.h"
 
+#include "LaunchParams.h"
+
 class Renderer
 {
 public:
 	Renderer();
 	~Renderer();
+
+	/**
+	* Renders one frame
+	*/
+	void Render();
+
+	/**
+	* Sets the framebuffer size to the newly chosen size
+	* @param size The newly chosen size
+	*/
+	void Resize(const vec2i& size);
 
 private:
 	/**
@@ -59,6 +72,14 @@ private:
 
 
 public:
+
+protected:
+	/** Basic setup of size */
+	LaunchParams Params;
+	/** Contents of the basic setup transferred to GPU */
+	CUDABuffer ParamsBuffer;
+	/** Framebuffer contents */
+	CUDABuffer ColorBuffer;
 
 private:
 	cudaStream_t CudaStream;

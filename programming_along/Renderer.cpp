@@ -18,6 +18,10 @@ Renderer::Renderer()
 	CreateHitgroupPrograms();
 
 	CreatePipeline();
+
+	BuildShaderBindingTable();
+
+	ParamsBuffer.Alloc(sizeof(LaunchParams));
 }
 
 Renderer::~Renderer()
@@ -45,6 +49,52 @@ Renderer::~Renderer()
 	optixModuleDestroy(OptixModuleInstance);
 	optixDeviceContextDestroy(OptixContext);
 	cudaStreamDestroy(CudaStream);
+}
+
+void Renderer::Render()
+{
+	// make sure the framebuffer is setup correctly
+	if (Params.FramebufferSize.x == 0)
+	{
+		return;
+	}
+
+	// upload the launch params and increment frame ID
+	ParamsBuffer.Upload(&Params, 1);
+	Params.FrameID++;
+
+	OptixResult result = optixLaunch(
+		/* Pipeline to launch */
+		Pipeline, CudaStream,
+		/* parameters and shader binding table*/
+		ParamsBuffer.CudaPtr(), ParamsBuffer.Size_bytes, &ShaderBindingTable,
+		/* dimensions of the launch */
+		Params.FramebufferSize.x, Params.FramebufferSize.y, 1);
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not execute optixLaunch!");
+	}
+
+	// make sure the frame is rendered before it is downloaded (only for this easy example!")
+	cudaDeviceSynchronize();
+	cudaError_t error = cudaGetLastError();
+	if (error != cudaSuccess)
+	{
+		const std::string errorString(cudaGetErrorString(error));
+		throw std::runtime_error("error synchronizing cuda: " + errorString);
+	}
+}
+
+void Renderer::Resize(const vec2i& size)
+{
+	if (size.x == 0 || size.y == 0)
+	{
+		return;
+	}
+	Params.FramebufferSize = size;
+	ColorBuffer.Resize(size.x * size.y * sizeof(uint32_t));
+	Params.FramebufferData = reinterpret_cast<uint32_t*>(ColorBuffer.CudaPtr());
 }
 
 void Renderer::InitOptix()
@@ -244,6 +294,8 @@ void Renderer::CreatePipeline()
 
 void Renderer::BuildShaderBindingTable()
 {
+	ShaderBindingTable = {};
+
 	// ray generation records
 	std::vector<RaygenRecord> raygenRecords;
 	for (size_t i = 0; i < RaygenProgramGroups.size(); i++)

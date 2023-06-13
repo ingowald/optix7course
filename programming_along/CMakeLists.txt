@@ -11,6 +11,8 @@ set(SOURCE_LIST
 	Renderer.cpp
 	util/SbtStructs.h
 	util/CUDABuffer.h
+	util/Window.h
+	util/Window.cpp
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})
