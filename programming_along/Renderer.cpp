@@ -216,6 +216,8 @@ void Renderer::CreateRaygenPrograms()
 		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create raygen program!");
 	}
+
+	std::cout << "Raygen program created!" << std::endl;
 }
 
 void Renderer::CreateMissPrograms()
@@ -235,8 +237,11 @@ void Renderer::CreateMissPrograms()
 
 	if (result != OPTIX_SUCCESS)
 	{
+		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create miss program!");
 	}
+
+	std::cout << "Miss program created!" << std::endl;
 }
 
 void Renderer::CreateHitgroupPrograms()
@@ -256,8 +261,11 @@ void Renderer::CreateHitgroupPrograms()
 
 	if (result != OPTIX_SUCCESS)
 	{
+		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create hitgroup program!");
 	}
+
+	std::cout << "Hit group program created!" << std::endl;
 }
 
 void Renderer::CreatePipeline()

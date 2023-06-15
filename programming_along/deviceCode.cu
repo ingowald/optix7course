@@ -4,7 +4,7 @@
 
 extern "C" __constant__ LaunchParams launchParams;
 
-__global__ void __raygen__renderFrame()
+extern "C" __global__ void __raygen__renderFrame()
 {
 	printf("doing ray generation in OptiX!");
 
@@ -13,5 +13,5 @@ __global__ void __raygen__renderFrame()
 }
 
 // dummy functions for OptiX pipeline
-__global__ void __miss__radiance() {}
-__global__ void __closesthit_radiance() {}
+extern "C" __global__ void __miss__radiance() {}
+extern "C" __global__ void __closesthit__radiance() {}
