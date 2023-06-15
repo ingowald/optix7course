@@ -158,4 +158,16 @@ void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t san
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
+
+	
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	Camera* cam = win->OptixRenderer.GetCameraPtr();
+
+	switch (key)
+	{
+	case GLFW_KEY_A: cam->SetEye(cam->GetEye() + vec3f(-1.f, 0.f, 0.f));
+	}
+
+	vec3f pos = cam->GetEye();
+	std::cout << "Cam pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
 }

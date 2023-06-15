@@ -102,6 +102,11 @@ void Renderer::DownloadPixels(uint32_t pixels[])
 	ColorBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
 }
 
+Camera* Renderer::GetCameraPtr()
+{
+	return &SceneCamera;
+}
+
 void Renderer::InitOptix()
 {
 	// check that CUDA works and a CUDA capable device is found
