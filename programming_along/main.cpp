@@ -5,13 +5,8 @@
 
 #include "cuda_runtime.h"
 
-#include "gdt/math/vec.h"
-
-#include "Renderer.h"
 #include "util/Window.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "3rdParty/stb_image_write.h"
 
 using namespace gdt;
 

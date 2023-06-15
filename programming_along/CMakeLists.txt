@@ -13,6 +13,8 @@ set(SOURCE_LIST
 	util/CUDABuffer.h
 	util/Window.h
 	util/Window.cpp
+	util/Camera.h
+	util/Camera.cpp
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})
