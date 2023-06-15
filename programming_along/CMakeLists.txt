@@ -15,6 +15,8 @@ set(SOURCE_LIST
 	util/Window.cpp
 	util/Camera.h
 	util/Camera.cpp
+	util/Mesh.h
+	util/Mesh.cpp
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})

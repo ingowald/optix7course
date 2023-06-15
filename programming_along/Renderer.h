@@ -14,6 +14,8 @@
 
 #include "LaunchParams.h"
 
+struct Mesh;
+
 class Renderer
 {
 public:
@@ -39,6 +41,8 @@ public:
 	void DownloadPixels(uint32_t pixels[]);
 
 	Camera* GetCameraPtr();
+
+	void AddMesh(const Mesh& mesh);
 
 private:
 	/**
@@ -93,6 +97,8 @@ protected:
 
 	/** Scene */
 	Camera SceneCamera;
+
+	std::vector<Mesh> MeshList;
 
 private:
 	cudaStream_t CudaStream;
