@@ -85,6 +85,13 @@ private:
 	*/
 	void BuildShaderBindingTable();
 
+	/**
+	* Builds an acceleration structure based on the mesh list
+	*/
+	OptixTraversableHandle BuildAccelerationStructure();
+
+	void SynchCuda();
+
 public:
 
 protected:
@@ -99,6 +106,10 @@ protected:
 	Camera SceneCamera;
 
 	std::vector<Mesh> MeshList;
+
+	// TODO: this probably needs to become part of the mesh rather than the renderer?
+	CUDABuffer VertexBuffer;
+	CUDABuffer IndexBuffer;
 
 private:
 	cudaStream_t CudaStream;

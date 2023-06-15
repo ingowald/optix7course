@@ -6,6 +6,12 @@
 
 extern "C" __constant__ LaunchParams launchParams;
 
+// simple ray type
+enum { 
+	SURFACE_RAY_TYPE = 0,
+	RAY_TYPE_COUNT
+};
+
 static __forceinline__ __device__
 void packPointer(void* ptr, uint32_t& i0, uint32_t& i1)
 {	
@@ -49,10 +55,30 @@ extern "C" __global__ void __raygen__renderFrame()
 		+ (normalizedScreenCoords.x - 0.5f) * camera.Width
 		+ (normalizedScreenCoords.y - 0.5f) * camera.Height);
 
+	optixTrace(launchParams.Traversable,
+		camera.Eye,
+		rayDir,
+		0.f,	// tmin(?)
+		1e20f,	// tmax(?)
+		0.0f,	// ray time(?)
+		OptixVisibilityMask(255),
+		OPTIX_RAY_FLAG_DISABLE_ANYHIT,
+		SURFACE_RAY_TYPE,
+		RAY_TYPE_COUNT,
+		SURFACE_RAY_TYPE,
+		u0, u1);
+
+	const int32_t r = int32_t(255.99 * pixelColorPrd.x);
+	const int32_t g = int32_t(255.99 * pixelColorPrd.y);
+	const int32_t b = int32_t(255.99 * pixelColorPrd.z);
+
+	// convert to 32-bit rgba value, with alpha explicitly 0xff
+	const uint32_t rgba = 0xff000000 | (r << 0) | (g << 8) | (b << 16);
+
 	const uint32_t fbIndex = ix + iy * launchParams.FramebufferSize.x;
 
 	// finally write to frame buffer
-	launchParams.FramebufferData[fbIndex] = 1;
+	launchParams.FramebufferData[fbIndex] = rgba;
 }
 
 // dummy functions for OptiX pipeline

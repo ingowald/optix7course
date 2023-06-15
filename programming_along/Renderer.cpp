@@ -83,13 +83,7 @@ void Renderer::Render()
 	}
 
 	// make sure the frame is rendered before it is downloaded (only for this easy example!")
-	cudaDeviceSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if (error != cudaSuccess)
-	{
-		const std::string errorString(cudaGetErrorString(error));
-		throw std::runtime_error("error synchronizing cuda: " + errorString);
-	}
+	SynchCuda();
 }
 
 void Renderer::Resize(const vec2i& size)
@@ -396,4 +390,108 @@ void Renderer::BuildShaderBindingTable()
 	ShaderBindingTable.hitgroupRecordBase = HitgroupRecordsBuffer.CudaPtr();
 	ShaderBindingTable.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
 	ShaderBindingTable.hitgroupRecordCount = (int32_t)hitgroupRecords.size();
+}
+
+OptixTraversableHandle Renderer::BuildAccelerationStructure()
+{
+	// TODO: support more than just one mesh
+	VertexBuffer.AllocAndUpload(MeshList[0].Vertices);
+	IndexBuffer.AllocAndUpload(MeshList[0].Indices);
+
+	OptixTraversableHandle handle = {};
+
+	// triangle inputs
+	OptixBuildInput triangleInput = {};
+	triangleInput.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+
+	// local variables such that pointer to device pointers can be created
+	CUdeviceptr cuVertices = VertexBuffer.CudaPtr();
+	CUdeviceptr cuIndices = IndexBuffer.CudaPtr();
+
+	triangleInput.triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
+	triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
+	triangleInput.triangleArray.numVertices = (int32_t)MeshList[0].Vertices.size();
+	triangleInput.triangleArray.vertexBuffers = &cuVertices;
+
+	triangleInput.triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+	triangleInput.triangleArray.indexStrideInBytes = sizeof(vec3i);
+	triangleInput.triangleArray.numIndexTriplets = (int32_t)MeshList[0].Indices.size();
+	triangleInput.triangleArray.indexBuffer = cuIndices;
+
+	uint32_t triangleInputFlags[1] = { 0 };
+
+	// currently only shader binding table entry, no per-primitive materials
+	triangleInput.triangleArray.flags = triangleInputFlags;
+	triangleInput.triangleArray.numSbtRecords = 1;
+	triangleInput.triangleArray.sbtIndexOffsetBuffer = 0;
+	triangleInput.triangleArray.sbtIndexOffsetSizeInBytes = 0;
+	triangleInput.triangleArray.sbtIndexOffsetStrideInBytes = 0;
+
+	// setup bottom level acceleration structure (BLAS)
+	OptixAccelBuildOptions accelOptions = { };
+	accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE | OPTIX_BUILD_FLAG_ALLOW_COMPACTION;
+	accelOptions.motionOptions.numKeys = 1;
+	accelOptions.operation = OPTIX_BUILD_OPERATION_BUILD;
+
+	OptixAccelBufferSizes blasBufferSizes;
+	OptixResult result = optixAccelComputeMemoryUsage(OptixContext,
+		&accelOptions, &triangleInput,
+		1, // number of build inputs
+		&blasBufferSizes);
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("could not compute memory usage for acceleration structure!");
+	}
+
+	// prepare compaction
+	CUDABuffer compactedSizeBuffer;
+	compactedSizeBuffer.Alloc(sizeof(uint64_t));
+
+	OptixAccelEmitDesc emitDesc;
+	emitDesc.type = OPTIX_PROPERTY_TYPE_COMPACTED_SIZE;
+	emitDesc.result = compactedSizeBuffer.CudaPtr();
+
+	// execute build
+
+	CUDABuffer tempBuffer;
+	tempBuffer.Alloc(blasBufferSizes.tempSizeInBytes);
+
+	CUDABuffer outputBuffer;
+	outputBuffer.Alloc(blasBufferSizes.outputSizeInBytes);
+
+	result = optixAccelBuild(OptixContext,
+		0,	//stream
+		&accelOptions, &triangleInput,
+		1,	//num build inputs
+		tempBuffer.CudaPtr(), tempBuffer.Size_bytes,
+		outputBuffer.CudaPtr(), outputBuffer.Size_bytes,
+		&handle,
+		&emitDesc,
+		1 // num emitted properties
+	);
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not build acceleration structure!");
+	}
+
+	SynchCuda();
+
+	// clean up
+	outputBuffer.Free();
+	tempBuffer.Free();
+	compactedSizeBuffer.Free();
+
+	return handle;
+}
+
+void Renderer::SynchCuda()
+{
+	cudaDeviceSynchronize();
+	cudaError_t error = cudaGetLastError();
+	if (error != cudaSuccess)
+	{
+		const std::string errorString(cudaGetErrorString(error));
+		throw std::runtime_error("error synchronizing cuda: " + errorString);
+	}
 }

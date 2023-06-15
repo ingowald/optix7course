@@ -13,4 +13,7 @@ struct LaunchParams
 	uint32_t* FramebufferData = nullptr;
 
 	CameraOptix Camera;
+
+	// the scene(?)
+	OptixTraversableHandle Traversable;
 };
