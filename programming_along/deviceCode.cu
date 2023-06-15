@@ -2,7 +2,7 @@
 
 #include "LaunchParams.h"
 
-__constant__ LaunchParams launchParams;
+extern "C" __constant__ LaunchParams launchParams;
 
 __global__ void __raygen__renderFrame()
 {

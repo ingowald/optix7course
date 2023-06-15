@@ -169,7 +169,7 @@ void Renderer::CreateModule()
 		PipelineCompileOptions.numPayloadValues = 2;
 		PipelineCompileOptions.numAttributeValues = 2;
 		PipelineCompileOptions.exceptionFlags = OPTIX_EXCEPTION_FLAG_NONE;
-		PipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
+		PipelineCompileOptions.pipelineLaunchParamsVariableName = "launchParams";
 				
 		PipelineLinkOptions.maxTraceDepth = 2;
 	}// end of option setup
