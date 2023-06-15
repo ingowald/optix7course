@@ -30,8 +30,8 @@ struct CUDABuffer
 		if(Data)
 		{
 			Free();
-			Alloc(size);
 		}
+		Alloc(size);
 	}
 
 	template<typename T>
