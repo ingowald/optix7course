@@ -6,6 +6,7 @@ using namespace gdt;
 
 class Camera
 {
+public:
 	Camera(const vec3f& eye = vec3f(0.f, 0.f, 0.f), 
 		const vec3f& at = vec3f(0.f, 0.f, -1.f), 
 		const vec3f& up = vec3f(0.f, 1.f, 0.f),
