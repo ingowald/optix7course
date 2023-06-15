@@ -20,6 +20,8 @@ public:
 	Renderer();
 	~Renderer();
 
+	void Tick(const float& deltaTime_seconds);
+
 	/**
 	* Renders one frame
 	*/

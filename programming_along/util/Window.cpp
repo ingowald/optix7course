@@ -1,7 +1,10 @@
 #include "Window.h"
 
 #include <string>
+#include <chrono>
 
+typedef std::chrono::system_clock::time_point TimePoint;
+typedef std::chrono::duration<float> Duration;
 
 Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/, const uint32_t& height /* = 768 */)// : osc::GLFWindow(windowTitle)
 {
@@ -119,8 +122,17 @@ void Window::Run()
 	glfwGetFramebufferSize(glfwWindow, &width, &height);
 	Resize(osc::vec2i(width, height));
 
+	TimePoint lastTime = std::chrono::system_clock::now();
+	
+
 	while (!glfwWindowShouldClose(glfwWindow))
 	{
+		TimePoint newtime = std::chrono::system_clock::now();
+
+		Duration deltaTime = newtime - lastTime;
+		std::chrono::seconds deltaTime_seconds = std::chrono::duration_cast<std::chrono::seconds>(deltaTime);
+		OptixRenderer.Tick(deltaTime_seconds.count());
+
 		Render();
 		Draw();
 
@@ -144,30 +156,23 @@ void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, 
 
 void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods)
 {
-	std::cout << "key " << char(key) << " was ";
-	if (action == GLFW_PRESS)
-	{
-		std::cout << " pressed!" << std::endl;
-	}
-	else
-	{
-		std::cout << " released!" << std::endl;
-	}
-
 	if (key == GLFW_KEY_ESCAPE)
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 
-	
 	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	Camera* cam = win->OptixRenderer.GetCameraPtr();
 
-	switch (key)
+	if (action == GLFW_PRESS)
 	{
-	case GLFW_KEY_A: cam->SetEye(cam->GetEye() + vec3f(-1.f, 0.f, 0.f));
+		cam->KeyDown(key);
+	}
+	else if(action == GLFW_RELEASE)
+	{
+		cam->KeyUp(key);
 	}
 
 	vec3f pos = cam->GetEye();
-	std::cout << "Cam pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
+	std::cout << "cam pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
 }

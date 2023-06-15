@@ -51,6 +51,11 @@ Renderer::~Renderer()
 	cudaStreamDestroy(CudaStream);
 }
 
+void Renderer::Tick(const float& deltaTime_seconds)
+{
+	SceneCamera.Tick(deltaTime_seconds);
+}
+
 void Renderer::Render()
 {
 	// make sure the framebuffer is setup correctly
