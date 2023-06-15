@@ -7,8 +7,6 @@
 
 #include "../Renderer.h"
 
-using namespace osc;
-
 struct Window// : public GLFWindow
 {
 public:
@@ -34,6 +32,8 @@ public:
 	*/
 	static void OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
 
+	static void OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods);
+
 protected:
 
 	// glfw setup
@@ -44,4 +44,7 @@ protected:
 	vec2i FramebufferSize;
 	GLuint FramebufferTexture{ 0 };
 	std::vector<uint32_t> Pixels;
+
+	// controls
+	vec2f MousePos;
 };

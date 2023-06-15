@@ -32,6 +32,7 @@ Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/
 
 	// callbacks (other than error)
 	glfwSetMouseButtonCallback(glfwWindow, OnMouseButtonPressedOrReleased);
+	glfwSetKeyCallback(glfwWindow, OnKeyPressedOrReleased);
 
 	// OpenGL setup that doesn't need to change on draw
 	glDisable(GL_LIGHTING);
@@ -130,5 +131,31 @@ void Window::Run()
 
 void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
 {
-	std::cout << "mouse was used" << std::endl;
+	const bool down = action == GLFW_PRESS;
+	if (down)
+	{
+		std::cout << "mouse button down" << std::endl;
+	}
+	else
+	{
+		std::cout << "mouse button up" << std::endl;
+	}
+}
+
+void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods)
+{
+	std::cout << "key " << char(key) << " was ";
+	if (action == GLFW_PRESS)
+	{
+		std::cout << " pressed!" << std::endl;
+	}
+	else
+	{
+		std::cout << " released!" << std::endl;
+	}
+
+	if (key == GLFW_KEY_ESCAPE)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
 }
