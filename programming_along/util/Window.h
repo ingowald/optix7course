@@ -16,6 +16,8 @@ public:
 
 	~Window();
 
+	static void ErrorCallback(int32_t error, const char* description);
+
 	virtual void Render();
 
 	virtual void Draw();
@@ -26,6 +28,11 @@ public:
 	* Starts (and maintains) the render loop
 	*/
 	virtual void Run();
+
+	/**
+	* Callback that is called when mouse button is pressed or released
+	*/
+	static void OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
 
 protected:
 

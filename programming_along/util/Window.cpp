@@ -5,6 +5,9 @@
 
 Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/, const uint32_t& height /* = 768 */)// : osc::GLFWindow(windowTitle)
 {
+	// set error callback first to get all errors
+	glfwSetErrorCallback(ErrorCallback);
+
 	if (!glfwInit())
 	{
 		throw std::runtime_error("Could not initialize glfw!");
@@ -27,6 +30,9 @@ Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/
 	glfwMakeContextCurrent(glfwWindow);
 	glfwSwapInterval(1);
 
+	// callbacks (other than error)
+	glfwSetMouseButtonCallback(glfwWindow, OnMouseButtonPressedOrReleased);
+
 	// OpenGL setup that doesn't need to change on draw
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
@@ -41,6 +47,11 @@ Window::~Window()
 		glfwDestroyWindow(glfwWindow);
 	}
 	glfwTerminate();
+}
+
+void Window::ErrorCallback(int32_t error, const char* description)
+{
+	fprintf(stderr, "GLFW Error: %s\n", description);
 }
 
 void Window::Render()
@@ -115,4 +126,9 @@ void Window::Run()
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();
 	}
+}
+
+void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
+{
+	std::cout << "mouse was used" << std::endl;
 }
