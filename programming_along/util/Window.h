@@ -9,20 +9,32 @@
 
 using namespace osc;
 
-//struct Window : public GLFWindow
-//{
-//public:
-//	Window(const std::string& windowTitle);
-//
-//	virtual void render() override;
-//
-//	virtual void draw() override;
-//
-//	virtual void resize(const vec2i& size);
-//
-//protected:
-//	vec2i FramebufferSize;
-//	GLuint FramebufferTexture{ 0 };
-//	Renderer OptixRenderer;
-//	std::vector<uint32_t> Pixels;
-//};
+struct Window// : public GLFWindow
+{
+public:
+	Window(const std::string& windowTitle, const uint32_t& width = 1024, const uint32_t& height = 768);
+
+	~Window();
+
+	virtual void Render();
+
+	virtual void Draw();
+
+	virtual void Resize(const vec2i& size);
+
+	/**
+	* Starts (and maintains) the render loop
+	*/
+	virtual void Run();
+
+protected:
+
+	// glfw setup
+	GLFWwindow* glfwWindow = nullptr;
+
+	Renderer OptixRenderer;
+
+	vec2i FramebufferSize;
+	GLuint FramebufferTexture{ 0 };
+	std::vector<uint32_t> Pixels;
+};

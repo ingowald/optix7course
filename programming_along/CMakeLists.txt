@@ -25,4 +25,8 @@ target_link_libraries(programming_along
 	${optix_LIBRARY}
 	${CUDA_LIBRARIES}
 	${CUDA_CUDA_LIBRARY}
+	
+	glfWindow
+	glfw
+	${OPENGL_gl_LIBRARY}
 )
