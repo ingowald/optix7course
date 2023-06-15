@@ -251,8 +251,10 @@ void Renderer::CreateHitgroupPrograms()
 	OptixProgramGroupOptions pgOptions = {};
 	OptixProgramGroupDesc pgDescr = {};
 	pgDescr.kind = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
-	pgDescr.raygen.module = OptixModuleInstance;
-	pgDescr.raygen.entryFunctionName = "__hitgroup__radiance";
+	pgDescr.hitgroup.moduleCH = OptixModuleInstance;
+	pgDescr.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
+	pgDescr.hitgroup.moduleAH = OptixModuleInstance;
+	pgDescr.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
 
 	char log[2048];
 	size_t logSize = sizeof(log);
