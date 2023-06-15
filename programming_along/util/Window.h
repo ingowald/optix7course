@@ -7,14 +7,14 @@
 
 #include "../Renderer.h"
 
-using namespace osc;
-
 struct Window// : public GLFWindow
 {
 public:
 	Window(const std::string& windowTitle, const uint32_t& width = 1024, const uint32_t& height = 768);
 
 	~Window();
+
+	static void ErrorCallback(int32_t error, const char* description);
 
 	virtual void Render();
 
@@ -27,6 +27,13 @@ public:
 	*/
 	virtual void Run();
 
+	/**
+	* Callback that is called when mouse button is pressed or released
+	*/
+	static void OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
+
+	static void OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods);
+
 protected:
 
 	// glfw setup
@@ -37,4 +44,7 @@ protected:
 	vec2i FramebufferSize;
 	GLuint FramebufferTexture{ 0 };
 	std::vector<uint32_t> Pixels;
+
+	// controls
+	vec2f MousePos;
 };

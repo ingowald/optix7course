@@ -51,6 +51,11 @@ Renderer::~Renderer()
 	cudaStreamDestroy(CudaStream);
 }
 
+void Renderer::Tick(const float& deltaTime_seconds)
+{
+	SceneCamera.Tick(deltaTime_seconds);
+}
+
 void Renderer::Render()
 {
 	// make sure the framebuffer is setup correctly
@@ -100,6 +105,11 @@ void Renderer::Resize(const vec2i& size)
 void Renderer::DownloadPixels(uint32_t pixels[])
 {
 	ColorBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
+}
+
+Camera* Renderer::GetCameraPtr()
+{
+	return &SceneCamera;
 }
 
 void Renderer::InitOptix()

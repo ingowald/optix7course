@@ -4,7 +4,9 @@
 
 #include "cuda_runtime.h"
 #include "cuda.h"
+
 #include "util/CUDABuffer.h"
+#include "util/Camera.h"
 
 #include "optix_types.h"
 
@@ -17,6 +19,8 @@ class Renderer
 public:
 	Renderer();
 	~Renderer();
+
+	void Tick(const float& deltaTime_seconds);
 
 	/**
 	* Renders one frame
@@ -33,6 +37,8 @@ public:
 	* Download the rendered color buffer from the device into a host array
 	*/
 	void DownloadPixels(uint32_t pixels[]);
+
+	Camera* GetCameraPtr();
 
 private:
 	/**
@@ -75,7 +81,6 @@ private:
 	*/
 	void BuildShaderBindingTable();
 
-
 public:
 
 protected:
@@ -85,6 +90,9 @@ protected:
 	CUDABuffer ParamsBuffer;
 	/** Framebuffer contents */
 	CUDABuffer ColorBuffer;
+
+	/** Scene */
+	Camera SceneCamera;
 
 private:
 	cudaStream_t CudaStream;

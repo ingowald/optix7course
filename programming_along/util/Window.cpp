@@ -1,10 +1,16 @@
 #include "Window.h"
 
 #include <string>
+#include <chrono>
 
+typedef std::chrono::system_clock::time_point TimePoint;
+typedef std::chrono::duration<float> Duration;
 
 Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/, const uint32_t& height /* = 768 */)// : osc::GLFWindow(windowTitle)
 {
+	// set error callback first to get all errors
+	glfwSetErrorCallback(ErrorCallback);
+
 	if (!glfwInit())
 	{
 		throw std::runtime_error("Could not initialize glfw!");
@@ -27,6 +33,10 @@ Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/
 	glfwMakeContextCurrent(glfwWindow);
 	glfwSwapInterval(1);
 
+	// callbacks (other than error)
+	glfwSetMouseButtonCallback(glfwWindow, OnMouseButtonPressedOrReleased);
+	glfwSetKeyCallback(glfwWindow, OnKeyPressedOrReleased);
+
 	// OpenGL setup that doesn't need to change on draw
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
@@ -41,6 +51,11 @@ Window::~Window()
 		glfwDestroyWindow(glfwWindow);
 	}
 	glfwTerminate();
+}
+
+void Window::ErrorCallback(int32_t error, const char* description)
+{
+	fprintf(stderr, "GLFW Error: %s\n", description);
 }
 
 void Window::Render()
@@ -107,12 +122,57 @@ void Window::Run()
 	glfwGetFramebufferSize(glfwWindow, &width, &height);
 	Resize(osc::vec2i(width, height));
 
+	TimePoint lastTime = std::chrono::system_clock::now();
+	
+
 	while (!glfwWindowShouldClose(glfwWindow))
 	{
+		TimePoint newtime = std::chrono::system_clock::now();
+
+		Duration deltaTime = newtime - lastTime;
+		std::chrono::seconds deltaTime_seconds = std::chrono::duration_cast<std::chrono::seconds>(deltaTime);
+		OptixRenderer.Tick(deltaTime_seconds.count());
+
 		Render();
 		Draw();
 
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();
 	}
+}
+
+void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
+{
+	const bool down = action == GLFW_PRESS;
+	if (down)
+	{
+		std::cout << "mouse button down" << std::endl;
+	}
+	else
+	{
+		std::cout << "mouse button up" << std::endl;
+	}
+}
+
+void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods)
+{
+	if (key == GLFW_KEY_ESCAPE)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	Camera* cam = win->OptixRenderer.GetCameraPtr();
+
+	if (action == GLFW_PRESS)
+	{
+		cam->KeyDown(key);
+	}
+	else if(action == GLFW_RELEASE)
+	{
+		cam->KeyUp(key);
+	}
+
+	vec3f pos = cam->GetEye();
+	std::cout << "cam pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
 }
