@@ -36,6 +36,5 @@ protected:
 
 	vec2i FramebufferSize;
 	GLuint FramebufferTexture{ 0 };
-	Renderer OptixRenderer;
 	std::vector<uint32_t> Pixels;
 };
