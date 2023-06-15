@@ -143,11 +143,13 @@ void Renderer::CreateContext()
 
 	OptixDeviceContextOptions optixOptions;
 
-	OptixResult opResult = optixDeviceContextCreate(CudaContext, &optixOptions, &OptixContext);
+	OptixResult opResult = optixDeviceContextCreate(CudaContext, 0, &OptixContext);
 	if (opResult != OPTIX_SUCCESS)
 	{
 		throw std::runtime_error("Could not create OptiX context!");
 	}
+
+	std::cout << "OptiX context created!" << std::endl;
 }
 
 extern "C" char embedded_ptx_code[];
@@ -181,8 +183,17 @@ void Renderer::CreateModule()
 	char log[2048];
 	size_t logSize = static_cast<size_t>(sizeof(log));
 
-	optixModuleCreateFromPTX(OptixContext, &ModuleOptions, &PipelineCompileOptions, deviceCode.c_str(), deviceCode.size(),
+	OptixResult result = optixModuleCreateFromPTX(OptixContext, &ModuleOptions, &PipelineCompileOptions, 
+		deviceCode.c_str(), deviceCode.size(),
 		log, &logSize, &OptixModuleInstance);
+
+	if (result != OPTIX_SUCCESS)
+	{
+		std::cerr << log << std::endl;
+		throw std::runtime_error("Could not create OptiX module!");
+	}
+
+	std::cout << "OptiX module created!" << std::endl;
 }
 
 void Renderer::CreateRaygenPrograms()
@@ -202,6 +213,7 @@ void Renderer::CreateRaygenPrograms()
 
 	if (result != OPTIX_SUCCESS)
 	{
+		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create raygen program!");
 	}
 }
