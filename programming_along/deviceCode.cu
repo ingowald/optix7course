@@ -6,33 +6,53 @@
 
 extern "C" __constant__ LaunchParams launchParams;
 
+static __forceinline__ __device__
+void packPointer(void* ptr, uint32_t& i0, uint32_t& i1)
+{	
+	// write the first half of the 64 bit value into i0, the second into i1 (both 32 bit)
+	const uint64_t uptr = reinterpret_cast<uint64_t>(ptr);
+	i0 = uptr >> 32;
+	i1 = uptr & 0x00000000ffffffff;
+}
+
+static __forceinline__ __device__
+void* unpackPointer(uint32_t i0, uint32_t i1)
+{
+	// store i0 and i1 (both 32 bit) in the same 64 bit variable
+	const uint64_t uptr = static_cast<uint64_t>(i0) << 32 | i1;
+	// return the new pointer as a void pointer
+	void* ptr = reinterpret_cast<void*>(uptr);
+	return ptr;
+}
+
 extern "C" __global__ void __raygen__renderFrame()
 {
-	if (launchParams.FrameID == 0
-		&& optixGetLaunchIndex().x == 0
-		&& optixGetLaunchIndex().y == 0)
-	{
-		printf("############################\n");
-		printf("Hello world from OptiX 7 raygen program!\n(within a %ix%i-sized launch)\n",
-			launchParams.FramebufferSize.x,
-			launchParams.FramebufferSize.y);
-		printf("############################\n");
-	}
-
 	const int32_t ix = optixGetLaunchIndex().x;
 	const int32_t iy = optixGetLaunchIndex().y;
 
-	const int32_t r = (ix % 256);
-	const int32_t g = (iy % 256);
-	const int32_t b = ((ix + iy) % 256);
+	const CameraOptix& camera = launchParams.Camera;
 
-	// convert to 32-bit rgba value, alpha is is explicitly set to 0xff for stb_image_write
-	const uint32_t rgba = 0xff000000 | (r << 0) | (g << 8) | (b << 16);
+	// per ray data
+	vec3f pixelColorPrd = vec3f(0.f);
+
+	// values we store in the per ray data.
+	// due to CUDA/OptiX restraints, we store two 32 bit values in a 64 bit pointer
+	uint32_t u0, u1;
+	packPointer(&pixelColorPrd, u0, u1);
+
+	// get normalized coords (i.e. in [0, 1]^2)
+	const vec2f normalizedScreenCoords(vec2f(ix + .5f, iy + .5f)
+		/ vec2f(launchParams.FramebufferSize));
+
+	// generate ray direction
+	vec3f rayDir = normalize(camera.At
+		+ (normalizedScreenCoords.x - 0.5f) * camera.Width
+		+ (normalizedScreenCoords.y - 0.5f) * camera.Height);
 
 	const uint32_t fbIndex = ix + iy * launchParams.FramebufferSize.x;
 
 	// finally write to frame buffer
-	launchParams.FramebufferData[fbIndex] = rgba;
+	launchParams.FramebufferData[fbIndex] = 1;
 }
 
 // dummy functions for OptiX pipeline
