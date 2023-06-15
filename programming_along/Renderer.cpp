@@ -6,6 +6,7 @@
 #include "optix_stubs.h"
 
 #include "util/SbtStructs.h"
+#include "util/Mesh.h"
 
 Renderer::Renderer()
 {
@@ -110,6 +111,11 @@ void Renderer::DownloadPixels(uint32_t pixels[])
 Camera* Renderer::GetCameraPtr()
 {
 	return &SceneCamera;
+}
+
+void Renderer::AddMesh(const Mesh& mesh)
+{
+	MeshList.push_back(mesh);
 }
 
 void Renderer::InitOptix()

@@ -176,3 +176,8 @@ void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t san
 	vec3f pos = cam->GetEye();
 	std::cout << "cam pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
 }
+
+Renderer* Window::GetRenderer()
+{
+	return &OptixRenderer;
+}
