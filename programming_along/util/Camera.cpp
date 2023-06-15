@@ -6,12 +6,15 @@
 Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/, 
 	const vec3f& at /* = vec3f(0.f, 0.f, -1.f)*/, 
 	const vec3f& up /* = vec3f(0.f, 1.f, 0.f)*/,
-	const float& fovy /* = 0.66f*/)
+	const float& fovy /* = 0.66f*/,
+	const uint32_t& width /* = 1024 */, const uint32_t height /* = 768 */)
 {
 	Eye = eye;
 	At = at;
 	Up = up;
 	Fovy = fovy;
+	Width = width;
+	Height = height;
 
 	std::fill_n(KeyStatus, 256, 0);
 }
@@ -112,4 +115,17 @@ void Camera::KeyDown(const int32_t& key)
 void Camera::KeyUp(const int32_t& key)
 {
 	KeyStatus[key] = 0;
+}
+
+CameraOptix Camera::GetOptixCamera() const
+{
+	CameraOptix cam;
+	cam.Eye = Eye;
+	cam.At = At;
+	cam.Up = Up;
+	cam.Fovy = Fovy;
+	cam.Width = Width;
+	cam.Height = Height;
+
+	return cam;
 }
