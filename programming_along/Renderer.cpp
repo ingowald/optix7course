@@ -97,6 +97,11 @@ void Renderer::Resize(const vec2i& size)
 	Params.FramebufferData = reinterpret_cast<uint32_t*>(ColorBuffer.CudaPtr());
 }
 
+void Renderer::DownloadPixels(uint32_t pixels[])
+{
+	ColorBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
+}
+
 void Renderer::InitOptix()
 {
 	// check that CUDA works and a CUDA capable device is found

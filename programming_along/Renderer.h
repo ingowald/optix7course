@@ -29,6 +29,11 @@ public:
 	*/
 	void Resize(const vec2i& size);
 
+	/**
+	* Download the rendered color buffer from the device into a host array
+	*/
+	void DownloadPixels(uint32_t pixels[]);
+
 private:
 	/**
 	* Does a few basic CUDA and OptiX operations to check that everything is available
