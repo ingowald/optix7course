@@ -31,8 +31,6 @@ void Camera::Tick(const float& deltaTime_seconds)
 
 void Camera::Move(const float& deltaTime_seconds)
 {
-	// TODO: get forward, right and up vector to move camera along these
-	// instead of along the axes of the coordinate system
 	vec3f forward = normalize(At - Eye);
 	vec3f right = cross(forward, Up);
 
