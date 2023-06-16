@@ -74,7 +74,7 @@ void Renderer::Render()
 		Pipeline, CudaStream,
 		/* parameters and shader binding table*/
 		ParamsBuffer.CudaPtr(), ParamsBuffer.Size_bytes, &ShaderBindingTable,
-		/* dimensions of the launch */
+		/* dimensions of the launch (i.e. of the threads in x/y/z) */
 		Params.FramebufferSize.x, Params.FramebufferSize.y, 1);
 
 	if (result != OPTIX_SUCCESS)
