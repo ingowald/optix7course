@@ -60,32 +60,32 @@ extern "C" __global__ void __raygen__renderFrame()
 
 
 	// generate ray direction
-	vec3f dir = camera.At - camera.Eye;
+	vec3f dir = camera.LookingDirection;
 	vec3f rayDir = normalize(dir
-		+ (normalizedScreenCoords.x - 0.5f) * launchParams.FramebufferSize.x//camera.Width
-		+ (normalizedScreenCoords.y - 0.5f) * launchParams.FramebufferSize.y);//camera.Height);
+		+ (normalizedScreenCoords.x - 0.5f) * camera.Horizontal
+		+ (normalizedScreenCoords.y - 0.5f) * camera.Vertical);
 
-	/*bool newLine = false;
-	if ((ix <= 0 || ix >= (launchParams.FramebufferSize.x-1))
-		&& (iy <= 0 || iy >= (launchParams.FramebufferSize.y - 1)))
-	{
-		printf("ix: %i, iy: %i\n"
-			"framebuffer size : (%i, %i)\n"
-			"normSreenCoord: (%.2f, %.2f)\n"
-			"eye: (%.2f, %.2f, %.2f)\n"
-			"at:  (%.2f, %.2f, %.2f)\n"
-			"rayDir: (% .2f, % .2f, % .2f)\n\n", 
-			ix, iy, 
-			launchParams.FramebufferSize.x, launchParams.FramebufferSize.y, 
-			normalizedScreenCoords.x, normalizedScreenCoords.y, 
-			camera.Eye.x, camera.Eye.y, camera.Eye.z,
-			camera.At.x, camera.At.y, camera.At.z,
-			rayDir.x, rayDir.y, rayDir.z);
-		newLine = true;
-	}*/
+	//bool newLine = false;
+	//if ((ix == (launchParams.FramebufferSize.x*0.5))
+	//	&& (iy == (launchParams.FramebufferSize.y*0.5)))
+	//{
+	//	printf("ix: %i, iy: %i\n"
+	//		"framebuffer size : (%i, %i)\n"
+	//		"normSreenCoord: (%.2f, %.2f)\n"
+	//		"eye: (%.2f, %.2f, %.2f)\n"
+	//		"at:  (%.2f, %.2f, %.2f)\n"
+	//		"rayDir: (% .2f, % .2f, % .2f)\n\n", 
+	//		ix, iy, 
+	//		launchParams.FramebufferSize.x, launchParams.FramebufferSize.y, 
+	//		normalizedScreenCoords.x, normalizedScreenCoords.y, 
+	//		camera.Eye.x, camera.Eye.y, camera.Eye.z,
+	//		camera.At.x, camera.At.y, camera.At.z,
+	//		rayDir.x, rayDir.y, rayDir.z);
+	//	newLine = true;
+	//}
 
 	optixTrace(launchParams.Traversable,
-		camera.Eye,
+		camera.Position,
 		rayDir,
 		0.f,	// tmin -> the earliest a hit will be detected, similar to near clipping plane
 		1e20f,	// tmax -> the latest a hit will be detected, similar to far clipping plane

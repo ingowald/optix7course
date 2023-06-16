@@ -8,7 +8,7 @@
 Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/, 
 	const vec3f& at /* = vec3f(0.f, 0.f, -1.f)*/, 
 	const vec3f& up /* = vec3f(0.f, 1.f, 0.f)*/,
-	const float& fovy /* = 0.66f*/,
+	const float& cosFovy /* = 0.66f*/,
 	const uint32_t& width /* = 1024 */, const uint32_t height /* = 768 */)
 {
 	Eye = eye;
@@ -19,7 +19,7 @@ Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/,
 	InitialAt = at;
 	InitialUp = up;
 
-	Fovy = fovy;
+	CosFovy = cosFovy;
 	Width = width;
 	Height = height;
 
@@ -122,14 +122,14 @@ vec3f Camera::GetUp() const
 	return Up;
 }
 
-void Camera::SetFovy(const float& fovy)
+void Camera::SetCosFovy(const float& cosFovy)
 {
-	Fovy = fovy;
+	CosFovy = cosFovy;
 }
 
-float Camera::GetFovy() const
+float Camera::GetCosFovy() const
 {
-	return Fovy;
+	return CosFovy;
 }
 
 float Camera::GetSpeed() const
@@ -166,12 +166,12 @@ void Camera::MousUp(const int32_t& button)
 CameraOptix Camera::GetOptixCamera() const
 {
 	CameraOptix cam;
-	cam.Eye = Eye;
-	cam.At = At;
-	cam.Up = Up;
-	cam.Fovy = Fovy;
-	cam.Width = Width;
-	cam.Height = Height;
+	cam.Position = Eye;
+	cam.LookingDirection = normalize(At - Eye);
+	cam.CosFovy = CosFovy;
+	const float aspectRatio = Width / Height;
+	cam.Horizontal = CosFovy * aspectRatio * normalize(cross(cam.LookingDirection, Up));
+	cam.Vertical = CosFovy * normalize(cross(cam.Horizontal, cam.LookingDirection));
 
 	return cam;
 }

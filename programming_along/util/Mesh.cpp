@@ -45,3 +45,13 @@ void Mesh::AddCube(const vec3f& center, const vec3f& size)
 	transformationMatrix.l.vz = vec3f(0.f, 0.f, size.z);
 	AddUnitCube(transformationMatrix);
 }
+
+void Mesh::AddTriangle(const vec3f vertices[3], const vec3i indices)
+{
+	size_t firstVertexId = Vertices.size();
+	for (size_t i = 0; i < 3; i++)
+	{
+		Vertices.push_back(vertices[i]);
+	}
+	Indices.push_back((int32_t)firstVertexId + indices);
+}

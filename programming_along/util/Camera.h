@@ -9,13 +9,12 @@ using namespace gdt;
 */
 struct CameraOptix
 {
-	vec3f Eye;
-	vec3f At;
-	vec3f Up;
-	float Fovy;
+	vec3f Position;
+	vec3f LookingDirection; // this is At - Eye
+	float CosFovy;
 
-	uint32_t Width;
-	uint32_t Height;
+	vec3f Horizontal;			// not the framebuffer width!
+	vec3f Vertical;
 };
 
 /**
@@ -27,7 +26,7 @@ public:
 	Camera(const vec3f& eye = vec3f(0.f, 0.f, 0.f), 
 		const vec3f& at = vec3f(0.f, 0.f, -1.f), 
 		const vec3f& up = vec3f(0.f, 1.f, 0.f),
-		const float& fovy = 0.66f,
+		const float& cosFovy = 0.66f,
 		const uint32_t& width = 1024, const uint32_t height = 768);
 	~Camera();
 
@@ -44,8 +43,8 @@ public:
 	void SetUp(const vec3f& up);
 	vec3f GetUp() const;
 
-	void SetFovy(const float& fovy);
-	float GetFovy() const;
+	void SetCosFovy(const float& cosFovy);
+	float GetCosFovy() const;
 
 	float GetSpeed() const;
 
@@ -67,7 +66,7 @@ private:
 	vec3f InitialAt;
 	vec3f InitialUp;
 
-	float Fovy;
+	float CosFovy;
 	uint32_t Width;
 	uint32_t Height;
 
