@@ -34,6 +34,7 @@ Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/
 	glfwSwapInterval(1);
 
 	// callbacks (other than error)
+	glfwSetCursorPosCallback(glfwWindow, OnCursorMoved);
 	glfwSetMouseButtonCallback(glfwWindow, OnMouseButtonPressedOrReleased);
 	glfwSetKeyCallback(glfwWindow, OnKeyPressedOrReleased);
 
@@ -165,6 +166,13 @@ void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, 
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 
+	cam->SetMousePos(vec2f(x / win->GetFramebufferSize().x, y / win->GetFramebufferSize().y));
+}
+
+void Window::OnCursorMoved(GLFWwindow* window, double x, double y)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	Camera* cam = win->OptixRenderer.GetCameraPtr();
 	cam->SetMousePos(vec2f(x / win->GetFramebufferSize().x, y / win->GetFramebufferSize().y));
 }
 

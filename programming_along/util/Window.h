@@ -32,6 +32,8 @@ public:
 	*/
 	static void OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
 
+	static void OnCursorMoved(GLFWwindow* window, double x, double y);
+
 	static void OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods);
 
 	Renderer* GetRenderer();

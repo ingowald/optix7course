@@ -85,9 +85,30 @@ void Camera::Move(const float& deltaTime_seconds)
 		float distance = sqrtf(way.x * way.x + way.y * way.y);
 		float angle = acos(distance);
 
+		std::string str = "way:("
+			+ std::to_string(way.x) + ","
+			+ std::to_string(way.y) + ","
+			+ "); ";
+		
+		str += "old dir:("
+			+ std::to_string(forward.x) + ","
+			+ std::to_string(forward.y) + ","
+			+ std::to_string(forward.z) + ","
+			+ "); ";
+		str += "angle:" + std::to_string(angle) + "; ";
+
 		Quaternion3f quat = Quaternion3f::rotate(Up, angle);
 
 		forward = quat * forward;
+
+		str += "new dir:("
+			+ std::to_string(forward.x) + ","
+			+ std::to_string(forward.y) + ","
+			+ std::to_string(forward.z) + ","
+			+ "); ";
+
+		std::cout << str << std::endl;
+
 		At = Eye + forward;
 	}
 }
