@@ -36,6 +36,8 @@ public:
 
 	Renderer* GetRenderer();
 
+	const vec2i& GetFramebufferSize() const;
+
 protected:
 
 	// glfw setup

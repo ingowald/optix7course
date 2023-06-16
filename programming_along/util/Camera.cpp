@@ -3,6 +3,8 @@
 
 #include "GLFW/glfw3.h"
 
+#include "gdt/math/Quaternion.h"
+
 Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/, 
 	const vec3f& at /* = vec3f(0.f, 0.f, -1.f)*/, 
 	const vec3f& up /* = vec3f(0.f, 1.f, 0.f)*/,
@@ -12,11 +14,17 @@ Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/,
 	Eye = eye;
 	At = at;
 	Up = up;
+
+	InitialEye = eye;
+	InitialAt = at;
+	InitialUp = up;
+
 	Fovy = fovy;
 	Width = width;
 	Height = height;
 
 	std::fill_n(KeyStatus, 256, 0);
+	std::fill_n(MouseStatus, 8, 0);
 }
 
 Camera::~Camera()
@@ -62,6 +70,25 @@ void Camera::Move(const float& deltaTime_seconds)
 	if (KeyStatus[GLFW_KEY_0])
 	{
 		Eye = vec3f(0.f, 0.f, 0.f);
+	}
+	if (KeyStatus[GLFW_KEY_9])
+	{
+		Eye = InitialEye;
+		At = InitialAt;
+		Up = InitialUp;
+	}
+
+	// mouse action
+	if (MouseStatus[GLFW_MOUSE_BUTTON_LEFT])
+	{
+		vec2f way = CurrentMousePos_Normalized - LastMousePos_Normalized;
+		float distance = sqrtf(way.x * way.x + way.y * way.y);
+		float angle = acos(distance);
+
+		Quaternion3f quat = Quaternion3f::rotate(Up, angle);
+
+		forward = quat * forward;
+		At = Eye + forward;
 	}
 }
 
@@ -118,6 +145,22 @@ void Camera::KeyDown(const int32_t& key)
 void Camera::KeyUp(const int32_t& key)
 {
 	KeyStatus[key] = 0;
+}
+
+void Camera::SetMousePos(const vec2f& NormalizedMousePos)
+{
+	LastMousePos_Normalized = CurrentMousePos_Normalized;
+	CurrentMousePos_Normalized = NormalizedMousePos;
+}
+
+void Camera::MouseDown(const int32_t& button)
+{
+	MouseStatus[button] = 1;
+}
+
+void Camera::MousUp(const int32_t& button)
+{
+	MouseStatus[button] = 0;
 }
 
 CameraOptix Camera::GetOptixCamera() const

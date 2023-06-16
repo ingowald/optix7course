@@ -52,6 +52,10 @@ public:
 	void KeyDown(const int32_t& key);
 	void KeyUp(const int32_t& key);
 
+	void SetMousePos(const vec2f& NormalizedMousePos);
+	void MouseDown(const int32_t& button);
+	void MousUp(const int32_t& button);
+
 	CameraOptix GetOptixCamera() const;
 
 private:
@@ -59,10 +63,17 @@ private:
 	vec3f At;
 	vec3f Up;
 
+	vec3f InitialEye;
+	vec3f InitialAt;
+	vec3f InitialUp;
+
 	float Fovy;
 	uint32_t Width;
 	uint32_t Height;
 
 	uint8_t KeyStatus[256];
+	vec2f LastMousePos_Normalized;
+	vec2f CurrentMousePos_Normalized;
+	uint8_t MouseStatus[8];
 	float Speed = 1.0f;
 };
