@@ -58,10 +58,31 @@ extern "C" __global__ void __raygen__renderFrame()
 	const vec2f normalizedScreenCoords(vec2f(ix + .5f, iy + .5f)
 		/ vec2f(launchParams.FramebufferSize));
 
+
 	// generate ray direction
-	vec3f rayDir = normalize(camera.At
-		+ (normalizedScreenCoords.x - 0.5f) * camera.Width
-		+ (normalizedScreenCoords.y - 0.5f) * camera.Height);
+	vec3f dir = camera.At - camera.Eye;
+	vec3f rayDir = normalize(dir
+		+ (normalizedScreenCoords.x - 0.5f) * launchParams.FramebufferSize.x//camera.Width
+		+ (normalizedScreenCoords.y - 0.5f) * launchParams.FramebufferSize.y);//camera.Height);
+
+	/*bool newLine = false;
+	if ((ix <= 0 || ix >= (launchParams.FramebufferSize.x-1))
+		&& (iy <= 0 || iy >= (launchParams.FramebufferSize.y - 1)))
+	{
+		printf("ix: %i, iy: %i\n"
+			"framebuffer size : (%i, %i)\n"
+			"normSreenCoord: (%.2f, %.2f)\n"
+			"eye: (%.2f, %.2f, %.2f)\n"
+			"at:  (%.2f, %.2f, %.2f)\n"
+			"rayDir: (% .2f, % .2f, % .2f)\n\n", 
+			ix, iy, 
+			launchParams.FramebufferSize.x, launchParams.FramebufferSize.y, 
+			normalizedScreenCoords.x, normalizedScreenCoords.y, 
+			camera.Eye.x, camera.Eye.y, camera.Eye.z,
+			camera.At.x, camera.At.y, camera.At.z,
+			rayDir.x, rayDir.y, rayDir.z);
+		newLine = true;
+	}*/
 
 	optixTrace(launchParams.Traversable,
 		camera.Eye,
