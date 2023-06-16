@@ -42,6 +42,8 @@ public:
 
 	Camera* GetCameraPtr();
 
+	void SetCameraPositionAndOrientation(const vec3f& eye, const vec3f& at, const vec3f& up);
+
 	void AddMesh(const Mesh& mesh);
 
 private:

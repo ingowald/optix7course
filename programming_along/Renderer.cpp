@@ -112,6 +112,13 @@ Camera* Renderer::GetCameraPtr()
 	return &SceneCamera;
 }
 
+void Renderer::SetCameraPositionAndOrientation(const vec3f& eye, const vec3f& at, const vec3f& up)
+{
+	SceneCamera.SetEye(eye);
+	SceneCamera.SetAt(at);
+	SceneCamera.SetUp(up);
+}
+
 void Renderer::AddMesh(const Mesh& mesh)
 {
 	MeshList.push_back(mesh);
