@@ -18,6 +18,8 @@ Renderer::Renderer()
 	CreateMissPrograms();
 	CreateHitgroupPrograms();
 
+	Params.Traversable = BuildAccelerationStructure();
+
 	CreatePipeline();
 
 	BuildShaderBindingTable();
@@ -65,6 +67,9 @@ void Renderer::Render()
 		return;
 	}
 
+	// update the camera values
+	Params.Camera = SceneCamera.GetOptixCamera();
+
 	// upload the launch params and increment frame ID
 	ParamsBuffer.Upload(&Params, 1);
 	Params.FrameID++;
@@ -110,6 +115,8 @@ Camera* Renderer::GetCameraPtr()
 void Renderer::AddMesh(const Mesh& mesh)
 {
 	MeshList.push_back(mesh);
+	//TODO: probably very inefficient to do this here
+	Params.Traversable = BuildAccelerationStructure();
 }
 
 void Renderer::InitOptix()
@@ -226,9 +233,13 @@ void Renderer::CreateRaygenPrograms()
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, RaygenProgramGroups.data());
 
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
 	if (result != OPTIX_SUCCESS)
 	{
-		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create raygen program!");
 	}
 
@@ -250,9 +261,13 @@ void Renderer::CreateMissPrograms()
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, MissProgramGroups.data());
 
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
 	if (result != OPTIX_SUCCESS)
 	{
-		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create miss program!");
 	}
 
@@ -276,9 +291,13 @@ void Renderer::CreateHitgroupPrograms()
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, HitgroupProgramGroups.data());
 
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
 	if (result != OPTIX_SUCCESS)
 	{
-		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create hitgroup program!");
 	}
 
@@ -394,11 +413,17 @@ void Renderer::BuildShaderBindingTable()
 
 OptixTraversableHandle Renderer::BuildAccelerationStructure()
 {
+	OptixTraversableHandle handle = {};
+
+	if (MeshList.size() == 0)
+	{
+		std::cout << "No meshes to build acceleration structure for!" << std::endl;
+		return handle;
+	}
+
 	// TODO: support more than just one mesh
 	VertexBuffer.AllocAndUpload(MeshList[0].Vertices);
 	IndexBuffer.AllocAndUpload(MeshList[0].Indices);
-
-	OptixTraversableHandle handle = {};
 
 	// triangle inputs
 	OptixBuildInput triangleInput = {};
