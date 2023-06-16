@@ -108,6 +108,7 @@ protected:
 	Camera SceneCamera;
 
 	std::vector<Mesh> MeshList;
+	CUDABuffer AccelerationStructureBuffer;
 
 	// TODO: this probably needs to become part of the mesh rather than the renderer?
 	CUDABuffer VertexBuffer;

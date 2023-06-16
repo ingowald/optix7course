@@ -509,6 +509,25 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 
 	SynchCuda("Error synchronizing CUDA after building acceleration structure!");
 
+	// perform compaction
+	uint64_t compactedSize;
+	compactedSizeBuffer.Download(&compactedSize, 1);
+
+	AccelerationStructureBuffer.Alloc(compactedSize);
+	result = optixAccelCompact(OptixContext,
+		0, //stream
+		handle,
+		AccelerationStructureBuffer.CudaPtr(),
+		AccelerationStructureBuffer.Size_bytes,
+		&handle);
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not compact acceleration structure!");
+	}
+
+	SynchCuda("Error synchronizing CUDA after compacting acceleration structure!");
+
 	// clean up
 	outputBuffer.Free();
 	tempBuffer.Free();
