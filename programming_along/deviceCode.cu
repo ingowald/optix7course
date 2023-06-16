@@ -31,6 +31,14 @@ void* unpackPointer(uint32_t i0, uint32_t i1)
 	return ptr;
 }
 
+template<typename T>
+static __forceinline__ __device__ T* getPerRayData()
+{
+	const uint32_t u0 = optixGetPayload_0();
+	const uint32_t u1 = optixGetPayload_1();
+	return reinterpret_cast<T*>(unpackPointer(u0, u1));
+}
+
 extern "C" __global__ void __raygen__renderFrame()
 {
 	const int32_t ix = optixGetLaunchIndex().x;
@@ -58,15 +66,27 @@ extern "C" __global__ void __raygen__renderFrame()
 	optixTrace(launchParams.Traversable,
 		camera.Eye,
 		rayDir,
-		0.f,	// tmin(?)
-		1e20f,	// tmax(?)
-		0.0f,	// ray time(?)
+		0.f,	// tmin -> the earliest a hit will be detected, similar to near clipping plane
+		1e20f,	// tmax -> the latest a hit will be detected, similar to far clipping plane
+		0.0f,	// ray time (has to be enabled in pipeline compile options, otherwise ignored)
 		OptixVisibilityMask(255),
 		OPTIX_RAY_FLAG_DISABLE_ANYHIT,
 		SURFACE_RAY_TYPE,
 		RAY_TYPE_COUNT,
 		SURFACE_RAY_TYPE,
-		u0, u1);
+		u0, u1 // payload p0, p1 (, up to p7? up to 31?)
+	);
+
+	// optixTrace starts the actual ray trace. 
+	// depending on if something is hit, either the closest hit program
+	// or the miss program is executed (anyhit is disabled in this example)
+	// since u0, u1 is the packed per ray data and set as a payload to trace
+	// and both the closest hit and the miss program write to the per ray data,
+	// we can assume that pixelColorPrd has gotten values through the payload
+	// writing of the two programs
+	// i.e:
+	// the ray was traced and returned a value here
+	// so we can write the result to the frame buffer
 
 	const int32_t r = int32_t(255.99 * pixelColorPrd.x);
 	const int32_t g = int32_t(255.99 * pixelColorPrd.y);
@@ -81,7 +101,21 @@ extern "C" __global__ void __raygen__renderFrame()
 	launchParams.FramebufferData[fbIndex] = rgba;
 }
 
+
+extern "C" __global__ void __miss__radiance() 
+{
+	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
+
+	// set to constant white as background colour
+	perRayData = vec3f(1.f);
+}
+
+extern "C" __global__ void __closesthit__radiance() 
+{
+	const int32_t primitiveId = optixGetPrimitiveIndex();
+	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
+	perRayData = gdt::randomColor(primitiveId);
+}
+
 // dummy functions for OptiX pipeline
-extern "C" __global__ void __miss__radiance() {}
-extern "C" __global__ void __closesthit__radiance() {}
 extern "C" __global__ void __anyhit__radiance() {}
