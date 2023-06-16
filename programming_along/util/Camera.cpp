@@ -31,29 +31,34 @@ void Camera::Tick(const float& deltaTime_seconds)
 
 void Camera::Move(const float& deltaTime_seconds)
 {
+	// TODO: get forward, right and up vector to move camera along these
+	// instead of along the axes of the coordinate system
+	vec3f forward = normalize(At - Eye);
+	vec3f right = cross(forward, Up);
+
 	if (KeyStatus[GLFW_KEY_A])
 	{
-		Eye.x -= Speed * deltaTime_seconds;
+		Eye -= Speed * deltaTime_seconds * right;
 	}
 	if (KeyStatus[GLFW_KEY_D])
 	{
-		Eye.x += Speed * deltaTime_seconds;
+		Eye += Speed * deltaTime_seconds * right;
 	}
 	if (KeyStatus[GLFW_KEY_W])
 	{
-		Eye.z += Speed * deltaTime_seconds;
+		Eye += Speed * deltaTime_seconds * forward;
 	}
 	if (KeyStatus[GLFW_KEY_S])
 	{
-		Eye.z -= Speed * deltaTime_seconds;
+		Eye -= Speed * deltaTime_seconds * forward;
 	}
 	if (KeyStatus[GLFW_KEY_E])
 	{
-		Eye.y += Speed * deltaTime_seconds;
+		Eye += Speed * deltaTime_seconds * Up;
 	}
 	if (KeyStatus[GLFW_KEY_Q])
 	{
-		Eye.y -= Speed * deltaTime_seconds;
+		Eye -= Speed * deltaTime_seconds * Up;
 	}
 
 	if (KeyStatus[GLFW_KEY_0])
