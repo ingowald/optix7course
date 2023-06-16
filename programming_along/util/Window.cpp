@@ -127,11 +127,12 @@ void Window::Run()
 
 	while (!glfwWindowShouldClose(glfwWindow))
 	{
-		TimePoint newtime = std::chrono::system_clock::now();
+		TimePoint newTime = std::chrono::system_clock::now();
 
-		Duration deltaTime = newtime - lastTime;
-		std::chrono::seconds deltaTime_seconds = std::chrono::duration_cast<std::chrono::seconds>(deltaTime);
-		OptixRenderer.Tick(deltaTime_seconds.count());
+		Duration deltaTime = newTime - lastTime;
+		lastTime = newTime;
+		std::chrono::milliseconds deltaTime_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(deltaTime);
+		OptixRenderer.Tick(deltaTime_milliseconds.count() * 0.001);
 
 		Render();
 		Draw();
