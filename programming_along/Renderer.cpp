@@ -83,7 +83,7 @@ void Renderer::Render()
 	}
 
 	// make sure the frame is rendered before it is downloaded (only for this easy example!")
-	SynchCuda();
+	SynchCuda("Error synchronizing CUDA after rendering!");
 }
 
 void Renderer::Resize(const vec2i& size)
@@ -475,7 +475,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 		throw std::runtime_error("Could not build acceleration structure!");
 	}
 
-	SynchCuda();
+	SynchCuda("Error synchronizing CUDA after building acceleration structure!");
 
 	// clean up
 	outputBuffer.Free();
@@ -485,13 +485,18 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	return handle;
 }
 
-void Renderer::SynchCuda()
+void Renderer::SynchCuda(const std::string& errorMsg /* = "" */)
 {
 	cudaDeviceSynchronize();
 	cudaError_t error = cudaGetLastError();
 	if (error != cudaSuccess)
 	{
 		const std::string errorString(cudaGetErrorString(error));
-		throw std::runtime_error("error synchronizing cuda: " + errorString);
+		std::string additionalMessage = "";
+		if (errorMsg.compare("") != 0)
+		{
+			additionalMessage = "\nDeveloper message: " + errorMsg;
+		}
+		throw std::runtime_error("error synchronizing cuda: " + errorString + additionalMessage);
 	}
 }

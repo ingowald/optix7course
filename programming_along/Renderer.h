@@ -90,7 +90,7 @@ private:
 	*/
 	OptixTraversableHandle BuildAccelerationStructure();
 
-	void SynchCuda();
+	void SynchCuda(const std::string& errorMsg = "");
 
 public:
 
