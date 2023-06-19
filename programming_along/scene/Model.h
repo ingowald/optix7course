@@ -3,17 +3,21 @@
 
 #include "../scene/Mesh.h"
 
+#include <vector>
+
 class Model
 {
 public:
 	Model() {};
 	Model(const Mesh& mesh);
+	Model(const std::string& meshFilePath);
 
-	Mesh GetMesh() const;
-	Mesh& GetMesh();
+	std::vector<Mesh> GetMeshList() const;
+	std::vector<Mesh>& GetMeshList();
 
-	void SetMesh(const Mesh& mesh);
+	void AddMesh(const Mesh& mesh);
+	void AddMeshFromFile(const std::string& filePath);
 
 protected:
-	Mesh MeshInstance;
+	std::vector<Mesh> MeshList;
 };

@@ -3,20 +3,30 @@
 
 Model::Model(const Mesh& mesh)
 {
-	MeshInstance = mesh;
+	MeshList.push_back(mesh);
 }
 
-Mesh Model::GetMesh() const 
+Model::Model(const std::string& meshFilePath)
 {
-	return MeshInstance;
+	AddMeshFromFile(meshFilePath);
 }
 
-Mesh& Model::GetMesh()
+std::vector<Mesh> Model::GetMeshList() const 
 {
-	return MeshInstance;
+	return MeshList;
 }
 
-void Model::SetMesh(const Mesh& mesh)
+std::vector<Mesh>& Model::GetMeshList()
 {
-	MeshInstance = mesh;
+	return MeshList;
+}
+
+void Model::AddMesh(const Mesh& mesh)
+{
+	MeshList.push_back(mesh);
+}
+
+void Model::AddMeshFromFile(const std::string& filePath)
+{
+	MeshList.push_back(Mesh(filePath));
 }

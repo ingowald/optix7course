@@ -15,6 +15,7 @@
 #include "LaunchParams.h"
 
 struct Model;
+struct Mesh;
 
 class Renderer
 {
@@ -101,6 +102,22 @@ private:
 	OptixTraversableHandle BuildAccelerationStructure();
 
 	void SynchCuda(const std::string& errorMsg = "");
+
+	uint32_t GetNumberMeshesFromScene() const;
+
+	/**
+	* Since there is a ModelList and a MeshList per Model,
+	* but the CUDA Vertex and Index buffers are one dimensional,
+	* we need to calculate the Index for a given mesh from a given model
+	*/
+	uint32_t GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const;
+
+	/**
+	* Since there is a ModelList and a MeshList per Model,
+	* but the CUDA Vertex and Index buffers are one dimensional,
+	* we need to calculate the Index for a given mesh from a given model
+	*/
+	uint32_t GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t meshIndex) const;
 
 public:
 
