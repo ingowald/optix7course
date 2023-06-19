@@ -14,7 +14,7 @@
 
 #include "LaunchParams.h"
 
-struct Mesh;
+struct Model;
 
 class Renderer
 {
@@ -51,6 +51,8 @@ public:
 	void InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up);
 
 	void AddMesh(const Mesh& mesh);
+
+	void AddModel(const Model& model);
 
 private:
 	/**
@@ -113,7 +115,7 @@ protected:
 	/** Scene */
 	Camera SceneCamera;
 
-	std::vector<Mesh> MeshList;
+	std::vector<Model> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
 	// TODO: this should probably become part of the mesh rather than the renderer?
