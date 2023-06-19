@@ -2,19 +2,9 @@
 
 #include "Mesh.h"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "3rdParty/tiny_obj_loader.h"
-
-#include <set>
-
 Mesh::Mesh()
 {
 	// nothing to do here, mesh will be added dynamically
-}
-
-Mesh::Mesh(const std::string& filePath)
-{
-	LoadFromObj(filePath);
 }
 
 void Mesh::AddUnitCube(const affine3f& transfomrationMatrix)
@@ -71,44 +61,53 @@ void Mesh::AddTriangle(const vec3f vertices[3], const vec3i indices)
 	Indices.push_back((int32_t)firstVertexId + indices);
 }
 
-void Mesh::LoadFromObj(const std::string& filePath)
+int32_t Mesh::FindOrAddVertex(tinyobj::attrib_t& attributes,
+	const tinyobj::index_t& idx,
+	std::map<tinyobj::index_t, int32_t>& knownVertices)
 {
-	const std::string materialFileDir = filePath.substr(0, filePath.rfind('/') + 1);
-	std::cout << "Searching material .mtl file for " << filePath << " at " << materialFileDir << std::endl;
-
-	tinyobj::attrib_t attributes;
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	std::string err = "";
-
-	bool result = tinyobj::LoadObj(
-		&attributes, &shapes, &materials, 
-		&err, &err, /* write warnings and errors into the same string */
-		filePath.c_str(), materialFileDir.c_str(),
-		true /* triangulate */
-	);
-
-	if (!result)
+	if (knownVertices.find(idx) != knownVertices.end())
 	{
-		throw std::runtime_error("Could not read obj model from " + filePath
-			+ ": " + err);
+		return knownVertices[idx];
 	}
 
-	if (materials.empty())
+	const vec3f* vertArr = (const vec3f*)attributes.vertices.data();
+	const vec3f* normalArr = (const vec3f*)attributes.normals.data();
+	const vec2f* texCoordArr = (const vec2f*)attributes.texcoords.data();
+
+	int32_t newId = static_cast<int32_t>(Vertices.size());
+	knownVertices[idx] = newId;
+
+	// add vertex
+	Vertices.push_back(vertArr[idx.vertex_index]);
+
+	// add normal
+	if (idx.normal_index >= 0)
 	{
-		throw std::runtime_error("Could not parse materials from " + materialFileDir);
-	}
-
-	std::cout << "Succesfully loaded model at " << filePath << std::endl;
-
-	for (int32_t shapeId = 0; shapeId < (int32_t)shapes.size(); shapeId++)
-	{
-		tinyobj::shape_t& shape = shapes[shapeId];
-
-		std::set<int32_t> materialIds;
-		for (int32_t faceMaterialId : shape.mesh.material_ids)
+		while (Normals.size() < Vertices.size())
 		{
-			materialIds.insert(faceMaterialId);
+			Normals.push_back(normalArr[idx.normal_index]);
 		}
 	}
+
+	// add tex coord
+	if (idx.texcoord_index >= 0)
+	{
+		while (TexCoords.size() < Vertices.size())
+		{
+			TexCoords.push_back(texCoordArr[idx.texcoord_index]);
+		}
+	}
+
+	// just to be safe
+	if (TexCoords.size() > 0)
+	{
+		TexCoords.resize(Vertices.size());
+	}
+
+	if (Normals.size() > 0)
+	{
+		Normals.resize(Vertices.size());
+	}
+
+	return newId;
 }

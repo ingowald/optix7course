@@ -21,15 +21,15 @@ int main(int ac, char **av)
 
 		Mesh cube1;
 		cube1.AddCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
-		cube1.Color = vec3f(.2f, .9f, .05f);
+		cube1.DiffuseColor = vec3f(.2f, .9f, .05f);
 		Model m1(cube1);
 		Mesh cube2;
 		cube2.AddCube(vec3f(0.f, -2.f, 0.f), vec3f(10.f, .1f, 10.f));
-		cube2.Color = vec3f(.2f, .1f, .7f);
+		cube2.DiffuseColor = vec3f(.2f, .1f, .7f);
 		m1.AddMesh(cube2);
 		Mesh cube3;
 		cube3.AddCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
-		cube3.Color = vec3f(.8f, 0.1f, 0.2f);
+		cube3.DiffuseColor = vec3f(.8f, 0.1f, 0.2f);
 
 		Renderer* renderer = window.GetRenderer();
 		renderer->AddModel(m1);

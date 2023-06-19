@@ -16,8 +16,11 @@ public:
 	std::vector<Mesh>& GetMeshList();
 
 	void AddMesh(const Mesh& mesh);
-	void AddMeshFromFile(const std::string& filePath);
+	void AddMeshesFromFile(const std::string& filePath);
 
 protected:
 	std::vector<Mesh> MeshList;
+
+	// bounding box
+	box3f BoundingBox;
 };

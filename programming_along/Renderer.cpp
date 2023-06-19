@@ -427,7 +427,7 @@ void Renderer::BuildShaderBindingTable()
 				throw std::runtime_error("Could not build raygen record!");
 			}
 
-			rec.MeshData.Color = model.GetMeshList()[meshId].Color;
+			rec.MeshData.DiffuseColor = model.GetMeshList()[meshId].DiffuseColor;
 			rec.MeshData.Vertices = (vec3f*)VertexBufferList[bufferIndex].CudaPtr();
 			rec.MeshData.Indices = (vec3i*)IndexBufferList[bufferIndex].CudaPtr();
 			hitgroupRecords.push_back(rec);
