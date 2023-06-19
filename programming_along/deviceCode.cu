@@ -5,7 +5,7 @@
 #include "gdt/math/vec.h"
 
 #include "LaunchParams.h"
-#include "util/Mesh.h"
+#include "scene/Mesh.h"
 
 extern "C" __constant__ LaunchParams launchParams;
 

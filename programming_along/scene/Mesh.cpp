@@ -110,11 +110,5 @@ void Mesh::LoadFromObj(const std::string& filePath)
 		{
 			materialIds.insert(faceMaterialId);
 		}
-
-		for (int32_t materialId : materialIds)
-		{
-			std::map<tinyobj::index_t, int32_t> knownVertices;
-			
-		}
 	}
 }

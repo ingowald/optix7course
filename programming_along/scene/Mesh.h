@@ -12,12 +12,20 @@ using namespace gdt;
 */
 struct Mesh
 {
+	Mesh();
+
+	Mesh(const std::string& filePath);
+
 	void AddUnitCube(const affine3f& transfomrationMatrix);
 
 	void AddCube(const vec3f& center, const vec3f& size);
 
 	void AddTriangle(const vec3f vertices[3], const vec3i indices);
 
+private:
+	void LoadFromObj(const std::string& filePath);
+
+public:
 	vec3f Color;
 	std::vector<vec3f> Vertices;
 	std::vector<vec3i> Indices;

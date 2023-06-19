@@ -6,7 +6,7 @@
 #include "optix_stubs.h"
 
 #include "util/SbtStructs.h"
-#include "util/Mesh.h"
+#include "scene/Mesh.h"
 
 Renderer::Renderer()
 {
@@ -75,7 +75,7 @@ void Renderer::Render()
 		return;
 	}
 
-	assert(IsInitialized, "Init has not been called. You should do this before rendering!");
+	assert(IsInitialized && "Init has not been called. You should do this before rendering!");
 
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
@@ -180,8 +180,6 @@ void Renderer::CreateContext()
 	{
 		throw std::runtime_error("Could not get CUDA context!");
 	}
-
-	OptixDeviceContextOptions optixOptions;
 
 	OptixResult opResult = optixDeviceContextCreate(CudaContext, 0, &OptixContext);
 	if (opResult != OPTIX_SUCCESS)

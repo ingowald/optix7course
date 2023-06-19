@@ -6,7 +6,7 @@
 #include "cuda.h"
 
 #include "util/CUDABuffer.h"
-#include "util/Camera.h"
+#include "scene/Camera.h"
 
 #include "optix_types.h"
 

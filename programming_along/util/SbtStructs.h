@@ -2,7 +2,7 @@
 
 #include "optix_types.h"
 
-#include "util/Mesh.h"
+#include "scene/Mesh.h"
 
 struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RaygenRecord
 {

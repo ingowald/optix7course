@@ -6,7 +6,7 @@
 #include "cuda_runtime.h"
 
 #include "util/Window.h"
-#include "util/Mesh.h"
+#include "scene/Mesh.h"
 
 
 using namespace gdt;

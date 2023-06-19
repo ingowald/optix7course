@@ -2,7 +2,7 @@
 
 #include "gdt/math/vec.h"
 
-#include "util/Camera.h"
+#include "scene/Camera.h"
 
 using namespace gdt;
 
