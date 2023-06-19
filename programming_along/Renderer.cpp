@@ -18,6 +18,8 @@ Renderer::Renderer()
 	CreateMissPrograms();
 	CreateHitgroupPrograms();
 
+	Params.Traversable = BuildAccelerationStructure();
+
 	CreatePipeline();
 
 	BuildShaderBindingTable();
@@ -65,6 +67,9 @@ void Renderer::Render()
 		return;
 	}
 
+	// update the camera values
+	Params.Camera = SceneCamera.GetOptixCamera();
+
 	// upload the launch params and increment frame ID
 	ParamsBuffer.Upload(&Params, 1);
 	Params.FrameID++;
@@ -74,7 +79,7 @@ void Renderer::Render()
 		Pipeline, CudaStream,
 		/* parameters and shader binding table*/
 		ParamsBuffer.CudaPtr(), ParamsBuffer.Size_bytes, &ShaderBindingTable,
-		/* dimensions of the launch */
+		/* dimensions of the launch (i.e. of the threads in x/y/z) */
 		Params.FramebufferSize.x, Params.FramebufferSize.y, 1);
 
 	if (result != OPTIX_SUCCESS)
@@ -83,13 +88,7 @@ void Renderer::Render()
 	}
 
 	// make sure the frame is rendered before it is downloaded (only for this easy example!")
-	cudaDeviceSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if (error != cudaSuccess)
-	{
-		const std::string errorString(cudaGetErrorString(error));
-		throw std::runtime_error("error synchronizing cuda: " + errorString);
-	}
+	SynchCuda("Error synchronizing CUDA after rendering!");
 }
 
 void Renderer::Resize(const vec2i& size)
@@ -113,9 +112,18 @@ Camera* Renderer::GetCameraPtr()
 	return &SceneCamera;
 }
 
+void Renderer::SetCameraPositionAndOrientation(const vec3f& eye, const vec3f& at, const vec3f& up)
+{
+	SceneCamera.SetEye(eye);
+	SceneCamera.SetAt(at);
+	SceneCamera.SetUp(up);
+}
+
 void Renderer::AddMesh(const Mesh& mesh)
 {
 	MeshList.push_back(mesh);
+	//TODO: probably very inefficient to do this here
+	Params.Traversable = BuildAccelerationStructure();
 }
 
 void Renderer::InitOptix()
@@ -232,9 +240,13 @@ void Renderer::CreateRaygenPrograms()
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, RaygenProgramGroups.data());
 
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
 	if (result != OPTIX_SUCCESS)
 	{
-		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create raygen program!");
 	}
 
@@ -256,9 +268,13 @@ void Renderer::CreateMissPrograms()
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, MissProgramGroups.data());
 
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
 	if (result != OPTIX_SUCCESS)
 	{
-		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create miss program!");
 	}
 
@@ -282,9 +298,13 @@ void Renderer::CreateHitgroupPrograms()
 	OptixResult result = optixProgramGroupCreate(OptixContext,
 		&pgDescr, 1, &pgOptions, log, &logSize, HitgroupProgramGroups.data());
 
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
 	if (result != OPTIX_SUCCESS)
 	{
-		std::cerr << log << std::endl;
 		throw std::runtime_error("Could not create hitgroup program!");
 	}
 
@@ -396,4 +416,138 @@ void Renderer::BuildShaderBindingTable()
 	ShaderBindingTable.hitgroupRecordBase = HitgroupRecordsBuffer.CudaPtr();
 	ShaderBindingTable.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
 	ShaderBindingTable.hitgroupRecordCount = (int32_t)hitgroupRecords.size();
+}
+
+OptixTraversableHandle Renderer::BuildAccelerationStructure()
+{
+	OptixTraversableHandle handle = {};
+
+	if (MeshList.size() == 0)
+	{
+		std::cout << "No meshes to build acceleration structure for!" << std::endl;
+		return handle;
+	}
+
+	// TODO: support more than just one mesh
+	VertexBuffer.AllocAndUpload(MeshList[0].Vertices);
+	IndexBuffer.AllocAndUpload(MeshList[0].Indices);
+
+	// triangle inputs
+	OptixBuildInput triangleInput = {};
+	triangleInput.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+
+	// local variables such that pointer to device pointers can be created
+	CUdeviceptr cuVertices = VertexBuffer.CudaPtr();
+	CUdeviceptr cuIndices = IndexBuffer.CudaPtr();
+
+	triangleInput.triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
+	triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
+	triangleInput.triangleArray.numVertices = (int32_t)MeshList[0].Vertices.size();
+	triangleInput.triangleArray.vertexBuffers = &cuVertices;
+
+	triangleInput.triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+	triangleInput.triangleArray.indexStrideInBytes = sizeof(vec3i);
+	triangleInput.triangleArray.numIndexTriplets = (int32_t)MeshList[0].Indices.size();
+	triangleInput.triangleArray.indexBuffer = cuIndices;
+
+	uint32_t triangleInputFlags[1] = { 0 };
+
+	// currently only shader binding table entry, no per-primitive materials
+	triangleInput.triangleArray.flags = triangleInputFlags;
+	triangleInput.triangleArray.numSbtRecords = 1;
+	triangleInput.triangleArray.sbtIndexOffsetBuffer = 0;
+	triangleInput.triangleArray.sbtIndexOffsetSizeInBytes = 0;
+	triangleInput.triangleArray.sbtIndexOffsetStrideInBytes = 0;
+
+	// setup bottom level acceleration structure (BLAS)
+	OptixAccelBuildOptions accelOptions = { };
+	accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE | OPTIX_BUILD_FLAG_ALLOW_COMPACTION;
+	accelOptions.motionOptions.numKeys = 1;
+	accelOptions.operation = OPTIX_BUILD_OPERATION_BUILD;
+
+	OptixAccelBufferSizes blasBufferSizes;
+	OptixResult result = optixAccelComputeMemoryUsage(OptixContext,
+		&accelOptions, &triangleInput,
+		1, // number of build inputs
+		&blasBufferSizes);
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("could not compute memory usage for acceleration structure!");
+	}
+
+	// prepare compaction
+	CUDABuffer compactedSizeBuffer;
+	compactedSizeBuffer.Alloc(sizeof(uint64_t));
+
+	OptixAccelEmitDesc emitDesc;
+	emitDesc.type = OPTIX_PROPERTY_TYPE_COMPACTED_SIZE;
+	emitDesc.result = compactedSizeBuffer.CudaPtr();
+
+	// execute build
+
+	CUDABuffer tempBuffer;
+	tempBuffer.Alloc(blasBufferSizes.tempSizeInBytes);
+
+	CUDABuffer outputBuffer;
+	outputBuffer.Alloc(blasBufferSizes.outputSizeInBytes);
+
+	result = optixAccelBuild(OptixContext,
+		0,	//stream
+		&accelOptions, &triangleInput,
+		1,	//num build inputs
+		tempBuffer.CudaPtr(), tempBuffer.Size_bytes,
+		outputBuffer.CudaPtr(), outputBuffer.Size_bytes,
+		&handle,
+		&emitDesc,
+		1 // num emitted properties
+	);
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not build acceleration structure!");
+	}
+
+	SynchCuda("Error synchronizing CUDA after building acceleration structure!");
+
+	// perform compaction
+	uint64_t compactedSize;
+	compactedSizeBuffer.Download(&compactedSize, 1);
+
+	AccelerationStructureBuffer.Alloc(compactedSize);
+	result = optixAccelCompact(OptixContext,
+		0, //stream
+		handle,
+		AccelerationStructureBuffer.CudaPtr(),
+		AccelerationStructureBuffer.Size_bytes,
+		&handle);
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not compact acceleration structure!");
+	}
+
+	SynchCuda("Error synchronizing CUDA after compacting acceleration structure!");
+
+	// clean up
+	outputBuffer.Free();
+	tempBuffer.Free();
+	compactedSizeBuffer.Free();
+
+	return handle;
+}
+
+void Renderer::SynchCuda(const std::string& errorMsg /* = "" */)
+{
+	cudaDeviceSynchronize();
+	cudaError_t error = cudaGetLastError();
+	if (error != cudaSuccess)
+	{
+		const std::string errorString(cudaGetErrorString(error));
+		std::string additionalMessage = "";
+		if (errorMsg.compare("") != 0)
+		{
+			additionalMessage = "\nDeveloper message: " + errorMsg;
+		}
+		throw std::runtime_error("error synchronizing cuda: " + errorString + additionalMessage);
+	}
 }

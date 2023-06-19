@@ -34,6 +34,7 @@ Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/
 	glfwSwapInterval(1);
 
 	// callbacks (other than error)
+	glfwSetCursorPosCallback(glfwWindow, OnCursorMoved);
 	glfwSetMouseButtonCallback(glfwWindow, OnMouseButtonPressedOrReleased);
 	glfwSetKeyCallback(glfwWindow, OnKeyPressedOrReleased);
 
@@ -65,8 +66,6 @@ void Window::Render()
 
 void Window::Draw()
 {
-	int32_t width, height;
-	glfwGetFramebufferSize(glfwWindow, &width, &height);
 	OptixRenderer.DownloadPixels(Pixels.data());
 
 	// to make the output visible, render a simple OpenGL quad and apply the framebuffer content as a texture
@@ -78,7 +77,8 @@ void Window::Draw()
 	glBindTexture(GL_TEXTURE_2D, FramebufferTexture);
 	GLenum texFormat = GL_RGBA;
 	GLenum texType = GL_UNSIGNED_BYTE;
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Pixels.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FramebufferSize.x, FramebufferSize.y, 0, 
+		GL_RGBA, GL_UNSIGNED_BYTE, Pixels.data());
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -88,9 +88,15 @@ void Window::Draw()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	// these can propably be setup once and not every tick
+	{
+		glViewport(0, 0, FramebufferSize.x, FramebufferSize.y);
+		glDisable(GL_DEPTH_TEST);
+	}
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0.f, (float)width, 0.f, (float)height, -1.f, 1.f);
+	glOrtho(0.f, (float)FramebufferSize.x, 0.f, (float)FramebufferSize.y, -1.f, 1.f);
 
 	glBegin(GL_QUADS);
 	{
@@ -98,22 +104,23 @@ void Window::Draw()
 		glVertex3f(0.f, 0.f, 0.f);
 
 		glTexCoord2f(0.f, 1.f);
-		glVertex3f(0.f, (float)height, 0.f);
+		glVertex3f(0.f, (float)FramebufferSize.y, 0.f);
 
 		glTexCoord2f(1.f, 1.f);
-		glVertex3f((float)width, (float)height, 0.f);
+		glVertex3f((float)FramebufferSize.x, (float)FramebufferSize.y, 0.f);
 
 		glTexCoord2f(1.f, 0.f);
-		glVertex3f((float)width, 0.f, 0.f);
+		glVertex3f((float)FramebufferSize.x, 0.f, 0.f);
 	}
 	glEnd();
 }
 
 void Window::Resize(const vec2i& size)
 {
+	FramebufferSize = size;
 	OptixRenderer.Resize(size);
 	Pixels.resize(size.x * size.y);
-	glViewport(0, 0, size.x, size.y);
+	//glViewport(0, 0, size.x, size.y);
 }
 
 void Window::Run()
@@ -127,11 +134,12 @@ void Window::Run()
 
 	while (!glfwWindowShouldClose(glfwWindow))
 	{
-		TimePoint newtime = std::chrono::system_clock::now();
+		TimePoint newTime = std::chrono::system_clock::now();
 
-		Duration deltaTime = newtime - lastTime;
-		std::chrono::seconds deltaTime_seconds = std::chrono::duration_cast<std::chrono::seconds>(deltaTime);
-		OptixRenderer.Tick(deltaTime_seconds.count());
+		Duration deltaTime = newTime - lastTime;
+		lastTime = newTime;
+		std::chrono::milliseconds deltaTime_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(deltaTime);
+		OptixRenderer.Tick(deltaTime_milliseconds.count() * 0.001);
 
 		Render();
 		Draw();
@@ -143,15 +151,29 @@ void Window::Run()
 
 void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
 {
-	const bool down = action == GLFW_PRESS;
-	if (down)
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	Camera* cam = win->OptixRenderer.GetCameraPtr();
+
+	if (action == GLFW_PRESS)
 	{
-		std::cout << "mouse button down" << std::endl;
+		cam->MouseDown(button);
 	}
-	else
+	else if (action == GLFW_RELEASE)
 	{
-		std::cout << "mouse button up" << std::endl;
+		cam->MousUp(button);
 	}
+
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);
+
+	cam->SetMousePos(vec2f(x / win->GetFramebufferSize().x, y / win->GetFramebufferSize().y));
+}
+
+void Window::OnCursorMoved(GLFWwindow* window, double x, double y)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	Camera* cam = win->OptixRenderer.GetCameraPtr();
+	cam->SetMousePos(vec2f(x / win->GetFramebufferSize().x, y / win->GetFramebufferSize().y));
 }
 
 void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods)
@@ -172,12 +194,14 @@ void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t san
 	{
 		cam->KeyUp(key);
 	}
-
-	vec3f pos = cam->GetEye();
-	std::cout << "cam pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
 }
 
 Renderer* Window::GetRenderer()
 {
 	return &OptixRenderer;
+}
+
+const vec2i& Window::GetFramebufferSize() const
+{
+	return FramebufferSize;
 }

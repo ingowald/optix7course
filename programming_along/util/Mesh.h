@@ -13,6 +13,8 @@ struct Mesh
 
 	void AddCube(const vec3f& center, const vec3f& size);
 
+	void AddTriangle(const vec3f vertices[3], const vec3i indices);
+
 	std::vector<vec3f> Vertices;
 	std::vector<vec3i> Indices;
 };

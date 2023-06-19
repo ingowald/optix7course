@@ -16,12 +16,19 @@ int main(int ac, char **av)
 {
 	try
 	{
-		Window window("OptiX window");
+		Window window("OptiX window", 1920, 1080);
 
-		Mesh cube;
-		cube.AddCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
+		Mesh mesh;
+		mesh.AddCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
+		mesh.AddCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
 
-		window.GetRenderer()->AddMesh(cube);
+		window.GetRenderer()->AddMesh(mesh);
+
+		window.GetRenderer()->SetCameraPositionAndOrientation(
+			vec3f(-10.f, 2.f, -12.f),	//eye
+			vec3f(0.f, 0.f, 0.f),		//at
+			vec3f(0.f, 1.f, 0.f)		//up
+		);
 
 		window.Run();
 	}
