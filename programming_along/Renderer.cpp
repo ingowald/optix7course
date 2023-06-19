@@ -520,7 +520,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	result = optixAccelBuild(OptixContext,
 		0,	//stream
 		&accelOptions, triangleInputList.data(),
-		1,	//num build inputs
+		(int32_t)MeshList.size(),
 		tempBuffer.CudaPtr(), tempBuffer.Size_bytes,
 		outputBuffer.CudaPtr(), outputBuffer.Size_bytes,
 		&handle,
