@@ -116,9 +116,9 @@ protected:
 	std::vector<Mesh> MeshList;
 	CUDABuffer AccelerationStructureBuffer;
 
-	// TODO: this probably needs to become part of the mesh rather than the renderer?
-	CUDABuffer VertexBuffer;
-	CUDABuffer IndexBuffer;
+	// TODO: this should probably become part of the mesh rather than the renderer?
+	std::vector<CUDABuffer> VertexBufferList;
+	std::vector<CUDABuffer> IndexBufferList;
 
 	bool IsInitialized = false;
 
