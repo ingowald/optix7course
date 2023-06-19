@@ -45,6 +45,8 @@ public:
 	void SetUp(const vec3f& up);
 	vec3f GetUp() const;
 
+	void UpdateInitialEyeAtUp();
+
 	void SetCosFovy(const float& cosFovy);
 	float GetCosFovy() const;
 

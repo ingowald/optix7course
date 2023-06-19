@@ -23,15 +23,16 @@ int main(int ac, char **av)
 		mesh.AddCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
 		mesh.Color = vec3f(.2f, .9f, .05f);
 
-		window.GetRenderer()->AddMesh(mesh);
+		Renderer* renderer = window.GetRenderer();
+		renderer->AddMesh(mesh);
 
-		window.GetRenderer()->SetCameraPositionAndOrientation(
+		renderer->InitializeCamera(
 			vec3f(-10.f, 2.f, -12.f),	//eye
 			vec3f(0.f, 0.f, 0.f),		//at
 			vec3f(0.f, 1.f, 0.f)		//up
 		);
 
-		window.GetRenderer()->Init();
+		renderer->Init();
 
 		window.Run();
 	}

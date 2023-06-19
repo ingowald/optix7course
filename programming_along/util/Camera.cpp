@@ -149,6 +149,13 @@ vec3f Camera::GetUp() const
 	return Up;
 }
 
+void Camera::UpdateInitialEyeAtUp()
+{
+	InitialEye = Eye;
+	InitialAt = At;
+	InitialUp = Up;
+}
+
 void Camera::SetCosFovy(const float& cosFovy)
 {
 	CosFovy = cosFovy;
