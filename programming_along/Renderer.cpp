@@ -510,7 +510,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	OptixAccelBufferSizes blasBufferSizes;
 	OptixResult result = optixAccelComputeMemoryUsage(OptixContext,
 		&accelOptions, triangleInputList.data(),
-		(int32_t)ModelList.size(), // number of build inputs
+		totalNumberMeshes, // number of build inputs
 		&blasBufferSizes);
 	if (result != OPTIX_SUCCESS)
 	{
