@@ -109,6 +109,7 @@ void Renderer::Resize(const vec2i& size)
 	Params.FramebufferSize = size;
 	ColorBuffer.Resize(size.x * size.y * sizeof(uint32_t));
 	Params.FramebufferData = reinterpret_cast<uint32_t*>(ColorBuffer.CudaPtr());
+	SceneCamera.SetFramebufferSize(size);
 }
 
 void Renderer::DownloadPixels(uint32_t pixels[])

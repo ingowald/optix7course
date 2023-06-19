@@ -34,6 +34,8 @@ public:
 
 	void Move(const float& deltaTime_seconds);
 
+	void SetFramebufferSize(const vec2i& fbSize);
+
 	void SetEye(const vec3f& eye);
 	vec3f GetEye() const;
 

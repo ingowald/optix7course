@@ -36,6 +36,8 @@ public:
 
 	static void OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods);
 
+	static void OnWindowResize(GLFWwindow* window, int32_t width, int32_t height);
+
 	Renderer* GetRenderer();
 
 	const vec2i& GetFramebufferSize() const;

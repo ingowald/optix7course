@@ -113,6 +113,12 @@ void Camera::Move(const float& deltaTime_seconds)
 	}
 }
 
+void Camera::SetFramebufferSize(const vec2i& fbSize)
+{
+	Width = fbSize.x;
+	Height = fbSize.y;
+}
+
 void Camera::SetEye(const vec3f& eye)
 {
 	Eye = eye;
