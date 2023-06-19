@@ -19,8 +19,6 @@ Renderer::Renderer()
 	CreateMissPrograms();
 	CreateHitgroupPrograms();
 
-	Params.Traversable = BuildAccelerationStructure();
-
 	CreatePipeline();
 }
 
@@ -456,6 +454,13 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 		return handle;
 	}
 
+	std::cout << "Building acceleration structure for " 
+		<< std::to_string(totalNumberMeshes) 
+		<< " meshes in "
+		<< std::to_string(ModelList.size()) 
+		<< " models." 
+		<< std::endl;
+
 	std::vector<OptixBuildInput> triangleInputList(totalNumberMeshes);
 	std::vector<CUdeviceptr> cudaVertexBufferList(totalNumberMeshes);
 	std::vector<CUdeviceptr> cudaIndexBufferList(totalNumberMeshes);
@@ -574,6 +579,8 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	outputBuffer.Free();
 	tempBuffer.Free();
 	compactedSizeBuffer.Free();
+
+	std::cout << "finished building acceleration structure" << std::endl;
 
 	return handle;
 }
