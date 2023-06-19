@@ -2,7 +2,10 @@
 
 #include <optix_device.h>
 
+#include "gdt/math/vec.h"
+
 #include "LaunchParams.h"
+#include "util/Mesh.h"
 
 extern "C" __constant__ LaunchParams launchParams;
 
@@ -133,9 +136,24 @@ extern "C" __global__ void __miss__radiance()
 
 extern "C" __global__ void __closesthit__radiance() 
 {
+	const MeshSbtData& meshData = *(const MeshSbtData*)optixGetSbtDataPointer();
+
+	// compute a normal
+	// TODO: this should be done offline when creating the mesh and put into a buffer
 	const int32_t primitiveId = optixGetPrimitiveIndex();
+	const vec3i index = meshData.Indices[primitiveId];
+	const vec3f& v0 = meshData.Vertices[index.x];
+	const vec3f& v1 = meshData.Vertices[index.y];
+	const vec3f& v2 = meshData.Vertices[index.z];
+	const vec3f& normal = normalize(cross(v1 - v0, v2 - v0));
+
+	const vec3f rayDir = optixGetWorldRayDirection();
+	
+	// shade the model based on ray / triangle angle (i.e. abs(dot(rayDir, normal)) )
+	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, normal));
+
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
-	perRayData = gdt::randomColor(primitiveId);
+	perRayData = cosAlpha * meshData.Color;
 }
 
 // dummy functions for OptiX pipeline

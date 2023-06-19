@@ -2,6 +2,8 @@
 
 #include "optix_types.h"
 
+#include "util/Mesh.h"
+
 struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RaygenRecord
 {
 	__align__ (OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
@@ -20,5 +22,5 @@ struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) HitgroupRecord
 {
 	__align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
 
-	int32_t ObjectId;
+	MeshSbtData MeshData;
 };

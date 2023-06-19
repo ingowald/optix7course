@@ -22,6 +22,12 @@ public:
 	Renderer();
 	~Renderer();
 
+	/**
+	* Initializes anything that could not be done in the ctor,
+	* e.g. building the shader binding table
+	*/
+	void Init();
+
 	void Tick(const float& deltaTime_seconds);
 
 	/**
@@ -113,6 +119,8 @@ protected:
 	// TODO: this probably needs to become part of the mesh rather than the renderer?
 	CUDABuffer VertexBuffer;
 	CUDABuffer IndexBuffer;
+
+	bool IsInitialized = false;
 
 private:
 	cudaStream_t CudaStream;

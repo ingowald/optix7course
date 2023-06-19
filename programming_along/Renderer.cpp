@@ -21,10 +21,6 @@ Renderer::Renderer()
 	Params.Traversable = BuildAccelerationStructure();
 
 	CreatePipeline();
-
-	BuildShaderBindingTable();
-
-	ParamsBuffer.Alloc(sizeof(LaunchParams));
 }
 
 Renderer::~Renderer()
@@ -54,6 +50,17 @@ Renderer::~Renderer()
 	cudaStreamDestroy(CudaStream);
 }
 
+void Renderer::Init()
+{
+	// initialize everything which needed mesh or camera information,
+	// as these may be set up from the outside (i.e. after ctor of Renderer)
+	BuildShaderBindingTable();
+
+	ParamsBuffer.Alloc(sizeof(LaunchParams));
+
+	IsInitialized = true;
+}
+
 void Renderer::Tick(const float& deltaTime_seconds)
 {
 	SceneCamera.Tick(deltaTime_seconds);
@@ -66,6 +73,8 @@ void Renderer::Render()
 	{
 		return;
 	}
+
+	assert(IsInitialized, "Init has not been called. You should do this before rendering!");
 
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
@@ -409,7 +418,10 @@ void Renderer::BuildShaderBindingTable()
 			throw std::runtime_error("Could not build raygen record!");
 		}
 
-		rec.ObjectId = i;
+		// TODO: support multiple objects
+		rec.MeshData.Color = MeshList[0].Color;
+		rec.MeshData.Vertices = (vec3f*)VertexBuffer.CudaPtr();
+		rec.MeshData.Indices = (vec3i*)IndexBuffer.CudaPtr();
 		hitgroupRecords.push_back(rec);
 	}
 	HitgroupRecordsBuffer.AllocAndUpload(hitgroupRecords);
