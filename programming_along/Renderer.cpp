@@ -21,10 +21,6 @@ Renderer::Renderer()
 	Params.Traversable = BuildAccelerationStructure();
 
 	CreatePipeline();
-
-	BuildShaderBindingTable();
-
-	ParamsBuffer.Alloc(sizeof(LaunchParams));
 }
 
 Renderer::~Renderer()
@@ -54,6 +50,17 @@ Renderer::~Renderer()
 	cudaStreamDestroy(CudaStream);
 }
 
+void Renderer::Init()
+{
+	// initialize everything which needed mesh or camera information,
+	// as these may be set up from the outside (i.e. after ctor of Renderer)
+	BuildShaderBindingTable();
+
+	ParamsBuffer.Alloc(sizeof(LaunchParams));
+
+	IsInitialized = true;
+}
+
 void Renderer::Tick(const float& deltaTime_seconds)
 {
 	SceneCamera.Tick(deltaTime_seconds);
@@ -66,6 +73,8 @@ void Renderer::Render()
 	{
 		return;
 	}
+
+	assert(IsInitialized, "Init has not been called. You should do this before rendering!");
 
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
@@ -100,6 +109,7 @@ void Renderer::Resize(const vec2i& size)
 	Params.FramebufferSize = size;
 	ColorBuffer.Resize(size.x * size.y * sizeof(uint32_t));
 	Params.FramebufferData = reinterpret_cast<uint32_t*>(ColorBuffer.CudaPtr());
+	SceneCamera.SetFramebufferSize(size);
 }
 
 void Renderer::DownloadPixels(uint32_t pixels[])
@@ -112,11 +122,13 @@ Camera* Renderer::GetCameraPtr()
 	return &SceneCamera;
 }
 
-void Renderer::SetCameraPositionAndOrientation(const vec3f& eye, const vec3f& at, const vec3f& up)
+void Renderer::InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up)
 {
 	SceneCamera.SetEye(eye);
 	SceneCamera.SetAt(at);
 	SceneCamera.SetUp(up);
+
+	SceneCamera.UpdateInitialEyeAtUp();
 }
 
 void Renderer::AddMesh(const Mesh& mesh)
@@ -409,7 +421,10 @@ void Renderer::BuildShaderBindingTable()
 			throw std::runtime_error("Could not build raygen record!");
 		}
 
-		rec.ObjectId = i;
+		// TODO: support multiple objects
+		rec.MeshData.Color = MeshList[0].Color;
+		rec.MeshData.Vertices = (vec3f*)VertexBuffer.CudaPtr();
+		rec.MeshData.Indices = (vec3i*)IndexBuffer.CudaPtr();
 		hitgroupRecords.push_back(rec);
 	}
 	HitgroupRecordsBuffer.AllocAndUpload(hitgroupRecords);

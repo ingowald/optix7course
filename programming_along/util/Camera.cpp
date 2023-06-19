@@ -113,6 +113,12 @@ void Camera::Move(const float& deltaTime_seconds)
 	}
 }
 
+void Camera::SetFramebufferSize(const vec2i& fbSize)
+{
+	Width = fbSize.x;
+	Height = fbSize.y;
+}
+
 void Camera::SetEye(const vec3f& eye)
 {
 	Eye = eye;
@@ -141,6 +147,13 @@ void Camera::SetUp(const vec3f& up)
 vec3f Camera::GetUp() const
 {
 	return Up;
+}
+
+void Camera::UpdateInitialEyeAtUp()
+{
+	InitialEye = Eye;
+	InitialAt = At;
+	InitialUp = Up;
 }
 
 void Camera::SetCosFovy(const float& cosFovy)
@@ -190,7 +203,7 @@ CameraOptix Camera::GetOptixCamera() const
 	cam.Position = Eye;
 	cam.LookingDirection = normalize(At - Eye);
 	cam.CosFovy = CosFovy;
-	const float aspectRatio = Width / Height;
+	const float aspectRatio = Width / (float)Height;
 	cam.Horizontal = CosFovy * aspectRatio * normalize(cross(cam.LookingDirection, Up));
 	cam.Vertical = CosFovy * normalize(cross(cam.Horizontal, cam.LookingDirection));
 

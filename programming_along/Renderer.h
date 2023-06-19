@@ -22,6 +22,12 @@ public:
 	Renderer();
 	~Renderer();
 
+	/**
+	* Initializes anything that could not be done in the ctor,
+	* e.g. building the shader binding table
+	*/
+	void Init();
+
 	void Tick(const float& deltaTime_seconds);
 
 	/**
@@ -42,7 +48,7 @@ public:
 
 	Camera* GetCameraPtr();
 
-	void SetCameraPositionAndOrientation(const vec3f& eye, const vec3f& at, const vec3f& up);
+	void InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up);
 
 	void AddMesh(const Mesh& mesh);
 
@@ -113,6 +119,8 @@ protected:
 	// TODO: this probably needs to become part of the mesh rather than the renderer?
 	CUDABuffer VertexBuffer;
 	CUDABuffer IndexBuffer;
+
+	bool IsInitialized = false;
 
 private:
 	cudaStream_t CudaStream;

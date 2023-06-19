@@ -37,6 +37,7 @@ Window::Window(const std::string& windowTitle, const uint32_t& width /* = 1024*/
 	glfwSetCursorPosCallback(glfwWindow, OnCursorMoved);
 	glfwSetMouseButtonCallback(glfwWindow, OnMouseButtonPressedOrReleased);
 	glfwSetKeyCallback(glfwWindow, OnKeyPressedOrReleased);
+	glfwSetFramebufferSizeCallback(glfwWindow, OnWindowResize);
 
 	// OpenGL setup that doesn't need to change on draw
 	glDisable(GL_LIGHTING);
@@ -194,6 +195,12 @@ void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t san
 	{
 		cam->KeyUp(key);
 	}
+}
+
+void Window::OnWindowResize(GLFWwindow* window, int32_t width, int32_t height)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	win->Resize(vec2i(width, height));
 }
 
 Renderer* Window::GetRenderer()

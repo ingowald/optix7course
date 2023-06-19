@@ -34,6 +34,8 @@ public:
 
 	void Move(const float& deltaTime_seconds);
 
+	void SetFramebufferSize(const vec2i& fbSize);
+
 	void SetEye(const vec3f& eye);
 	vec3f GetEye() const;
 
@@ -42,6 +44,8 @@ public:
 
 	void SetUp(const vec3f& up);
 	vec3f GetUp() const;
+
+	void UpdateInitialEyeAtUp();
 
 	void SetCosFovy(const float& cosFovy);
 	float GetCosFovy() const;
