@@ -42,6 +42,8 @@ void Camera::Move(const float& deltaTime_seconds)
 	vec3f forward = normalize(At - Eye);
 	vec3f right = cross(forward, Up);
 
+	vec3f lastEye = Eye;
+
 	if (KeyStatus[GLFW_KEY_A])
 	{
 		Eye -= Speed * deltaTime_seconds * right;
@@ -67,6 +69,12 @@ void Camera::Move(const float& deltaTime_seconds)
 		Eye -= Speed * deltaTime_seconds * Up;
 	}
 
+	// safety net
+	if (std::isnan(Eye.x) || std::isnan(Eye.y) || std::isnan(Eye.z))
+	{
+		Eye = lastEye;
+	}
+
 	if (KeyStatus[GLFW_KEY_0])
 	{
 		Eye = vec3f(0.f, 0.f, 0.f);
@@ -83,46 +91,29 @@ void Camera::Move(const float& deltaTime_seconds)
 	{
 		vec2f way = CurrentMousePos_Normalized - LastMousePos_Normalized;
 		float distance = sqrtf(way.x * way.x + way.y * way.y);
+		float distanceX = sqrtf(way.x * way.x);
+		float distanceY = sqrtf(way.y * way.y);
 
 		if (distance == 0)
 		{
 			return;
 		}
 
-		const int8_t sign = CurrentMousePos_Normalized.x > LastMousePos_Normalized.x ? 1 : -1;
+		const int8_t signX = CurrentMousePos_Normalized.x > LastMousePos_Normalized.x ? 1 : -1;
+		const int8_t signY = CurrentMousePos_Normalized.y > LastMousePos_Normalized.y ? 1 : -1;
 
-		float angle = sign * asin(distance);
+		float angleX = signX * asin(distanceX);
+		float angleY = signY * asin(distanceY);
 
-		std::string str = "way:("
-			+ std::to_string(way.x) + ","
-			+ std::to_string(way.y) + ","
-			+ "); ";
+		Quaternion3f quatX = Quaternion3f::rotate(Up, angleX);
+		forward = quatX * forward;
 
-		str += "distance: "
-			+ std::to_string(distance)
-			+ " ";
-		
-		str += "old dir:("
-			+ std::to_string(forward.x) + ","
-			+ std::to_string(forward.y) + ","
-			+ std::to_string(forward.z) + ","
-			+ "); ";
-		str += "angle:" + std::to_string(angle) + "; ";
-
-		Quaternion3f quat = Quaternion3f::rotate(Up, angle);
-
-		forward = quat * forward;
-
-		str += "new dir:("
-			+ std::to_string(forward.x) + ","
-			+ std::to_string(forward.y) + ","
-			+ std::to_string(forward.z) + ","
-			+ "); ";
-
-		std::cout << str << std::endl;
-
-		At = Eye + forward;
+		Quaternion3f quatY = Quaternion3f::rotate(right, angleY);
+		forward = quatY * forward;
 	}
+	At = Eye + forward;
+
+	LastMousePos_Normalized = CurrentMousePos_Normalized;
 }
 
 void Camera::SetFramebufferSize(const vec2i& fbSize)
