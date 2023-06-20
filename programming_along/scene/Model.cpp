@@ -6,12 +6,12 @@
 
 #include <set>
 
-Model::Model(const Mesh& mesh)
+Model::Model(const Mesh& mesh, const std::string& name /* = "model" */) : Name(name)
 {
 	MeshList.push_back(mesh);
 }
 
-Model::Model(const std::string& meshFilePath)
+Model::Model(const std::string& meshFilePath, const std::string& name /* = "model" */) : Name(name)
 {
 	AddMeshesFromFile(meshFilePath);
 }
@@ -24,6 +24,16 @@ std::vector<Mesh> Model::GetMeshList() const
 std::vector<Mesh>& Model::GetMeshList()
 {
 	return MeshList;
+}
+
+std::vector<Texture2D> Model::GetTextureList() const
+{
+	return TextureList;
+}
+
+std::vector<Texture2D>& Model::GetTextureList()
+{
+	return TextureList;
 }
 
 void Model::AddMesh(const Mesh& mesh)
@@ -118,4 +128,19 @@ void Model::AddMeshesFromFile(const std::string& filePath)
 	std::cout << "created a total of " << std::to_string(MeshList.size()) 
 		<< " meshes for model at " 
 		<< filePath << std::endl;
+}
+
+Mesh& Model::GetMeshAt(const size_t& index)
+{
+	return MeshList[index];
+}
+
+void Model::SetName(const std::string& name)
+{
+	Name = name;
+}
+
+std::string Model::GetName() const
+{
+	return Name;
 }

@@ -92,6 +92,11 @@ private:
 	void CreatePipeline();
 
 	/**
+	* Creates all necessary textures for all meshes from all models for OptiX
+	*/
+	void CreateTextures();
+
+	/**
 	* Builds the shader binding table
 	*/
 	void BuildShaderBindingTable();
@@ -135,9 +140,13 @@ protected:
 	std::vector<Model> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
-	// TODO: this should probably become part of the mesh rather than the renderer?
 	std::vector<CUDABuffer> VertexBufferList;
+	std::vector<CUDABuffer> NormalBufferList;
 	std::vector<CUDABuffer> IndexBufferList;
+	std::vector<CUDABuffer> TexCoordsBufferList;
+
+	std::vector<cudaArray_t> TextureArrays;
+	std::vector<cudaTextureObject_t> TextureObjects;
 
 	bool IsInitialized = false;
 

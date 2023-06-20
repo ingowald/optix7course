@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "cuda_runtime.h"
+
 #include <gdt/math/vec.h>
 #include <gdt/math/AffineSpace.h>
 
@@ -27,11 +29,24 @@ struct Mesh
 		std::map<tinyobj::index_t, int32_t>& knownVertices);
 
 public:
-	vec3f DiffuseColor;
+	
 	std::vector<vec3f> Vertices;
 	std::vector<vec3f> Normals;
 	std::vector<vec2f> TexCoords;
 	std::vector<vec3i> Indices;
+
+	/**
+	* Diffuse color that the mesh is to be rendered with
+	* This is not used, if DiffuseTextureId has been set
+	*/
+	vec3f DiffuseColor;
+
+	// TODO: support multiple (diffuse) textures
+	/**
+	* Texture id for the diffuse texture. If this is set
+	* the DiffuseColor will not be used.
+	*/
+	int32_t DiffuseTextureId = -1;
 };
 
 /**
@@ -42,5 +57,9 @@ struct MeshSbtData
 	vec3f DiffuseColor;
 	vec3f* Vertices;
 	vec3f* Normals;
+	vec2f* TexCoords;
 	vec3i* Indices;
+
+	cudaTextureObject_t Texture;
+	bool HasTexture = false;
 };

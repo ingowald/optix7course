@@ -369,6 +369,73 @@ void Renderer::CreatePipeline()
 	}
 }
 
+void Renderer::CreateTextures()
+{
+	int32_t numTextures = 0;
+	for (const Model& model : ModelList)
+	{
+		numTextures += static_cast<int32_t>(model.GetTextureList().size());
+	}
+
+	TextureArrays.resize(numTextures);
+	TextureObjects.resize(numTextures);
+
+	for (const Model& model : ModelList)
+	{
+		for (int32_t texId = 0; texId < numTextures; texId++)
+		{
+			Texture2D texture = model.GetTextureList()[texId];
+
+			cudaResourceDesc resourceDesc = {};
+			cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
+			const int32_t numComponents = 4;
+			const int32_t pitch = texture.Resolution.x * numComponents * sizeof(uint8_t);
+
+			cudaArray_t& pixelArray = TextureArrays[texId];
+			cudaError_t result = cudaMallocArray(&pixelArray, &channelDesc,
+				texture.Resolution.x, texture.Resolution.y);
+
+			if (result != cudaSuccess)
+			{
+				throw std::runtime_error("could allocate cuda array for texture of model " + model.GetName() + "!");
+			}
+
+			result = cudaMemcpy2DToArray(pixelArray,
+				0, 0,	//wOffset, hOffset
+				texture.Pixels,
+				pitch, texture.Resolution.x, texture.Resolution.y,
+				cudaMemcpyHostToDevice);
+
+			if (result != cudaSuccess)
+			{
+				throw std::runtime_error("could not copy texture to cuda array of model " + model.GetName() + "!");
+			}
+
+			resourceDesc.resType = cudaResourceTypeArray;
+			resourceDesc.res.array.array = pixelArray;
+
+			cudaTextureDesc texDesc = {};
+			texDesc.addressMode[0] = cudaAddressModeWrap;
+			texDesc.addressMode[1] = cudaAddressModeWrap;
+			texDesc.filterMode = cudaFilterModeLinear;
+			texDesc.readMode = cudaReadModeNormalizedFloat;
+			texDesc.normalizedCoords = 1;
+			texDesc.maxAnisotropy = 1;
+			texDesc.maxMipmapLevelClamp = 99;
+			texDesc.minMipmapLevelClamp = 1;
+			texDesc.mipmapFilterMode = cudaFilterModePoint;
+			texDesc.borderColor[0] = 1.0f;
+			texDesc.sRGB = 0;
+
+			// create the actual CUDA texture object
+			cudaTextureObject_t cudaTex = 0;
+			result = cudaCreateTextureObject(&cudaTex, &resourceDesc, &texDesc, nullptr);
+			TextureObjects[texId] = cudaTex;
+		}
+	}
+	
+}
+
 void Renderer::BuildShaderBindingTable()
 {
 	ShaderBindingTable = {};
@@ -427,9 +494,23 @@ void Renderer::BuildShaderBindingTable()
 				throw std::runtime_error("Could not build raygen record!");
 			}
 
+			// TODO: only upload normals and texcoords, if they are available?
+			//		what does CUDA do, if the uploaded array size is 0?
 			rec.MeshData.DiffuseColor = model.GetMeshList()[meshId].DiffuseColor;
 			rec.MeshData.Vertices = (vec3f*)VertexBufferList[bufferIndex].CudaPtr();
+			rec.MeshData.Normals = (vec3f*)NormalBufferList[bufferIndex].CudaPtr();
 			rec.MeshData.Indices = (vec3i*)IndexBufferList[bufferIndex].CudaPtr();
+			rec.MeshData.TexCoords = (vec2f*)TexCoordsBufferList[bufferIndex].CudaPtr();
+
+			// setup textures, if applicable
+			if (model.GetTextureList().size() > 0)
+			{
+				rec.MeshData.HasTexture = true;
+				const std::vector<Mesh>& meshList = model.GetMeshList();
+				const Mesh& mesh = meshList[meshId];
+				rec.MeshData.Texture = TextureObjects[mesh.DiffuseTextureId];
+			}
+
 			hitgroupRecords.push_back(rec);
 		}
 	}
@@ -444,7 +525,9 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 {
 	const uint32_t totalNumberMeshes = GetNumberMeshesFromScene();
 	VertexBufferList.resize(totalNumberMeshes);
+	NormalBufferList.resize(totalNumberMeshes);
 	IndexBufferList.resize(totalNumberMeshes);
+	TexCoordsBufferList.resize(totalNumberMeshes);
 
 	OptixTraversableHandle handle = {};
 
@@ -461,6 +544,15 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 		<< " models." 
 		<< std::endl;
 
+	// triangle inputs
+	//	-> literally triangle, i.e. only vertex and index data
+	//		no normals, texcoords or anything else
+	// 
+	//		instead, the buffers for normals, texcoords, etc
+	//		are simply allocated and uploaded, then pointed to 
+	//		in the hitgroup record, but not otherwise handled in this
+	//		triangle input data
+
 	std::vector<OptixBuildInput> triangleInputList(totalNumberMeshes);
 	std::vector<CUdeviceptr> cudaVertexBufferList(totalNumberMeshes);
 	std::vector<CUdeviceptr> cudaIndexBufferList(totalNumberMeshes);
@@ -474,7 +566,15 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 			const uint32_t bufferIndex = GetMeshBufferIndex(model, static_cast<uint32_t>(meshId));
 			Mesh& mesh = meshList[meshId];
 			VertexBufferList[bufferIndex].AllocAndUpload(mesh.Vertices);
+			if (!mesh.Normals.empty())
+			{
+				NormalBufferList[meshId].AllocAndUpload(mesh.Normals);
+			}
 			IndexBufferList[bufferIndex].AllocAndUpload(mesh.Indices);
+			if (!mesh.TexCoords.empty())
+			{
+				TexCoordsBufferList[bufferIndex].AllocAndUpload(mesh.Indices);
+			}
 
 			// triangle inputs
 			OptixBuildInput& triangleInput = triangleInputList[bufferIndex];
