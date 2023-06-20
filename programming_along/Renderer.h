@@ -23,6 +23,8 @@ public:
 	Renderer();
 	~Renderer();
 
+	static void OptixLogCallback(uint32_t level, const char* tag, const char* message, void* cbdata);
+
 	/**
 	* Initializes anything that could not be done in the ctor,
 	* e.g. building the shader binding table

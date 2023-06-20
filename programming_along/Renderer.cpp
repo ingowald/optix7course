@@ -49,6 +49,19 @@ Renderer::~Renderer()
 	cudaStreamDestroy(CudaStream);
 }
 
+void Renderer::OptixLogCallback(uint32_t level, const char* tag, const char* message, void* cbdata)
+{
+	std::string outStr = tag + std::string(" (") + std::to_string(level) + "): " + (message ? message : "no message");
+	if (std::string(tag).compare("ERROR") == 0)
+	{
+		std::cerr << outStr << std::endl;
+	}
+	else
+	{
+		std::cout << outStr << std::endl;
+	}
+}
+
 void Renderer::Init()
 {
 	// initialize everything which needed mesh or camera information,
@@ -94,7 +107,16 @@ void Renderer::Render()
 
 	if (result != OPTIX_SUCCESS)
 	{
-		throw std::runtime_error("Could not execute optixLaunch!");
+		if (result == OPTIX_ERROR_CUDA_ERROR)
+		{
+			cudaError_t error = cudaGetLastError();
+			const std::string errorString(cudaGetErrorString(error));
+			throw std::runtime_error("Could not execute optixLaunch due to CUDA error:\n" + errorString);
+		}
+		else
+		{
+			throw std::runtime_error("Could not execute optixLaunch!");
+		}
 	}
 
 	// make sure the frame is rendered before it is downloaded (only for this easy example!")
@@ -187,7 +209,16 @@ void Renderer::CreateContext()
 		throw std::runtime_error("Could not get CUDA context!");
 	}
 
-	OptixResult opResult = optixDeviceContextCreate(CudaContext, 0, &OptixContext);
+	OptixDeviceContextOptions options = {};
+#ifdef NDEBUG
+	options.validationMode = OPTIX_DEVICE_CONTEXT_VALIDATION_MODE_OFF;
+#else
+	options.validationMode = OPTIX_DEVICE_CONTEXT_VALIDATION_MODE_ALL;
+	options.logCallbackFunction = &OptixLogCallback;
+	options.logCallbackLevel = 4;
+#endif
+
+	OptixResult opResult = optixDeviceContextCreate(CudaContext, &options, &OptixContext);
 	if (opResult != OPTIX_SUCCESS)
 	{
 		throw std::runtime_error("Could not create OptiX context!");
