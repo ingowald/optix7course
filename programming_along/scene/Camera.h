@@ -78,5 +78,5 @@ private:
 	vec2f LastMousePos_Normalized;
 	vec2f CurrentMousePos_Normalized;
 	uint8_t MouseStatus[8];
-	float Speed = 10.0f;
+	float Speed = 100.0f;
 };

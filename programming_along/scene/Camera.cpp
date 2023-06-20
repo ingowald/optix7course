@@ -5,6 +5,8 @@
 
 #include "gdt/math/Quaternion.h"
 
+#include "../util/Util.h"
+
 Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/, 
 	const vec3f& at /* = vec3f(0.f, 0.f, -1.f)*/, 
 	const vec3f& up /* = vec3f(0.f, 1.f, 0.f)*/,
@@ -84,6 +86,20 @@ void Camera::Move(const float& deltaTime_seconds)
 		Eye = InitialEye;
 		At = InitialAt;
 		Up = InitialUp;
+	}
+
+	// print camera setup for easier initial setup
+	if (KeyStatus[GLFW_KEY_P])
+	{
+		std::cout << "Eye: "
+			<< Util::VecToString(Eye)
+			<< std::endl;
+		std::cout << "At: "
+			<< Util::VecToString(At)
+			<< std::endl;
+		std::cout << "Up: "
+			<< Util::VecToString(Up)
+			<< std::endl;
 	}
 
 	// mouse action
