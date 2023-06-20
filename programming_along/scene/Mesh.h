@@ -5,7 +5,6 @@
 #include <gdt/math/vec.h>
 #include <gdt/math/AffineSpace.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
 #include "3rdParty/tiny_obj_loader.h"
 
 using namespace gdt;

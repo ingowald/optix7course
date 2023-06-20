@@ -14,7 +14,7 @@
 
 #include "LaunchParams.h"
 
-struct Model;
+class Model;
 struct Mesh;
 
 class Renderer
