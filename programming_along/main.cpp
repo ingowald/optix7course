@@ -31,7 +31,17 @@ int main(int ac, char **av)
 		cube3.AddCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
 		cube3.DiffuseColor = vec3f(.8f, 0.1f, 0.2f);
 
+		// load the sponza level
+#ifdef _WIN32
+		const std::string filePath = "../../models/crytek_sponza/sponza.obj";
+#else
+		// untested, but should work on linux
+		const std::string filePath = "../models/crytek_sponza/sponza.obj";
+#endif
+		Model sponza(filePath);
+
 		Renderer* renderer = window.GetRenderer();
+		renderer->AddModel(sponza);
 		renderer->AddModel(m1);
 		renderer->AddMesh(cube3);
 
