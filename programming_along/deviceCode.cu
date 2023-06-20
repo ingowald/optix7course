@@ -44,6 +44,7 @@ static __forceinline__ __device__ T* getPerRayData()
 
 extern "C" __global__ void __raygen__renderFrame()
 {
+
 	const int32_t ix = optixGetLaunchIndex().x;
 	const int32_t iy = optixGetLaunchIndex().y;
 

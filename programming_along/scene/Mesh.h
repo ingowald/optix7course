@@ -62,5 +62,5 @@ struct MeshSbtData
 	vec3i* Indices;
 
 	cudaTextureObject_t Texture;
-	bool HasTexture = false;
+	uint8_t HasTexture = false;
 };

@@ -107,16 +107,7 @@ void Renderer::Render()
 
 	if (result != OPTIX_SUCCESS)
 	{
-		if (result == OPTIX_ERROR_CUDA_ERROR)
-		{
-			cudaError_t error = cudaGetLastError();
-			const std::string errorString(cudaGetErrorString(error));
-			throw std::runtime_error("Could not execute optixLaunch due to CUDA error:\n" + errorString);
-		}
-		else
-		{
-			throw std::runtime_error("Could not execute optixLaunch!");
-		}
+		throw std::runtime_error("Could not execute optixLaunch!");
 	}
 
 	// make sure the frame is rendered before it is downloaded (only for this easy example!")
@@ -538,11 +529,11 @@ void Renderer::BuildShaderBindingTable()
 			// setup textures, if applicable
 			if (model.GetTextureList().size() > 0)
 			{
-				rec.MeshData.HasTexture = true;
 				const std::vector<Mesh>& meshList = model.GetMeshList();
 				const Mesh& mesh = meshList[meshId];
-				if (mesh.DiffuseTextureId > 0)
+				if (mesh.DiffuseTextureId >= 0)
 				{
+					rec.MeshData.HasTexture = true;
 					rec.MeshData.Texture = TextureObjects[mesh.DiffuseTextureId];
 				}
 			}
