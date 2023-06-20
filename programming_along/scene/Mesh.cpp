@@ -61,6 +61,24 @@ void Mesh::AddTriangle(const vec3f vertices[3], const vec3i indices)
 	Indices.push_back((int32_t)firstVertexId + indices);
 }
 
+// operator needed to be able to use find on the map
+namespace std
+{
+	inline bool operator<(const tinyobj::index_t& a, const tinyobj::index_t& b)
+	{
+		if (a.vertex_index < b.vertex_index) return true;
+		if (a.vertex_index > b.vertex_index) return false;
+
+		if (a.normal_index < b.normal_index) return true;
+		if (a.normal_index > b.normal_index) return false;
+
+		if (a.texcoord_index < b.texcoord_index) return true;
+		if (a.texcoord_index > b.texcoord_index) return false;
+
+		return false;
+	}
+}
+
 int32_t Mesh::FindOrAddVertex(tinyobj::attrib_t& attributes,
 	const tinyobj::index_t& idx,
 	std::map<tinyobj::index_t, int32_t>& knownVertices)
