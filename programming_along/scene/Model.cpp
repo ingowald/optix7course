@@ -94,7 +94,10 @@ void Model::AddMeshesFromFile(const std::string& filePath)
 				);
 				mesh.Indices.push_back(idx);
 				mesh.DiffuseColor = (const vec3f&)materials[materialId].diffuse;
-				//mesh.DiffuseColor = gdt::randomColor(materialId);
+
+				//TODO: use textures
+				std::cout << "Using random colors for model loaded from obj!" << std::endl;
+				mesh.DiffuseColor = gdt::randomColor(materialId);
 			}
 
 			if (!mesh.Vertices.empty())
