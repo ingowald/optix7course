@@ -145,7 +145,7 @@ void Renderer::InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& 
 	SceneCamera.UpdateInitialEyeAtUp();
 }
 
-void Renderer::AddMesh(const Mesh& mesh)
+void Renderer::AddMesh(std::shared_ptr<Mesh> mesh)
 {
 	Model m(mesh);
 	AddModel(m);
@@ -520,7 +520,7 @@ void Renderer::BuildShaderBindingTable()
 
 			// TODO: only upload normals and texcoords, if they are available?
 			//		what does CUDA do, if the uploaded array size is 0?
-			rec.MeshData.DiffuseColor = model.GetMeshList()[meshId].DiffuseColor;
+			rec.MeshData.DiffuseColor = model.GetMeshList()[meshId]->DiffuseColor;
 			rec.MeshData.Vertices = (vec3f*)VertexBufferList[bufferIndex].CudaPtr();
 			rec.MeshData.Normals = (vec3f*)NormalBufferList[bufferIndex].CudaPtr();
 			rec.MeshData.Indices = (vec3i*)IndexBufferList[bufferIndex].CudaPtr();
@@ -529,12 +529,12 @@ void Renderer::BuildShaderBindingTable()
 			// setup textures, if applicable
 			if (model.GetTextureList().size() > 0)
 			{
-				const std::vector<Mesh>& meshList = model.GetMeshList();
-				const Mesh& mesh = meshList[meshId];
-				if (mesh.DiffuseTextureId >= 0)
+				const std::vector<std::shared_ptr<Mesh>>& meshList = model.GetMeshList();
+				std::shared_ptr<Mesh> mesh = meshList[meshId];
+				if (mesh->DiffuseTextureId >= 0)
 				{
 					rec.MeshData.HasTexture = true;
-					rec.MeshData.Texture = TextureObjects[mesh.DiffuseTextureId];
+					rec.MeshData.Texture = TextureObjects[mesh->DiffuseTextureId];
 				}
 			}
 
@@ -587,20 +587,20 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 
 	for (const Model& model : ModelList)
 	{
-		std::vector<Mesh>& meshList = model.GetMeshList();
+		std::vector<std::shared_ptr<Mesh>>& meshList = model.GetMeshList();
 		for (size_t meshId = 0; meshId < meshList.size(); meshId++)
 		{
 			const uint32_t bufferIndex = GetMeshBufferIndex(model, static_cast<uint32_t>(meshId));
-			Mesh& mesh = meshList[meshId];
-			VertexBufferList[bufferIndex].AllocAndUpload(mesh.Vertices);
-			if (!mesh.Normals.empty())
+			std::shared_ptr<Mesh> mesh = meshList[meshId];
+			VertexBufferList[bufferIndex].AllocAndUpload(mesh->Vertices);
+			if (!mesh->Normals.empty())
 			{
-				NormalBufferList[meshId].AllocAndUpload(mesh.Normals);
+				NormalBufferList[meshId].AllocAndUpload(mesh->Normals);
 			}
-			IndexBufferList[bufferIndex].AllocAndUpload(mesh.Indices);
-			if (!mesh.TexCoords.empty())
+			IndexBufferList[bufferIndex].AllocAndUpload(mesh->Indices);
+			if (!mesh->TexCoords.empty())
 			{
-				TexCoordsBufferList[bufferIndex].AllocAndUpload(mesh.Indices);
+				TexCoordsBufferList[bufferIndex].AllocAndUpload(mesh->Indices);
 			}
 
 			// triangle inputs
@@ -614,12 +614,12 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 
 			triangleInput.triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
 			triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
-			triangleInput.triangleArray.numVertices = (int32_t)meshList[meshId].Vertices.size();
+			triangleInput.triangleArray.numVertices = (int32_t)meshList[meshId]->Vertices.size();
 			triangleInput.triangleArray.vertexBuffers = &cudaVertexBufferList[bufferIndex];
 
 			triangleInput.triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
 			triangleInput.triangleArray.indexStrideInBytes = sizeof(vec3i);
-			triangleInput.triangleArray.numIndexTriplets = (int32_t)meshList[meshId].Indices.size();
+			triangleInput.triangleArray.numIndexTriplets = (int32_t)meshList[meshId]->Indices.size();
 			triangleInput.triangleArray.indexBuffer = cudaIndexBufferList[bufferIndex];
 
 			triangleInputFlagsList[bufferIndex] = 0;
@@ -744,7 +744,7 @@ uint32_t Renderer::GetModelIndex(const Model& model) const
 	{
 		if (&model == &ModelList[i])
 		{
-			return i;
+			return static_cast<uint32_t>(i);
 		}
 	}
 

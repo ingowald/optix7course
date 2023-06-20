@@ -53,7 +53,7 @@ public:
 
 	void InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up);
 
-	void AddMesh(const Mesh& mesh);
+	void AddMesh(std::shared_ptr<Mesh> mesh);
 
 	void AddModel(const Model& model);
 
