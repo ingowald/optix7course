@@ -5,7 +5,7 @@
 #include "gdt/math/vec.h"
 
 #include "LaunchParams.h"
-#include "util/Mesh.h"
+#include "scene/Mesh.h"
 
 extern "C" __constant__ LaunchParams launchParams;
 
@@ -153,7 +153,7 @@ extern "C" __global__ void __closesthit__radiance()
 	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, normal));
 
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
-	perRayData = cosAlpha * meshData.Color;
+	perRayData = cosAlpha * meshData.DiffuseColor;
 }
 
 // dummy functions for OptiX pipeline

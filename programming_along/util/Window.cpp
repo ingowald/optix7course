@@ -167,14 +167,14 @@ void Window::OnMouseButtonPressedOrReleased(GLFWwindow* window, int32_t button, 
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 
-	cam->SetMousePos(vec2f(x / win->GetFramebufferSize().x, y / win->GetFramebufferSize().y));
+	cam->SetMousePos(vec2f((float)x / win->GetFramebufferSize().x, (float)y / win->GetFramebufferSize().y));
 }
 
 void Window::OnCursorMoved(GLFWwindow* window, double x, double y)
 {
 	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	Camera* cam = win->OptixRenderer.GetCameraPtr();
-	cam->SetMousePos(vec2f(x / win->GetFramebufferSize().x, y / win->GetFramebufferSize().y));
+	cam->SetMousePos(vec2f((float)x / win->GetFramebufferSize().x, (float)y / win->GetFramebufferSize().y));
 }
 
 void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t sanCode, int32_t action, int32_t mods)

@@ -6,7 +6,8 @@
 #include "optix_stubs.h"
 
 #include "util/SbtStructs.h"
-#include "util/Mesh.h"
+#include "scene/Model.h"
+#include "scene/Mesh.h"
 
 Renderer::Renderer()
 {
@@ -17,8 +18,6 @@ Renderer::Renderer()
 	CreateRaygenPrograms();
 	CreateMissPrograms();
 	CreateHitgroupPrograms();
-
-	Params.Traversable = BuildAccelerationStructure();
 
 	CreatePipeline();
 }
@@ -75,7 +74,7 @@ void Renderer::Render()
 		return;
 	}
 
-	assert(IsInitialized, "Init has not been called. You should do this before rendering!");
+	assert(IsInitialized && "Init has not been called. You should do this before rendering!");
 
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
@@ -134,7 +133,13 @@ void Renderer::InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& 
 
 void Renderer::AddMesh(const Mesh& mesh)
 {
-	MeshList.push_back(mesh);	
+	Model m(mesh);
+	AddModel(m);
+}
+
+void Renderer::AddModel(const Model& model)
+{
+	ModelList.push_back(model);
 }
 
 void Renderer::InitOptix()
@@ -180,8 +185,6 @@ void Renderer::CreateContext()
 	{
 		throw std::runtime_error("Could not get CUDA context!");
 	}
-
-	OptixDeviceContextOptions optixOptions;
 
 	OptixResult opResult = optixDeviceContextCreate(CudaContext, 0, &OptixContext);
 	if (opResult != OPTIX_SUCCESS)
@@ -410,22 +413,27 @@ void Renderer::BuildShaderBindingTable()
 	// there are n meshes and m ray types, so n*m hitgroup records
 	// currently there is only one ray type, so n hitgroup records
 	std::vector<HitgroupRecord> hitgroupRecords;
-	for (size_t meshId = 0; meshId < MeshList.size(); meshId++)
+	for (const Model& model : ModelList)
 	{
-		HitgroupRecord rec;
-
-		// all the meshes use the same kernel(/shader), therefore all use the same hit group
-		OptixResult result = optixSbtRecordPackHeader(HitgroupProgramGroups[0], &rec);
-		if (result != OPTIX_SUCCESS)
+		for (size_t meshId = 0; meshId < model.GetMeshList().size(); meshId++)
 		{
-			throw std::runtime_error("Could not build raygen record!");
-		}
+			const uint32_t bufferIndex = GetMeshBufferIndex(model, static_cast<uint32_t>(meshId));
+			HitgroupRecord rec;
 
-		rec.MeshData.Color = MeshList[meshId].Color;
-		rec.MeshData.Vertices = (vec3f*)VertexBufferList[meshId].CudaPtr();
-		rec.MeshData.Indices = (vec3i*)IndexBufferList[meshId].CudaPtr();
-		hitgroupRecords.push_back(rec);
+			// all the meshes use the same kernel(/shader), therefore all use the same hit group
+			OptixResult result = optixSbtRecordPackHeader(HitgroupProgramGroups[0], &rec);
+			if (result != OPTIX_SUCCESS)
+			{
+				throw std::runtime_error("Could not build raygen record!");
+			}
+
+			rec.MeshData.DiffuseColor = model.GetMeshList()[meshId].DiffuseColor;
+			rec.MeshData.Vertices = (vec3f*)VertexBufferList[bufferIndex].CudaPtr();
+			rec.MeshData.Indices = (vec3i*)IndexBufferList[bufferIndex].CudaPtr();
+			hitgroupRecords.push_back(rec);
+		}
 	}
+	
 	HitgroupRecordsBuffer.AllocAndUpload(hitgroupRecords);
 	ShaderBindingTable.hitgroupRecordBase = HitgroupRecordsBuffer.CudaPtr();
 	ShaderBindingTable.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
@@ -434,55 +442,68 @@ void Renderer::BuildShaderBindingTable()
 
 OptixTraversableHandle Renderer::BuildAccelerationStructure()
 {
-	VertexBufferList.resize(MeshList.size());
-	IndexBufferList.resize(MeshList.size());
+	const uint32_t totalNumberMeshes = GetNumberMeshesFromScene();
+	VertexBufferList.resize(totalNumberMeshes);
+	IndexBufferList.resize(totalNumberMeshes);
 
 	OptixTraversableHandle handle = {};
 
-	if (MeshList.size() == 0)
+	if (totalNumberMeshes == 0)
 	{
 		std::cout << "No meshes to build acceleration structure for!" << std::endl;
 		return handle;
 	}
 
-	std::vector<OptixBuildInput> triangleInputList(MeshList.size());
-	std::vector<CUdeviceptr> cudaVertexBufferList(MeshList.size());
-	std::vector<CUdeviceptr> cudaIndexBufferList(MeshList.size());
-	std::vector<uint32_t> triangleInputFlagsList(MeshList.size());
+	std::cout << "Building acceleration structure for " 
+		<< std::to_string(totalNumberMeshes) 
+		<< " meshes in "
+		<< std::to_string(ModelList.size()) 
+		<< " models." 
+		<< std::endl;
 
-	for (size_t meshId = 0; meshId < MeshList.size(); meshId++)
+	std::vector<OptixBuildInput> triangleInputList(totalNumberMeshes);
+	std::vector<CUdeviceptr> cudaVertexBufferList(totalNumberMeshes);
+	std::vector<CUdeviceptr> cudaIndexBufferList(totalNumberMeshes);
+	std::vector<uint32_t> triangleInputFlagsList(totalNumberMeshes);
+
+	for (const Model& model : ModelList)
 	{
-		Mesh& mesh = MeshList[meshId];
-		VertexBufferList[meshId].AllocAndUpload(mesh.Vertices);
-		IndexBufferList[meshId].AllocAndUpload(mesh.Indices);
+		std::vector<Mesh>& meshList = model.GetMeshList();
+		for (size_t meshId = 0; meshId < meshList.size(); meshId++)
+		{
+			const uint32_t bufferIndex = GetMeshBufferIndex(model, static_cast<uint32_t>(meshId));
+			Mesh& mesh = meshList[meshId];
+			VertexBufferList[bufferIndex].AllocAndUpload(mesh.Vertices);
+			IndexBufferList[bufferIndex].AllocAndUpload(mesh.Indices);
 
-		// triangle inputs
-		OptixBuildInput& triangleInput = triangleInputList[meshId];
-		triangleInput = {};
-		triangleInput.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+			// triangle inputs
+			OptixBuildInput& triangleInput = triangleInputList[bufferIndex];
+			triangleInput = {};
+			triangleInput.type = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
 
-		// local variables such that pointer to device pointers can be created
-		cudaVertexBufferList[meshId] = VertexBufferList[meshId].CudaPtr();
-		cudaIndexBufferList[meshId] = IndexBufferList[meshId].CudaPtr();
+			// local variables such that pointer to device pointers can be created
+			cudaVertexBufferList[bufferIndex] = VertexBufferList[bufferIndex].CudaPtr();
+			cudaIndexBufferList[bufferIndex] = IndexBufferList[bufferIndex].CudaPtr();
 
-		triangleInput.triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
-		triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
-		triangleInput.triangleArray.numVertices = (int32_t)MeshList[0].Vertices.size();
-		triangleInput.triangleArray.vertexBuffers = &cudaVertexBufferList[meshId];
+			triangleInput.triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
+			triangleInput.triangleArray.vertexStrideInBytes = sizeof(vec3f);
+			triangleInput.triangleArray.numVertices = (int32_t)meshList[meshId].Vertices.size();
+			triangleInput.triangleArray.vertexBuffers = &cudaVertexBufferList[bufferIndex];
 
-		triangleInput.triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-		triangleInput.triangleArray.indexStrideInBytes = sizeof(vec3i);
-		triangleInput.triangleArray.numIndexTriplets = (int32_t)MeshList[0].Indices.size();
-		triangleInput.triangleArray.indexBuffer = cudaIndexBufferList[meshId];
+			triangleInput.triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+			triangleInput.triangleArray.indexStrideInBytes = sizeof(vec3i);
+			triangleInput.triangleArray.numIndexTriplets = (int32_t)meshList[meshId].Indices.size();
+			triangleInput.triangleArray.indexBuffer = cudaIndexBufferList[bufferIndex];
 
-		triangleInputFlagsList[meshId] = 0;
+			triangleInputFlagsList[bufferIndex] = 0;
 
-		// currently only shader binding table entry, no per-primitive materials
-		triangleInput.triangleArray.flags = &triangleInputFlagsList[meshId];
-		triangleInput.triangleArray.numSbtRecords = 1;
-		triangleInput.triangleArray.sbtIndexOffsetBuffer = 0;
-		triangleInput.triangleArray.sbtIndexOffsetSizeInBytes = 0;
-		triangleInput.triangleArray.sbtIndexOffsetStrideInBytes = 0;
+			// currently only shader binding table entry, no per-primitive materials
+			triangleInput.triangleArray.flags = &triangleInputFlagsList[bufferIndex];
+			triangleInput.triangleArray.numSbtRecords = 1;
+			triangleInput.triangleArray.sbtIndexOffsetBuffer = 0;
+			triangleInput.triangleArray.sbtIndexOffsetSizeInBytes = 0;
+			triangleInput.triangleArray.sbtIndexOffsetStrideInBytes = 0;
+		}
 	}
 
 	// setup bottom level acceleration structure (BLAS)
@@ -494,7 +515,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	OptixAccelBufferSizes blasBufferSizes;
 	OptixResult result = optixAccelComputeMemoryUsage(OptixContext,
 		&accelOptions, triangleInputList.data(),
-		(int32_t)MeshList.size(), // number of build inputs
+		totalNumberMeshes, // number of build inputs
 		&blasBufferSizes);
 	if (result != OPTIX_SUCCESS)
 	{
@@ -520,7 +541,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	result = optixAccelBuild(OptixContext,
 		0,	//stream
 		&accelOptions, triangleInputList.data(),
-		(int32_t)MeshList.size(),
+		(int32_t)totalNumberMeshes,
 		tempBuffer.CudaPtr(), tempBuffer.Size_bytes,
 		outputBuffer.CudaPtr(), outputBuffer.Size_bytes,
 		&handle,
@@ -559,6 +580,8 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	tempBuffer.Free();
 	compactedSizeBuffer.Free();
 
+	std::cout << "finished building acceleration structure" << std::endl;
+
 	return handle;
 }
 
@@ -576,4 +599,49 @@ void Renderer::SynchCuda(const std::string& errorMsg /* = "" */)
 		}
 		throw std::runtime_error("error synchronizing cuda: " + errorString + additionalMessage);
 	}
+}
+
+uint32_t Renderer::GetNumberMeshesFromScene() const
+{
+	uint32_t numMeshes = 0;
+	for (const Model& model : ModelList)
+	{
+		numMeshes += static_cast<uint32_t>(model.GetMeshList().size());
+	}
+	return numMeshes;
+}
+
+uint32_t Renderer::GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const
+{
+	size_t index = 0;
+
+	for (size_t i = 0; i < ModelList.size(); i++)
+	{
+		if (&model == &ModelList[i])
+		{
+			index = i;
+			break;
+		}
+	}
+
+	return GetMeshBufferIndex(static_cast<uint32_t>(index), meshIndex);
+}
+
+uint32_t Renderer::GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t meshIndex) const
+{
+	uint32_t index = 0;
+	for (size_t modelId = 0; modelId < ModelList.size(); modelId++)
+	{
+		if (modelId == modelIndex)
+		{
+			index += meshIndex;
+			break;
+		}
+		else
+		{
+			index += static_cast<uint32_t>(ModelList[modelId].GetMeshList().size());
+		}
+	}
+
+	return index;
 }

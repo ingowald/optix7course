@@ -6,7 +6,7 @@
 #include "cuda.h"
 
 #include "util/CUDABuffer.h"
-#include "util/Camera.h"
+#include "scene/Camera.h"
 
 #include "optix_types.h"
 
@@ -14,6 +14,7 @@
 
 #include "LaunchParams.h"
 
+class Model;
 struct Mesh;
 
 class Renderer
@@ -51,6 +52,8 @@ public:
 	void InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up);
 
 	void AddMesh(const Mesh& mesh);
+
+	void AddModel(const Model& model);
 
 private:
 	/**
@@ -100,6 +103,22 @@ private:
 
 	void SynchCuda(const std::string& errorMsg = "");
 
+	uint32_t GetNumberMeshesFromScene() const;
+
+	/**
+	* Since there is a ModelList and a MeshList per Model,
+	* but the CUDA Vertex and Index buffers are one dimensional,
+	* we need to calculate the Index for a given mesh from a given model
+	*/
+	uint32_t GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const;
+
+	/**
+	* Since there is a ModelList and a MeshList per Model,
+	* but the CUDA Vertex and Index buffers are one dimensional,
+	* we need to calculate the Index for a given mesh from a given model
+	*/
+	uint32_t GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t meshIndex) const;
+
 public:
 
 protected:
@@ -113,7 +132,7 @@ protected:
 	/** Scene */
 	Camera SceneCamera;
 
-	std::vector<Mesh> MeshList;
+	std::vector<Model> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
 	// TODO: this should probably become part of the mesh rather than the renderer?

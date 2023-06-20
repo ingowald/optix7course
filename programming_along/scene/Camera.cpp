@@ -42,6 +42,8 @@ void Camera::Move(const float& deltaTime_seconds)
 	vec3f forward = normalize(At - Eye);
 	vec3f right = cross(forward, Up);
 
+	vec3f lastEye = Eye;
+
 	if (KeyStatus[GLFW_KEY_A])
 	{
 		Eye -= Speed * deltaTime_seconds * right;
@@ -67,6 +69,12 @@ void Camera::Move(const float& deltaTime_seconds)
 		Eye -= Speed * deltaTime_seconds * Up;
 	}
 
+	// safety net
+	if (std::isnan(Eye.x) || std::isnan(Eye.y) || std::isnan(Eye.z))
+	{
+		Eye = lastEye;
+	}
+
 	if (KeyStatus[GLFW_KEY_0])
 	{
 		Eye = vec3f(0.f, 0.f, 0.f);
@@ -83,34 +91,29 @@ void Camera::Move(const float& deltaTime_seconds)
 	{
 		vec2f way = CurrentMousePos_Normalized - LastMousePos_Normalized;
 		float distance = sqrtf(way.x * way.x + way.y * way.y);
-		float angle = acos(distance);
+		float distanceX = sqrtf(way.x * way.x);
+		float distanceY = sqrtf(way.y * way.y);
 
-		std::string str = "way:("
-			+ std::to_string(way.x) + ","
-			+ std::to_string(way.y) + ","
-			+ "); ";
-		
-		str += "old dir:("
-			+ std::to_string(forward.x) + ","
-			+ std::to_string(forward.y) + ","
-			+ std::to_string(forward.z) + ","
-			+ "); ";
-		str += "angle:" + std::to_string(angle) + "; ";
+		if (distance == 0)
+		{
+			return;
+		}
 
-		Quaternion3f quat = Quaternion3f::rotate(Up, angle);
+		const int8_t signX = CurrentMousePos_Normalized.x > LastMousePos_Normalized.x ? 1 : -1;
+		const int8_t signY = CurrentMousePos_Normalized.y > LastMousePos_Normalized.y ? 1 : -1;
 
-		forward = quat * forward;
+		float angleX = signX * asin(distanceX);
+		float angleY = signY * asin(distanceY);
 
-		str += "new dir:("
-			+ std::to_string(forward.x) + ","
-			+ std::to_string(forward.y) + ","
-			+ std::to_string(forward.z) + ","
-			+ "); ";
+		Quaternion3f quatX = Quaternion3f::rotate(Up, angleX);
+		forward = quatX * forward;
 
-		std::cout << str << std::endl;
-
-		At = Eye + forward;
+		Quaternion3f quatY = Quaternion3f::rotate(right, angleY);
+		forward = quatY * forward;
 	}
+	At = Eye + forward;
+
+	LastMousePos_Normalized = CurrentMousePos_Normalized;
 }
 
 void Camera::SetFramebufferSize(const vec2i& fbSize)
