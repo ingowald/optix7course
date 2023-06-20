@@ -5,6 +5,7 @@
 #include "../util/Texture.h"
 
 #include <vector>
+#include <memory>
 
 class Model
 {
@@ -13,11 +14,16 @@ public:
 	Model(const Mesh& mesh, const std::string& name = "model");
 	Model(const std::string& meshFilePath, const std::string& name = "model");
 
+	~Model();
+
 	std::vector<Mesh> GetMeshList() const;
 	std::vector<Mesh>& GetMeshList();
 
-	std::vector<Texture2D> GetTextureList() const;
-	std::vector<Texture2D>& GetTextureList();
+	std::vector<std::shared_ptr<Texture2D>> GetTextureList() const;
+	std::vector<std::shared_ptr<Texture2D>>& GetTextureList();
+
+	void LoadTextureForMesh(Mesh& mesh, std::map<std::string, int32_t>& knownTextures,
+		const std::string& textureFilePath);
 
 	void AddMesh(const Mesh& mesh);
 	void AddMeshesFromFile(const std::string& filePath);
@@ -29,7 +35,7 @@ public:
 
 protected:
 	std::vector<Mesh> MeshList;
-	std::vector<Texture2D> TextureList;
+	std::vector<std::shared_ptr<Texture2D>> TextureList;
 
 	/**
 	* bounding box

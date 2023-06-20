@@ -111,6 +111,11 @@ private:
 	uint32_t GetNumberMeshesFromScene() const;
 
 	/**
+	* Finds the given model in the ModelList and returns the index
+	*/
+	uint32_t GetModelIndex(const Model& model) const;
+
+	/**
 	* Since there is a ModelList and a MeshList per Model,
 	* but the CUDA Vertex and Index buffers are one dimensional,
 	* we need to calculate the Index for a given mesh from a given model
@@ -123,6 +128,22 @@ private:
 	* we need to calculate the Index for a given mesh from a given model
 	*/
 	uint32_t GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t meshIndex) const;
+
+	uint32_t GetNumberTexturesFromScene() const;
+
+	/**
+	* Since there is a ModelList and a TextureList per Model,
+	* but CUDA Texture buffers are one dimensional
+	* we need to calculate the Index for a given texture from a given model
+	*/
+	uint32_t GetTextureBufferIndex(const Model& model, const uint32_t textureIndex) const;
+
+	/**
+	* Since there is a ModelList and a TextureList per Model,
+	* but CUDA Texture buffers are one dimensional
+	* we need to calculate the Index for a given texture from a given model
+	*/
+	uint32_t GetTextureBufferIndex(const uint32_t& modelIndex, const uint32_t textureIndex) const;
 
 public:
 

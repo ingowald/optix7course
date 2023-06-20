@@ -4,7 +4,13 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "3rdParty/tiny_obj_loader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "3rdParty/stb_image.h"
+
 #include <set>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 Model::Model(const Mesh& mesh, const std::string& name /* = "model" */) : Name(name)
 {
@@ -14,6 +20,11 @@ Model::Model(const Mesh& mesh, const std::string& name /* = "model" */) : Name(n
 Model::Model(const std::string& meshFilePath, const std::string& name /* = "model" */) : Name(name)
 {
 	AddMeshesFromFile(meshFilePath);
+}
+
+Model::~Model()
+{
+
 }
 
 std::vector<Mesh> Model::GetMeshList() const 
@@ -26,14 +37,77 @@ std::vector<Mesh>& Model::GetMeshList()
 	return MeshList;
 }
 
-std::vector<Texture2D> Model::GetTextureList() const
+std::vector<std::shared_ptr<Texture2D>> Model::GetTextureList() const
 {
 	return TextureList;
 }
 
-std::vector<Texture2D>& Model::GetTextureList()
+std::vector<std::shared_ptr<Texture2D>>& Model::GetTextureList()
 {
 	return TextureList;
+}
+
+void Model::LoadTextureForMesh(Mesh& mesh, std::map<std::string, int32_t>& knownTextures,
+	const std::string& textureFilePath)
+{
+	if (textureFilePath == "" || fs::is_directory(textureFilePath))
+	{
+		return;
+	}
+
+	if (textureFilePath.find(".png") == std::string::npos
+		&& textureFilePath.find(".jpg") == std::string::npos
+		&& textureFilePath.find(".jpeg") == std::string::npos)
+	{
+		std::cout << "invalid texture path!" << std::endl;
+		return;
+	}
+	if (!fs::exists(textureFilePath))
+	{
+		std::cout << "invalid filepath " << textureFilePath << " for model " << Name << std::endl;
+		return;
+	}
+
+
+	if (knownTextures.find(textureFilePath) != knownTextures.end())
+	{
+		// texture has been loaded already and can be reused
+		mesh.DiffuseTextureId = knownTextures[textureFilePath];
+		return;
+	}
+
+	vec2i resolution;
+	int32_t comp;	//components, don't need this here except for stbi
+	uint8_t* imageData = stbi_load(textureFilePath.c_str(),
+		&resolution.x, &resolution.y, &comp, STBI_rgb_alpha);
+
+	int32_t texId = -1;
+	if (imageData)
+	{
+		texId = static_cast<int32_t>(TextureList.size());
+		std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>();
+		texture->Resolution = resolution;
+		texture->Pixels = reinterpret_cast<uint32_t*>(imageData);
+
+		// mirror along the y axis, due to some error in stbi loading the images that way
+		for (int32_t y = 0; y < resolution.y / 2; y++)
+		{
+			uint32_t* lineY = texture->Pixels + y * resolution.x;
+			uint32_t* mirroredY = texture->Pixels + (resolution.y - 1 - y) * resolution.x;
+			for (int32_t x = 0; x < resolution.x; x++)
+			{
+				std::swap(lineY[x], mirroredY[x]);
+			}
+		}
+
+		TextureList.push_back(texture);
+	}
+	else
+	{
+		throw std::runtime_error("Could not load texture from " + textureFilePath + " for model " + Name);
+	}
+
+	knownTextures[textureFilePath] = texId;
 }
 
 void Model::AddMesh(const Mesh& mesh)
@@ -71,6 +145,8 @@ void Model::AddMeshesFromFile(const std::string& filePath)
 
 	std::cout << "Successfully loaded model at " << filePath << std::endl;
 
+	std::map<std::string, int32_t> knownTextures;
+
 	for (int32_t shapeId = 0; shapeId < (int32_t)shapes.size(); shapeId++)
 	{
 		tinyobj::shape_t& shape = shapes[shapeId];
@@ -105,9 +181,16 @@ void Model::AddMeshesFromFile(const std::string& filePath)
 				mesh.Indices.push_back(idx);
 				mesh.DiffuseColor = (const vec3f&)materials[materialId].diffuse;
 
-				//TODO: use textures
-				std::cout << "Using random colors for model loaded from obj!" << std::endl;
-				mesh.DiffuseColor = gdt::randomColor(materialId);
+				const std::string texturePath =
+					materialFileDir	
+					//the textures folder is implicit in diffuse_texname
+					+ materials[materialId].diffuse_texname; 
+				LoadTextureForMesh(mesh, knownTextures, texturePath);
+
+				if (mesh.DiffuseTextureId == -1)
+				{
+					mesh.DiffuseColor = gdt::randomColor(materialId);
+				}				
 			}
 
 			if (!mesh.Vertices.empty())

@@ -37,14 +37,15 @@ public:
 
 	/**
 	* Diffuse color that the mesh is to be rendered with
-	* This is not used, if DiffuseTextureId has been set
+	* Will be combined with the diffuse texture
+	* (set to (1, 1, 1) for only diffuse texture results)
 	*/
-	vec3f DiffuseColor;
+	vec3f DiffuseColor = vec3f(1, 1, 1);
 
 	// TODO: support multiple (diffuse) textures
 	/**
-	* Texture id for the diffuse texture. If this is set
-	* the DiffuseColor will not be used.
+	* Texture id for the diffuse texture. 
+	* Will be combined with the diffuse color
 	*/
 	int32_t DiffuseTextureId = -1;
 };

@@ -383,33 +383,34 @@ void Renderer::CreateTextures()
 
 	for (const Model& model : ModelList)
 	{
-		for (int32_t texId = 0; texId < numTextures; texId++)
+		for (size_t texId = 0; texId < model.GetTextureList().size(); texId++)
 		{
-			Texture2D texture = model.GetTextureList()[texId];
+			uint32_t textureIndex = GetTextureBufferIndex(model, texId);
+			std::shared_ptr<Texture2D> texture = model.GetTextureList()[texId];
 
 			cudaResourceDesc resourceDesc = {};
 			cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
 			const int32_t numComponents = 4;
-			const int32_t pitch = texture.Resolution.x * numComponents * sizeof(uint8_t);
+			const int32_t pitch = texture->Resolution.x * numComponents * sizeof(uint8_t);
 
-			cudaArray_t& pixelArray = TextureArrays[texId];
+			cudaArray_t& pixelArray = TextureArrays[textureIndex];
 			cudaError_t result = cudaMallocArray(&pixelArray, &channelDesc,
-				texture.Resolution.x, texture.Resolution.y);
+				texture->Resolution.x, texture->Resolution.y);
 
 			if (result != cudaSuccess)
 			{
-				throw std::runtime_error("could allocate cuda array for texture of model " + model.GetName() + "!");
+				throw std::runtime_error("could allocate CUDA array for texture of model " + model.GetName() + "!");
 			}
 
 			result = cudaMemcpy2DToArray(pixelArray,
 				0, 0,	//wOffset, hOffset
-				texture.Pixels,
-				pitch, texture.Resolution.x, texture.Resolution.y,
+				texture->Pixels,
+				pitch, texture->Resolution.x, texture->Resolution.y,
 				cudaMemcpyHostToDevice);
 
 			if (result != cudaSuccess)
 			{
-				throw std::runtime_error("could not copy texture to cuda array of model " + model.GetName() + "!");
+				throw std::runtime_error("could not copy texture to CUDA array of model " + model.GetName() + "!");
 			}
 
 			resourceDesc.resType = cudaResourceTypeArray;
@@ -431,7 +432,7 @@ void Renderer::CreateTextures()
 			// create the actual CUDA texture object
 			cudaTextureObject_t cudaTex = 0;
 			result = cudaCreateTextureObject(&cudaTex, &resourceDesc, &texDesc, nullptr);
-			TextureObjects[texId] = cudaTex;
+			TextureObjects[textureIndex] = cudaTex;
 		}
 	}
 	
@@ -509,7 +510,10 @@ void Renderer::BuildShaderBindingTable()
 				rec.MeshData.HasTexture = true;
 				const std::vector<Mesh>& meshList = model.GetMeshList();
 				const Mesh& mesh = meshList[meshId];
-				rec.MeshData.Texture = TextureObjects[mesh.DiffuseTextureId];
+				if (mesh.DiffuseTextureId > 0)
+				{
+					rec.MeshData.Texture = TextureObjects[mesh.DiffuseTextureId];
+				}
 			}
 
 			hitgroupRecords.push_back(rec);
@@ -712,18 +716,22 @@ uint32_t Renderer::GetNumberMeshesFromScene() const
 	return numMeshes;
 }
 
-uint32_t Renderer::GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const
+uint32_t Renderer::GetModelIndex(const Model& model) const
 {
-	size_t index = 0;
-
 	for (size_t i = 0; i < ModelList.size(); i++)
 	{
 		if (&model == &ModelList[i])
 		{
-			index = i;
-			break;
+			return i;
 		}
 	}
+
+	return -1;
+}
+
+uint32_t Renderer::GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const
+{
+	size_t index = GetModelIndex(model);
 
 	return GetMeshBufferIndex(static_cast<uint32_t>(index), meshIndex);
 }
@@ -741,6 +749,42 @@ uint32_t Renderer::GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t
 		else
 		{
 			index += static_cast<uint32_t>(ModelList[modelId].GetMeshList().size());
+		}
+	}
+
+	return index;
+}
+
+uint32_t Renderer::GetNumberTexturesFromScene() const
+{
+	uint32_t numTexs = 0;
+	for (const Model& model : ModelList)
+	{
+		numTexs += static_cast<uint32_t>(model.GetTextureList().size());
+	}
+	return numTexs;
+}
+
+uint32_t Renderer::GetTextureBufferIndex(const Model& model, const uint32_t textureIndex) const
+{
+	size_t index = GetModelIndex(model);
+
+	return GetTextureBufferIndex(static_cast<uint32_t>(index), textureIndex);
+}
+
+uint32_t Renderer::GetTextureBufferIndex(const uint32_t& modelIndex, const uint32_t textureIndex) const
+{
+	uint32_t index = 0;
+	for (size_t modelId = 0; modelId < ModelList.size(); modelId++)
+	{
+		if (modelId == modelIndex)
+		{
+			index += textureIndex;
+			break;
+		}
+		else
+		{
+			index += static_cast<uint32_t>(ModelList[modelId].GetTextureList().size());
 		}
 	}
 

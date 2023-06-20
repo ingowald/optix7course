@@ -138,22 +138,49 @@ extern "C" __global__ void __closesthit__radiance()
 {
 	const MeshSbtData& meshData = *(const MeshSbtData*)optixGetSbtDataPointer();
 
-	// compute a normal
-	// TODO: this should be done offline when creating the mesh and put into a buffer
+	// basic hit information
 	const int32_t primitiveId = optixGetPrimitiveIndex();
 	const vec3i index = meshData.Indices[primitiveId];
-	const vec3f& v0 = meshData.Vertices[index.x];
-	const vec3f& v1 = meshData.Vertices[index.y];
-	const vec3f& v2 = meshData.Vertices[index.z];
-	const vec3f& normal = normalize(cross(v1 - v0, v2 - v0));
 
-	const vec3f rayDir = optixGetWorldRayDirection();
+	const float u = optixGetTriangleBarycentrics().x;
+	const float v = optixGetTriangleBarycentrics().y;
+
+	// read normal if one was provided, otherwise compute normal
+	vec3f normal;
+	if (meshData.Normals)
+	{
+		normal = (1.f - u - v) * meshData.Normals[index.x]
+			+ u * meshData.Normals[index.y]
+			+ v * meshData.Normals[index.z];
+	}
+	else
+	{
+		const vec3f& v0 = meshData.Vertices[index.x];
+		const vec3f& v1 = meshData.Vertices[index.y];
+		const vec3f& v2 = meshData.Vertices[index.z];
+		normal = cross(v1 - v0, v2 - v0);
+	}
+
+	normal = normalize(normal);
+
+	// get colour from color variable or texture
+	vec3f diffuseColor = meshData.DiffuseColor;
+	if (meshData.HasTexture)
+	{
+		const vec2f texCoord = (1.f - u - v) * meshData.TexCoords[index.x]
+			+ u * meshData.TexCoords[index.y]
+			+ v * meshData.TexCoords[index.z];
+
+		vec4f diffuseTexColor = tex2D<float4>(meshData.Texture, texCoord.x, texCoord.y);
+		diffuseColor *= (vec3f)diffuseTexColor;
+	}
 	
 	// shade the model based on ray / triangle angle (i.e. abs(dot(rayDir, normal)) )
+	const vec3f rayDir = optixGetWorldRayDirection();
 	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, normal));
 
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
-	perRayData = cosAlpha * meshData.DiffuseColor;
+	perRayData = cosAlpha * diffuseColor;
 }
 
 // dummy functions for OptiX pipeline
