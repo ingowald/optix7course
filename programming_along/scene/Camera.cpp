@@ -83,12 +83,22 @@ void Camera::Move(const float& deltaTime_seconds)
 	{
 		vec2f way = CurrentMousePos_Normalized - LastMousePos_Normalized;
 		float distance = sqrtf(way.x * way.x + way.y * way.y);
-		float angle = acos(distance);
+
+		if (distance == 0)
+		{
+			return;
+		}
+
+		float angle = asin(distance);
 
 		std::string str = "way:("
 			+ std::to_string(way.x) + ","
 			+ std::to_string(way.y) + ","
 			+ "); ";
+
+		str += "distance: "
+			+ std::to_string(distance)
+			+ " ";
 		
 		str += "old dir:("
 			+ std::to_string(forward.x) + ","
