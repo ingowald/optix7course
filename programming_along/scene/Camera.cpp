@@ -89,7 +89,9 @@ void Camera::Move(const float& deltaTime_seconds)
 			return;
 		}
 
-		float angle = asin(distance);
+		const int8_t sign = CurrentMousePos_Normalized.x > LastMousePos_Normalized.x ? 1 : -1;
+
+		float angle = sign * asin(distance);
 
 		std::string str = "way:("
 			+ std::to_string(way.x) + ","
