@@ -54,6 +54,7 @@ void Renderer::Init()
 	// initialize everything which needed mesh or camera information,
 	// as these may be set up from the outside (i.e. after ctor of Renderer)
 	Params.Traversable = BuildAccelerationStructure();
+	CreateTextures();
 	BuildShaderBindingTable();
 
 	ParamsBuffer.Alloc(sizeof(LaunchParams));
