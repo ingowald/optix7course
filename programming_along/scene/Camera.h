@@ -2,6 +2,8 @@
 
 #include "gdt/math/vec.h"
 
+#include "GLFW/glfw3.h"
+
 using namespace gdt;
 
 /**
@@ -74,7 +76,7 @@ private:
 	uint32_t Width;
 	uint32_t Height;
 
-	uint8_t KeyStatus[256];
+	uint8_t KeyStatus[GLFW_KEY_LAST];
 	vec2f LastMousePos_Normalized;
 	vec2f CurrentMousePos_Normalized;
 	uint8_t MouseStatus[8];
