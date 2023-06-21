@@ -571,39 +571,44 @@ void Renderer::BuildShaderBindingTable()
 	std::vector<HitgroupRecord> hitgroupRecords;
 	for (const Model& model : ModelList)
 	{
-		for (size_t meshId = 0; meshId < model.GetMeshList().size(); meshId++)
+		const std::vector<std::shared_ptr<Mesh>>& meshList = model.GetMeshList();
+		for (size_t meshId = 0; meshId < meshList.size(); meshId++)
 		{
+			std::shared_ptr<Mesh> mesh = meshList[meshId];
 			const uint32_t bufferIndex = GetMeshBufferIndex(model, static_cast<uint32_t>(meshId));
-			HitgroupRecord rec;
 
-			// all the meshes use the same kernel(/shader), therefore all use the same hit group
-			OptixResult result = optixSbtRecordPackHeader(HitgroupProgramGroups[0], &rec);
-			if (result != OPTIX_SUCCESS)
+			// a hit group record per mesh and per ray type is needed
+			for (size_t rayTypeId = 0; rayTypeId < RAY_TYPE_COUNT; rayTypeId++)
 			{
-				throw std::runtime_error("Could not build raygen record!");
-			}
+				HitgroupRecord rec;
 
-			// TODO: only upload normals and texcoords, if they are available?
-			//		what does CUDA do, if the uploaded array size is 0?
-			rec.MeshData.DiffuseColor = model.GetMeshList()[meshId]->DiffuseColor;
-			rec.MeshData.Vertices = (vec3f*)VertexBufferList[bufferIndex].CudaPtr();
-			rec.MeshData.Normals = (vec3f*)NormalBufferList[bufferIndex].CudaPtr();
-			rec.MeshData.Indices = (vec3i*)IndexBufferList[bufferIndex].CudaPtr();
-			rec.MeshData.TexCoords = (vec2f*)TexCoordsBufferList[bufferIndex].CudaPtr();
-
-			// setup textures, if applicable
-			if (model.GetTextureList().size() > 0)
-			{
-				const std::vector<std::shared_ptr<Mesh>>& meshList = model.GetMeshList();
-				std::shared_ptr<Mesh> mesh = meshList[meshId];
-				if (mesh->DiffuseTextureId >= 0)
+				// all the meshes use the same kernel(/shader), therefore all use the same hit group
+				OptixResult result = optixSbtRecordPackHeader(HitgroupProgramGroups[0], &rec);
+				if (result != OPTIX_SUCCESS)
 				{
-					rec.MeshData.HasTexture = true;
-					rec.MeshData.Texture = TextureObjects[mesh->DiffuseTextureId];
+					throw std::runtime_error("Could not build raygen record!");
 				}
-			}
 
-			hitgroupRecords.push_back(rec);
+				// TODO: only upload normals and texcoords, if they are available?
+				//		what does CUDA do, if the uploaded array size is 0?
+				rec.MeshData.DiffuseColor = mesh->DiffuseColor;
+				rec.MeshData.Vertices = (vec3f*)VertexBufferList[bufferIndex].CudaPtr();
+				rec.MeshData.Normals = (vec3f*)NormalBufferList[bufferIndex].CudaPtr();
+				rec.MeshData.Indices = (vec3i*)IndexBufferList[bufferIndex].CudaPtr();
+				rec.MeshData.TexCoords = (vec2f*)TexCoordsBufferList[bufferIndex].CudaPtr();
+
+				// setup textures, if applicable
+				if (model.GetTextureList().size() > 0)
+				{
+					if (mesh->DiffuseTextureId >= 0)
+					{
+						rec.MeshData.HasTexture = true;
+						rec.MeshData.Texture = TextureObjects[mesh->DiffuseTextureId];
+					}
+				}
+
+				hitgroupRecords.push_back(rec);
+			}
 		}
 	}
 	
