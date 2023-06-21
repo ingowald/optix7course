@@ -427,7 +427,7 @@ void Renderer::CreateTextures()
 			result = cudaMemcpy2DToArray(pixelArray,
 				0, 0,	//wOffset, hOffset
 				texture->Pixels,
-				pitch, texture->Resolution.x, texture->Resolution.y,
+				pitch, pitch, texture->Resolution.y,
 				cudaMemcpyHostToDevice);
 
 			if (result != cudaSuccess)

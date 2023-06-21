@@ -172,7 +172,7 @@ extern "C" __global__ void __closesthit__radiance()
 			+ u * meshData.TexCoords[index.y]
 			+ v * meshData.TexCoords[index.z];
 
-		vec4f diffuseTexColor = tex2D<float4>(meshData.Texture, texCoord.x, texCoord.y);
+		const vec4f diffuseTexColor = tex2D<float4>(meshData.Texture, texCoord.x, texCoord.y);
 		diffuseColor *= (vec3f)diffuseTexColor;
 	}
 	
@@ -181,7 +181,7 @@ extern "C" __global__ void __closesthit__radiance()
 	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, normal));
 
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
-	perRayData = cosAlpha * diffuseColor;
+	perRayData = cosAlpha* diffuseColor;
 }
 
 // dummy functions for OptiX pipeline
