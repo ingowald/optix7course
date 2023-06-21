@@ -9,12 +9,6 @@
 
 extern "C" __constant__ LaunchParams launchParams;
 
-// simple ray type
-enum { 
-	SURFACE_RAY_TYPE = 0,
-	RAY_TYPE_COUNT
-};
-
 static __forceinline__ __device__
 void packPointer(void* ptr, uint32_t& i0, uint32_t& i1)
 {	
@@ -96,9 +90,9 @@ extern "C" __global__ void __raygen__renderFrame()
 		0.0f,	// ray time (has to be enabled in pipeline compile options, otherwise ignored)
 		OptixVisibilityMask(255),
 		OPTIX_RAY_FLAG_DISABLE_ANYHIT,
-		SURFACE_RAY_TYPE,
+		RADIANCE_RAY_TYPE,
 		RAY_TYPE_COUNT,
-		SURFACE_RAY_TYPE,
+		RADIANCE_RAY_TYPE,
 		u0, u1 // payload p0, p1 (, up to p7? up to 31?)
 	);
 
@@ -126,6 +120,13 @@ extern "C" __global__ void __raygen__renderFrame()
 	launchParams.FramebufferData[fbIndex] = rgba;
 }
 
+extern "C" __global__ void __miss__shadow()
+{
+	// the shadow ray has not hit anything,
+	// therefore the light hits the surface and fully lightens it
+	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
+	perRayData = vec3f(1.f);
+}
 
 extern "C" __global__ void __miss__radiance() 
 {
@@ -133,6 +134,11 @@ extern "C" __global__ void __miss__radiance()
 
 	// set to constant white as background colour
 	perRayData = vec3f(1.f);
+}
+
+extern "C" __global__ void __closesthit__shadow()
+{
+	// nothing to do here, shadows will be handled in anyhit
 }
 
 extern "C" __global__ void __closesthit__radiance() 
@@ -184,5 +190,17 @@ extern "C" __global__ void __closesthit__radiance()
 	perRayData = cosAlpha* diffuseColor;
 }
 
-// dummy functions for OptiX pipeline
-extern "C" __global__ void __anyhit__radiance() {}
+extern "C" __global__ void __anyhit__shadow()
+{
+	// if the shadow ray hits, the corresponding pixel is in shadow.
+	// therefore, it should not (fullly) be shadded. 
+	// the idea is, to assume a pixel is shaded and only if a shadow 
+	// ray triggers the miss program (i.e. does not hit geometry)
+	// will the pixel be fully lighted. this makes any code 
+	// outside of the miss program obsolete
+	//		-> tl;dr: nothing to do here
+}
+
+extern "C" __global__ void __anyhit__radiance() 
+{// dummy functions for OptiX pipeline
+}

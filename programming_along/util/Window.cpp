@@ -140,7 +140,7 @@ void Window::Run()
 		Duration deltaTime = newTime - lastTime;
 		lastTime = newTime;
 		std::chrono::milliseconds deltaTime_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(deltaTime);
-		OptixRenderer.Tick(deltaTime_milliseconds.count() * 0.001);
+		OptixRenderer.Tick((float)deltaTime_milliseconds.count() * 0.001f);
 
 		Render();
 		Draw();

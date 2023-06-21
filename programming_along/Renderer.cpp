@@ -292,7 +292,11 @@ void Renderer::CreateRaygenPrograms()
 
 void Renderer::CreateMissPrograms()
 {
-	MissProgramGroups.resize(1);
+	MissProgramGroups.resize(RAY_TYPE_COUNT);
+
+	//---------------------
+	//--- Radiance Rays ---
+	//---------------------
 
 	OptixProgramGroupOptions pgOptions = {};
 	OptixProgramGroupDesc pgDescr = {};
@@ -303,7 +307,7 @@ void Renderer::CreateMissPrograms()
 	char log[2048];
 	size_t logSize = sizeof(log);
 	OptixResult result = optixProgramGroupCreate(OptixContext,
-		&pgDescr, 1, &pgOptions, log, &logSize, MissProgramGroups.data());
+		&pgDescr, 1, &pgOptions, log, &logSize, &MissProgramGroups[RADIANCE_RAY_TYPE]);
 
 	if (logSize > 1)
 	{
@@ -312,15 +316,42 @@ void Renderer::CreateMissPrograms()
 
 	if (result != OPTIX_SUCCESS)
 	{
-		throw std::runtime_error("Could not create miss program!");
+		throw std::runtime_error("Could not create radiance miss program!");
 	}
 
-	std::cout << "Miss program created!" << std::endl;
+	std::cout << "Miss program for radiance rays created!" << std::endl;
+
+	//-------------------
+	//--- Shadow Rays ---
+	//-------------------
+
+	// we can reuse description and options of the radiance rays
+	pgDescr.raygen.entryFunctionName = "__miss__shadow";
+
+	result = optixProgramGroupCreate(OptixContext,
+		&pgDescr, 1, &pgOptions, log, &logSize, &MissProgramGroups[SHADOW_RAY_TYPE]);
+
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create shadow miss program!");
+	}
+
+	std::cout << "Miss program for shadow rays created!" << std::endl;
+
 }
 
 void Renderer::CreateHitgroupPrograms()
 {
-	HitgroupProgramGroups.resize(1);
+	HitgroupProgramGroups.resize(RAY_TYPE_COUNT);
+
+	//---------------------
+	//--- Radiance Rays ---
+	//---------------------
 
 	OptixProgramGroupOptions pgOptions = {};
 	OptixProgramGroupDesc pgDescr = {};
@@ -333,7 +364,7 @@ void Renderer::CreateHitgroupPrograms()
 	char log[2048];
 	size_t logSize = sizeof(log);
 	OptixResult result = optixProgramGroupCreate(OptixContext,
-		&pgDescr, 1, &pgOptions, log, &logSize, HitgroupProgramGroups.data());
+		&pgDescr, 1, &pgOptions, log, &logSize, &HitgroupProgramGroups[RADIANCE_RAY_TYPE]);
 
 	if (logSize > 1)
 	{
@@ -342,10 +373,34 @@ void Renderer::CreateHitgroupPrograms()
 
 	if (result != OPTIX_SUCCESS)
 	{
-		throw std::runtime_error("Could not create hitgroup program!");
+		throw std::runtime_error("Could not radiance create hitgroup program!");
 	}
 
-	std::cout << "Hit group program created!" << std::endl;
+	std::cout << "Hit group program for radiance created!" << std::endl;
+	
+	//-------------------
+	//--- Shadow Rays ---
+	//-------------------
+
+	// we can reuse the previously created options
+	// also: technically not needed since only the miss program is used
+	pgDescr.hitgroup.entryFunctionNameCH = "__closesthit__shadow";
+	pgDescr.hitgroup.entryFunctionNameAH = "__anyhit__shadow";
+
+	result = optixProgramGroupCreate(OptixContext,
+		&pgDescr, 1, &pgOptions, log, &logSize, &HitgroupProgramGroups[SHADOW_RAY_TYPE]);
+
+	if (logSize > 1)
+	{
+		std::cout << log << std::endl;
+	}
+
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create shadow hitgroup program!");
+	}
+
+	std::cout << "Hit group program for shadow created!" << std::endl;
 }
 
 void Renderer::CreatePipeline()
@@ -407,7 +462,7 @@ void Renderer::CreateTextures()
 	{
 		for (size_t texId = 0; texId < model.GetTextureList().size(); texId++)
 		{
-			uint32_t textureIndex = GetTextureBufferIndex(model, texId);
+			uint32_t textureIndex = GetTextureBufferIndex(model, static_cast<uint32_t>(texId));
 			std::shared_ptr<Texture2D> texture = model.GetTextureList()[texId];
 
 			cudaResourceDesc resourceDesc = {};

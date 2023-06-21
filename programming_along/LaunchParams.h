@@ -6,6 +6,13 @@
 
 using namespace gdt;
 
+// simple ray type
+enum {
+	RADIANCE_RAY_TYPE = 0,
+	SHADOW_RAY_TYPE,
+	RAY_TYPE_COUNT
+};
+
 struct LaunchParams
 {
 	uint32_t FrameID{ 0 };
