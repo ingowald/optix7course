@@ -21,3 +21,11 @@ public:
 protected:
 	vec3f Location = vec3f(0.f);
 };
+
+/**
+* struct to provide easier access for OptiX (/CUDA) kernels
+*/
+struct LightOptix
+{
+	vec3f Location;
+};

@@ -144,6 +144,7 @@ extern "C" __global__ void __closesthit__shadow()
 extern "C" __global__ void __closesthit__radiance() 
 {
 	const MeshSbtData& meshData = *(const MeshSbtData*)optixGetSbtDataPointer();
+	const LightOptix& light = launchParams.Light;
 
 	// basic hit information
 	const int32_t primitiveId = optixGetPrimitiveIndex();
@@ -181,6 +182,36 @@ extern "C" __global__ void __closesthit__radiance()
 		const vec4f diffuseTexColor = tex2D<float4>(meshData.Texture, texCoord.x, texCoord.y);
 		diffuseColor *= (vec3f)diffuseTexColor;
 	}
+
+	// compute, if the pixel is in shadow
+	const vec3f surfacePosition =
+		(1.f - u - v) * meshData.Vertices[index.x]
+		+ u * meshData.Vertices[index.y]
+		+ v * meshData.Vertices[index.z];
+	const vec3f lightDir = light.Location - surfacePosition;
+
+	// trace a shadow ray
+	vec3f lightVisibility = 0.f;
+	uint32_t u0, u1;
+	packPointer(&lightVisibility, u0, u1);
+
+	optixTrace(launchParams.Traversable,
+		surfacePosition + 1e-3f * normal,
+		lightDir,
+		1e-3f,			// tmin
+		1.f - 1e-3f,	// tmax
+		0.f,			// ray time
+		OptixVisibilityMask(255),
+		// skip any/closest hit for shadow rays, and terminate on first intersection
+		// the actual work is done in the miss shader, since that dertermines, if 
+		// the light is visible from the given surface position
+		OPTIX_RAY_FLAG_DISABLE_ANYHIT
+		| OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
+		| OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
+		SHADOW_RAY_TYPE,	// Shader binding table offset
+		RAY_TYPE_COUNT,		// Sbt stride
+		SHADOW_RAY_TYPE,	// Sbt miss program index
+		u0, u1);
 	
 	// shade the model based on ray / triangle angle (i.e. abs(dot(rayDir, normal)) )
 	const vec3f rayDir = optixGetWorldRayDirection();
