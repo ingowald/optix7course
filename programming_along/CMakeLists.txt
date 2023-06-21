@@ -22,6 +22,10 @@ set(SOURCE_LIST
 	scene/Mesh.cpp
 	scene/Model.h
 	scene/Model.cpp
+	scene/Light.h
+	scene/Light.cpp
+	scene/RotatingLight.h
+	scene/RotatingLight.cpp
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})
