@@ -427,7 +427,11 @@ void Renderer::CreateTextures()
 			result = cudaMemcpy2DToArray(pixelArray,
 				0, 0,	//wOffset, hOffset
 				texture->Pixels,
-				pitch, pitch, texture->Resolution.y,
+				pitch, pitch, texture->Resolution.y,	// it's important to use width as "width in bytes"
+														// i.e. here width_pixels * components * sizeof component
+														// which is equal to pitch.
+														// TODO: why is the pitch needed as an extra parameter then?
+														//		seem to always be the same
 				cudaMemcpyHostToDevice);
 
 			if (result != cudaSuccess)
