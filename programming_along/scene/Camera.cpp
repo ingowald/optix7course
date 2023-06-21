@@ -84,17 +84,6 @@ void Camera::Move(const float& deltaTime_seconds)
 		Eye = lastEye;
 	}
 
-	if (KeyStatus[GLFW_KEY_0])
-	{
-		Eye = vec3f(0.f, 0.f, 0.f);
-	}
-	if (KeyStatus[GLFW_KEY_9])
-	{
-		Eye = InitialEye;
-		At = InitialAt;
-		Up = InitialUp;
-	}
-
 	// print camera setup for easier initial setup
 	if (KeyStatus[GLFW_KEY_P])
 	{
@@ -134,7 +123,27 @@ void Camera::Move(const float& deltaTime_seconds)
 		Quaternion3f quatY = Quaternion3f::rotate(right, angleY);
 		forward = quatY * forward;
 	}
+	if (KeyStatus[GLFW_KEY_0])
+	{
+		Eye = vec3f(0.f, 0.f, 0.f);
+	}
+	
 	At = Eye + forward;
+
+	// if setting to a certain position and orientation,
+	// ignore any forward calculations!
+	if (KeyStatus[GLFW_KEY_9])
+	{
+		Eye = InitialEye;
+		At = InitialAt;
+		Up = InitialUp;
+	}
+	if (KeyStatus[GLFW_KEY_8])
+	{
+		Eye = vec3f(-40.406, 48.918, 57.771);
+		At = vec3f(-39.874, 48.441, 57.071);
+		Up = vec3f(0.f, 1.f, 0.f);
+	}
 
 	LastMousePos_Normalized = CurrentMousePos_Normalized;
 }
