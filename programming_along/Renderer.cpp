@@ -454,6 +454,12 @@ void Renderer::CreateTextures()
 			// create the actual CUDA texture object
 			cudaTextureObject_t cudaTex = 0;
 			result = cudaCreateTextureObject(&cudaTex, &resourceDesc, &texDesc, nullptr);
+
+			if (result != cudaSuccess)
+			{
+				const std::string errorString(cudaGetErrorString(result));
+				throw std::runtime_error("error creating CUDA texture object: " + errorString);
+			}
 			TextureObjects[textureIndex] = cudaTex;
 		}
 	}
