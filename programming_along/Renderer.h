@@ -23,6 +23,8 @@ public:
 	Renderer();
 	~Renderer();
 
+	static void OptixLogCallback(uint32_t level, const char* tag, const char* message, void* cbdata);
+
 	/**
 	* Initializes anything that could not be done in the ctor,
 	* e.g. building the shader binding table
@@ -51,7 +53,7 @@ public:
 
 	void InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up);
 
-	void AddMesh(const Mesh& mesh);
+	void AddMesh(std::shared_ptr<Mesh> mesh);
 
 	void AddModel(const Model& model);
 
@@ -92,6 +94,11 @@ private:
 	void CreatePipeline();
 
 	/**
+	* Creates all necessary textures for all meshes from all models for OptiX
+	*/
+	void CreateTextures();
+
+	/**
 	* Builds the shader binding table
 	*/
 	void BuildShaderBindingTable();
@@ -106,6 +113,11 @@ private:
 	uint32_t GetNumberMeshesFromScene() const;
 
 	/**
+	* Finds the given model in the ModelList and returns the index
+	*/
+	uint32_t GetModelIndex(const Model& model) const;
+
+	/**
 	* Since there is a ModelList and a MeshList per Model,
 	* but the CUDA Vertex and Index buffers are one dimensional,
 	* we need to calculate the Index for a given mesh from a given model
@@ -118,6 +130,22 @@ private:
 	* we need to calculate the Index for a given mesh from a given model
 	*/
 	uint32_t GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t meshIndex) const;
+
+	uint32_t GetNumberTexturesFromScene() const;
+
+	/**
+	* Since there is a ModelList and a TextureList per Model,
+	* but CUDA Texture buffers are one dimensional
+	* we need to calculate the Index for a given texture from a given model
+	*/
+	uint32_t GetTextureBufferIndex(const Model& model, const uint32_t textureIndex) const;
+
+	/**
+	* Since there is a ModelList and a TextureList per Model,
+	* but CUDA Texture buffers are one dimensional
+	* we need to calculate the Index for a given texture from a given model
+	*/
+	uint32_t GetTextureBufferIndex(const uint32_t& modelIndex, const uint32_t textureIndex) const;
 
 public:
 
@@ -135,9 +163,13 @@ protected:
 	std::vector<Model> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
-	// TODO: this should probably become part of the mesh rather than the renderer?
 	std::vector<CUDABuffer> VertexBufferList;
+	std::vector<CUDABuffer> NormalBufferList;
 	std::vector<CUDABuffer> IndexBufferList;
+	std::vector<CUDABuffer> TexCoordsBufferList;
+
+	std::vector<cudaArray_t> TextureArrays;
+	std::vector<cudaTextureObject_t> TextureObjects;
 
 	bool IsInitialized = false;
 

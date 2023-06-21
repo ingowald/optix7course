@@ -11,6 +11,9 @@ set(SOURCE_LIST
 	Renderer.cpp
 	util/SbtStructs.h
 	util/CUDABuffer.h
+	util/Texture.h
+	util/Util.h
+	util/Util.cpp
 	util/Window.h
 	util/Window.cpp
 	scene/Camera.h

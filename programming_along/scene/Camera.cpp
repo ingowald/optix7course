@@ -5,6 +5,8 @@
 
 #include "gdt/math/Quaternion.h"
 
+#include "../util/Util.h"
+
 Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/, 
 	const vec3f& at /* = vec3f(0.f, 0.f, -1.f)*/, 
 	const vec3f& up /* = vec3f(0.f, 1.f, 0.f)*/,
@@ -44,29 +46,36 @@ void Camera::Move(const float& deltaTime_seconds)
 
 	vec3f lastEye = Eye;
 
+	float adjustedSpeed = Speed;
+
+	if (KeyStatus[GLFW_KEY_LEFT_SHIFT])
+	{
+		adjustedSpeed *= 10;
+	}
+
 	if (KeyStatus[GLFW_KEY_A])
 	{
-		Eye -= Speed * deltaTime_seconds * right;
+		Eye -= adjustedSpeed * deltaTime_seconds * right;
 	}
 	if (KeyStatus[GLFW_KEY_D])
 	{
-		Eye += Speed * deltaTime_seconds * right;
+		Eye += adjustedSpeed * deltaTime_seconds * right;
 	}
 	if (KeyStatus[GLFW_KEY_W])
 	{
-		Eye += Speed * deltaTime_seconds * forward;
+		Eye += adjustedSpeed * deltaTime_seconds * forward;
 	}
 	if (KeyStatus[GLFW_KEY_S])
 	{
-		Eye -= Speed * deltaTime_seconds * forward;
+		Eye -= adjustedSpeed * deltaTime_seconds * forward;
 	}
 	if (KeyStatus[GLFW_KEY_E])
 	{
-		Eye += Speed * deltaTime_seconds * Up;
+		Eye += adjustedSpeed * deltaTime_seconds * Up;
 	}
 	if (KeyStatus[GLFW_KEY_Q])
 	{
-		Eye -= Speed * deltaTime_seconds * Up;
+		Eye -= adjustedSpeed * deltaTime_seconds * Up;
 	}
 
 	// safety net
@@ -75,15 +84,18 @@ void Camera::Move(const float& deltaTime_seconds)
 		Eye = lastEye;
 	}
 
-	if (KeyStatus[GLFW_KEY_0])
+	// print camera setup for easier initial setup
+	if (KeyStatus[GLFW_KEY_P])
 	{
-		Eye = vec3f(0.f, 0.f, 0.f);
-	}
-	if (KeyStatus[GLFW_KEY_9])
-	{
-		Eye = InitialEye;
-		At = InitialAt;
-		Up = InitialUp;
+		std::cout << "Eye: "
+			<< Util::VecToString(Eye)
+			<< std::endl;
+		std::cout << "At: "
+			<< Util::VecToString(At)
+			<< std::endl;
+		std::cout << "Up: "
+			<< Util::VecToString(Up)
+			<< std::endl;
 	}
 
 	// mouse action
@@ -111,7 +123,27 @@ void Camera::Move(const float& deltaTime_seconds)
 		Quaternion3f quatY = Quaternion3f::rotate(right, angleY);
 		forward = quatY * forward;
 	}
+	if (KeyStatus[GLFW_KEY_0])
+	{
+		Eye = vec3f(0.f, 0.f, 0.f);
+	}
+	
 	At = Eye + forward;
+
+	// if setting to a certain position and orientation,
+	// ignore any forward calculations!
+	if (KeyStatus[GLFW_KEY_9])
+	{
+		Eye = InitialEye;
+		At = InitialAt;
+		Up = InitialUp;
+	}
+	if (KeyStatus[GLFW_KEY_8])
+	{
+		Eye = vec3f(-40.406, 48.918, 57.771);
+		At = vec3f(-39.874, 48.441, 57.071);
+		Up = vec3f(0.f, 1.f, 0.f);
+	}
 
 	LastMousePos_Normalized = CurrentMousePos_Normalized;
 }

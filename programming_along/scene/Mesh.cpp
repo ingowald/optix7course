@@ -21,6 +21,16 @@ void Mesh::AddUnitCube(const affine3f& transfomrationMatrix)
 	Vertices.push_back(xfmPoint(transfomrationMatrix, vec3f(0.f, 1.f, 1.f)));
 	Vertices.push_back(xfmPoint(transfomrationMatrix, vec3f(1.f, 1.f, 1.f)));
 
+	TexCoords.push_back(vec2f(0.f, 0.f));
+	TexCoords.push_back(vec2f(1.f, 0.f));
+	TexCoords.push_back(vec2f(0.f, 1.f));
+	TexCoords.push_back(vec2f(1.f, 1.f));
+
+	TexCoords.push_back(vec2f(0.f, 0.f));
+	TexCoords.push_back(vec2f(1.f, 0.f));
+	TexCoords.push_back(vec2f(0.f, 1.f));
+	TexCoords.push_back(vec2f(1.f, 1.f));
+
 	int32_t indices[] = {
 		0, 1, 3,	2, 3, 0,
 		5, 7, 6,	5, 6, 4,

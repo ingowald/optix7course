@@ -8,4 +8,5 @@ build
 *.zip
 Session.vim
 /models/*
+/textures/*
 *.swp
