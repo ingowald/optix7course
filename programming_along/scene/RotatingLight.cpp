@@ -1,7 +1,7 @@
 
 #include "RotatingLight.h"
 
-RotatingLight::RotatingLight(const vec3f& location, float rotationSpeed = 1.f, float rotationRadius = 1.f)
+RotatingLight::RotatingLight(const vec3f& location, float rotationSpeed /* = 1.f*/, float rotationRadius /* = 1.f */ )
 {
 	Location = location;
 	RotationSpeed = rotationSpeed;
@@ -10,8 +10,6 @@ RotatingLight::RotatingLight(const vec3f& location, float rotationSpeed = 1.f, f
 
 void RotatingLight::Tick(const float& deltaTime_seconds)
 {
-	TotalTime += deltaTime_seconds;
-
 	vec3f location = Location;
 	location.x += sin(deltaTime_seconds * RotationSpeed) * RotationRadius;
 	location.z += cos(deltaTime_seconds * RotationSpeed) * RotationRadius;
