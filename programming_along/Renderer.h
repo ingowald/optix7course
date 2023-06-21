@@ -16,6 +16,7 @@
 
 class Model;
 struct Mesh;
+class Light;
 
 class Renderer
 {
@@ -56,6 +57,8 @@ public:
 	void AddMesh(std::shared_ptr<Mesh> mesh);
 
 	void AddModel(const Model& model);
+
+	void AddLight(std::shared_ptr<Light> light);
 
 private:
 	/**
@@ -162,6 +165,8 @@ protected:
 
 	std::vector<Model> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
+
+	std::vector<std::shared_ptr<Light>> LightList;
 
 	std::vector<CUDABuffer> VertexBufferList;
 	std::vector<CUDABuffer> NormalBufferList;

@@ -156,6 +156,11 @@ void Renderer::AddModel(const Model& model)
 	ModelList.push_back(model);
 }
 
+void Renderer::AddLight(std::shared_ptr<Light> light)
+{
+	LightList.push_back(light);
+}
+
 void Renderer::InitOptix()
 {
 	// check that CUDA works and a CUDA capable device is found
