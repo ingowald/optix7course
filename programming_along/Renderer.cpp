@@ -606,7 +606,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 			IndexBufferList[bufferIndex].AllocAndUpload(mesh->Indices);
 			if (!mesh->TexCoords.empty())
 			{
-				TexCoordsBufferList[bufferIndex].AllocAndUpload(mesh->Indices);
+				TexCoordsBufferList[bufferIndex].AllocAndUpload(mesh->TexCoords);
 			}
 
 			// triangle inputs
