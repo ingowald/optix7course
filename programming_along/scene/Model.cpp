@@ -167,7 +167,7 @@ void Model::AddMeshesFromFile(const std::string& filePath)
 		for (int32_t materialId : materialIds)
 		{
 			std::map<tinyobj::index_t, int32_t> knownVertices;
-			std::shared_ptr<Mesh> mesh;
+			std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
 			for (int32_t faceId = 0; faceId < shape.mesh.material_ids.size(); faceId++)
 			{
