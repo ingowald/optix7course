@@ -40,10 +40,10 @@ int main(int ac, char **av)
 		// untested, but should work on linux
 		const std::string filePath = "../models/crytek_sponza/sponza.obj";
 #endif
-		//Model sponza(filePath, "sponza scene");
+		Model sponza(filePath, "sponza scene");
 
 		Renderer* renderer = window.GetRenderer();
-		//renderer->AddModel(sponza);
+		renderer->AddModel(sponza);
 		renderer->AddModel(m1);
 		renderer->AddModel(m2);
 
