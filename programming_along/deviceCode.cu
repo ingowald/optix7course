@@ -231,7 +231,7 @@ extern "C" __global__ void __closesthit__radiance()
 		u0, u1);
 	
 	// shade the model based on ray / triangle angle (i.e. abs(dot(rayDir, normal)) )
-	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, surfaceNormal));
+	const float cosAlpha = 0.1f + .8f * fabsf(dot(rayDir, surfaceNormal));
 
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
 	perRayData = (.1f + (.2f + .8f * lightVisibility) * cosAlpha) * diffuseColor;

@@ -44,3 +44,10 @@ std::shared_ptr<Model> Light::GetProxy() const
 {
 	return Proxy;
 }
+
+LightOptix Light::GetOptixLight() const
+{
+	LightOptix l;
+	l.Location = Location;
+	return l;
+}

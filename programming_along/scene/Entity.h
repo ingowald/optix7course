@@ -11,12 +11,14 @@ using namespace gdt;
 class Entity
 {
 public:
-	Entity() : TransfomrationMatrix(affine3f())
-	{}
+	Entity()
+	{
+		TransfomrationMatrix = affine3f::translate(vec3f(0.f));
+	}
 
 	affine3f GetTransformationMatrix() const;
 	void SetTransformationMatrix(const affine3f& matrix);
 
 protected:
-	affine3f& TransfomrationMatrix;
+	affine3f TransfomrationMatrix;
 };

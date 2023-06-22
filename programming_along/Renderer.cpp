@@ -93,6 +93,9 @@ void Renderer::Render()
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
 
+	// update light values
+	Params.Light = LightList[0]->GetOptixLight();
+
 	// upload the launch params and increment frame ID
 	ParamsBuffer.Upload(&Params, 1);
 	Params.FrameID++;

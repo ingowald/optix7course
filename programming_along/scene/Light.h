@@ -10,6 +10,14 @@ using namespace gdt;
 struct Mesh;
 class Model;
 
+/**
+* struct to provide easier access for OptiX (/CUDA) kernels
+*/
+struct LightOptix
+{
+	vec3f Location;
+};
+
 class Light : public Entity
 {
 public:
@@ -28,18 +36,12 @@ public:
 
 	std::shared_ptr<Model> GetProxy() const;
 
+	LightOptix GetOptixLight() const;
+
 protected:
 	vec3f Location = vec3f(0.f);
 
 	bool ShowProxyMesh = false;
 
 	std::shared_ptr<Model> Proxy;
-};
-
-/**
-* struct to provide easier access for OptiX (/CUDA) kernels
-*/
-struct LightOptix
-{
-	vec3f Location;
 };
