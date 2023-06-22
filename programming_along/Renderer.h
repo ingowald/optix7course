@@ -56,7 +56,7 @@ public:
 
 	void AddMesh(std::shared_ptr<Mesh> mesh);
 
-	void AddModel(const Model& model);
+	void AddModel(std::shared_ptr<Model> model);
 
 	void AddLight(std::shared_ptr<Light> light);
 
@@ -113,19 +113,19 @@ private:
 
 	void SynchCuda(const std::string& errorMsg = "");
 
-	uint32_t GetNumberMeshesFromScene() const;
+	uint32_t GetNumberMeshesFromScene(const bool& includeVisibleProxies = true) const;
 
 	/**
 	* Finds the given model in the ModelList and returns the index
 	*/
-	uint32_t GetModelIndex(const Model& model) const;
+	uint32_t GetModelIndex(std::shared_ptr<Model> model) const;
 
 	/**
 	* Since there is a ModelList and a MeshList per Model,
 	* but the CUDA Vertex and Index buffers are one dimensional,
 	* we need to calculate the Index for a given mesh from a given model
 	*/
-	uint32_t GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const;
+	uint32_t GetMeshBufferIndex(std::shared_ptr<Model> model, const uint32_t meshIndex) const;
 
 	/**
 	* Since there is a ModelList and a MeshList per Model,
@@ -141,7 +141,7 @@ private:
 	* but CUDA Texture buffers are one dimensional
 	* we need to calculate the Index for a given texture from a given model
 	*/
-	uint32_t GetTextureBufferIndex(const Model& model, const uint32_t textureIndex) const;
+	uint32_t GetTextureBufferIndex(std::shared_ptr<Model> model, const uint32_t textureIndex) const;
 
 	/**
 	* Since there is a ModelList and a TextureList per Model,
@@ -163,7 +163,7 @@ protected:
 	/** Scene */
 	Camera SceneCamera;
 
-	std::vector<Model> ModelList;
+	std::vector<std::shared_ptr<Model>> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
 	std::vector<std::shared_ptr<Light>> LightList;

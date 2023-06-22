@@ -147,11 +147,10 @@ void Renderer::InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& 
 
 void Renderer::AddMesh(std::shared_ptr<Mesh> mesh)
 {
-	Model m(mesh);
-	AddModel(m);
+	AddModel(std::make_shared<Model>(mesh));
 }
 
-void Renderer::AddModel(const Model& model)
+void Renderer::AddModel(std::shared_ptr<Model> model)
 {
 	ModelList.push_back(model);
 }
@@ -455,20 +454,20 @@ void Renderer::CreatePipeline()
 void Renderer::CreateTextures()
 {
 	int32_t numTextures = 0;
-	for (const Model& model : ModelList)
+	for (std::shared_ptr<Model> model : ModelList)
 	{
-		numTextures += static_cast<int32_t>(model.GetTextureList().size());
+		numTextures += static_cast<int32_t>(model->GetTextureList().size());
 	}
 
 	TextureArrays.resize(numTextures);
 	TextureObjects.resize(numTextures);
 
-	for (const Model& model : ModelList)
+	for (std::shared_ptr<Model> model : ModelList)
 	{
-		for (size_t texId = 0; texId < model.GetTextureList().size(); texId++)
+		for (size_t texId = 0; texId < model->GetTextureList().size(); texId++)
 		{
 			uint32_t textureIndex = GetTextureBufferIndex(model, static_cast<uint32_t>(texId));
-			std::shared_ptr<Texture2D> texture = model.GetTextureList()[texId];
+			std::shared_ptr<Texture2D> texture = model->GetTextureList()[texId];
 
 			cudaResourceDesc resourceDesc = {};
 			cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
@@ -481,8 +480,7 @@ void Renderer::CreateTextures()
 
 			if (result != cudaSuccess)
 			{
-				throw std::runtime_error("could allocate CUDA array for texture of model " + model.GetName() + "!");
-			}
+				throw std::runtime_error("could allocate CUDA array for texture of model " + model->GetName() + "!");			}
 
 			result = cudaMemcpy2DToArray(pixelArray,
 				0, 0,	//wOffset, hOffset
@@ -496,7 +494,7 @@ void Renderer::CreateTextures()
 
 			if (result != cudaSuccess)
 			{
-				throw std::runtime_error("could not copy texture to CUDA array of model " + model.GetName() + "!");
+				throw std::runtime_error("could not copy texture to CUDA array of model " + model->GetName() + "!");
 			}
 
 			resourceDesc.resType = cudaResourceTypeArray;
@@ -574,9 +572,9 @@ void Renderer::BuildShaderBindingTable()
 	// there are n meshes and m ray types, so n*m hitgroup records
 	// currently there is only one ray type, so n hitgroup records
 	std::vector<HitgroupRecord> hitgroupRecords;
-	for (const Model& model : ModelList)
+	for (std::shared_ptr<Model> model : ModelList)
 	{
-		const std::vector<std::shared_ptr<Mesh>>& meshList = model.GetMeshList();
+		const std::vector<std::shared_ptr<Mesh>>& meshList = model->GetMeshList();
 		for (size_t meshId = 0; meshId < meshList.size(); meshId++)
 		{
 			std::shared_ptr<Mesh> mesh = meshList[meshId];
@@ -603,7 +601,7 @@ void Renderer::BuildShaderBindingTable()
 				rec.MeshData.TexCoords = (vec2f*)TexCoordsBufferList[bufferIndex].CudaPtr();
 
 				// setup textures, if applicable
-				if (model.GetTextureList().size() > 0)
+				if (model->GetTextureList().size() > 0)
 				{
 					if (mesh->DiffuseTextureId >= 0)
 					{
@@ -660,9 +658,20 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	std::vector<CUdeviceptr> cudaIndexBufferList(totalNumberMeshes);
 	std::vector<uint32_t> triangleInputFlagsList(totalNumberMeshes);
 
-	for (const Model& model : ModelList)
+	// create a temporary model list, such that other models can be added to the scene
+	std::vector<std::shared_ptr<Model>> tempModelList = ModelList;
+	
+	for (std::shared_ptr<Light> light : LightList)
 	{
-		std::vector<std::shared_ptr<Mesh>>& meshList = model.GetMeshList();
+		if (light->GetShowProxyMesh())
+		{
+			//tempModelList.push_back(light->GetProxy());
+		}
+	}
+
+	for (std::shared_ptr<Model> model : tempModelList)
+	{
+		std::vector<std::shared_ptr<Mesh>>& meshList = model->GetMeshList();
 		for (size_t meshId = 0; meshId < meshList.size(); meshId++)
 		{
 			const uint32_t bufferIndex = GetMeshBufferIndex(model, static_cast<uint32_t>(meshId));
@@ -803,21 +812,33 @@ void Renderer::SynchCuda(const std::string& errorMsg /* = "" */)
 	}
 }
 
-uint32_t Renderer::GetNumberMeshesFromScene() const
+uint32_t Renderer::GetNumberMeshesFromScene(const bool& includeVisibleProxies /* = true*/) const
 {
 	uint32_t numMeshes = 0;
-	for (const Model& model : ModelList)
+	for (std::shared_ptr<Model> model : ModelList)
 	{
-		numMeshes += static_cast<uint32_t>(model.GetMeshList().size());
+		numMeshes += static_cast<uint32_t>(model->GetMeshList().size());
 	}
+
+	if (includeVisibleProxies)
+	{
+		for (std::shared_ptr<Light> light : LightList)
+		{
+			if (light->GetShowProxyMesh())
+			{
+				numMeshes++;
+			}
+		}
+	}
+
 	return numMeshes;
 }
 
-uint32_t Renderer::GetModelIndex(const Model& model) const
+uint32_t Renderer::GetModelIndex(std::shared_ptr<Model> model) const
 {
 	for (size_t i = 0; i < ModelList.size(); i++)
 	{
-		if (&model == &ModelList[i])
+		if (model == ModelList[i])
 		{
 			return static_cast<uint32_t>(i);
 		}
@@ -826,7 +847,7 @@ uint32_t Renderer::GetModelIndex(const Model& model) const
 	return -1;
 }
 
-uint32_t Renderer::GetMeshBufferIndex(const Model& model, const uint32_t meshIndex) const
+uint32_t Renderer::GetMeshBufferIndex(std::shared_ptr<Model> model, const uint32_t meshIndex) const
 {
 	size_t index = GetModelIndex(model);
 
@@ -845,7 +866,7 @@ uint32_t Renderer::GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t
 		}
 		else
 		{
-			index += static_cast<uint32_t>(ModelList[modelId].GetMeshList().size());
+			index += static_cast<uint32_t>(ModelList[modelId]->GetMeshList().size());
 		}
 	}
 
@@ -855,14 +876,14 @@ uint32_t Renderer::GetMeshBufferIndex(const uint32_t& modelIndex, const uint32_t
 uint32_t Renderer::GetNumberTexturesFromScene() const
 {
 	uint32_t numTexs = 0;
-	for (const Model& model : ModelList)
+	for (std::shared_ptr<Model> model : ModelList)
 	{
-		numTexs += static_cast<uint32_t>(model.GetTextureList().size());
+		numTexs += static_cast<uint32_t>(model->GetTextureList().size());
 	}
 	return numTexs;
 }
 
-uint32_t Renderer::GetTextureBufferIndex(const Model& model, const uint32_t textureIndex) const
+uint32_t Renderer::GetTextureBufferIndex(std::shared_ptr<Model> model, const uint32_t textureIndex) const
 {
 	size_t index = GetModelIndex(model);
 
@@ -881,7 +902,7 @@ uint32_t Renderer::GetTextureBufferIndex(const uint32_t& modelIndex, const uint3
 		}
 		else
 		{
-			index += static_cast<uint32_t>(ModelList[modelId].GetTextureList().size());
+			index += static_cast<uint32_t>(ModelList[modelId]->GetTextureList().size());
 		}
 	}
 

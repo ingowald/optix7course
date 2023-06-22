@@ -5,6 +5,9 @@
 
 using namespace gdt;
 
+struct Mesh;
+class Model;
+
 class Light
 {
 public:
@@ -18,8 +21,17 @@ public:
 
 	void SetLocation(const vec3f& location);
 
+	bool GetShowProxyMesh() const;
+	void SetShowProxyMesh(const bool& showMesh);
+
+	std::shared_ptr<Model> GetProxy() const;
+
 protected:
 	vec3f Location = vec3f(0.f);
+
+	bool ShowProxyMesh = false;
+
+	std::shared_ptr<Model> Proxy;
 };
 
 /**
