@@ -16,8 +16,12 @@ public:
 	float GetRotationRadius() const;
 	void SetRotationRadius(const float& rotationRadius);
 
+	virtual LightOptix GetOptixLight() const override;
+
 protected:
 
+	float TotalTime_seconds = 0.f;
+	vec3f RotationOffset = vec3f(0.f);
 	float RotationSpeed = 1.f;
 	float RotationRadius = 1.f;
 };

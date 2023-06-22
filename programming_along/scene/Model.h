@@ -17,6 +17,8 @@ public:
 
 	~Model();
 
+	virtual void Tick(const float& deltaTime_Seconds) override;
+
 	std::vector<std::shared_ptr<Mesh>> GetMeshList() const;
 	std::vector<std::shared_ptr<Mesh>>& GetMeshList();
 

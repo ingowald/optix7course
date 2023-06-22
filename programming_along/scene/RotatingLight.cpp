@@ -10,9 +10,9 @@ RotatingLight::RotatingLight(const vec3f& location, float rotationSpeed /* = 1.f
 
 void RotatingLight::Tick(const float& deltaTime_seconds)
 {
-	vec3f location = Location;
-	location.x += sin(deltaTime_seconds * RotationSpeed) * RotationRadius;
-	location.z += cos(deltaTime_seconds * RotationSpeed) * RotationRadius;
+	TotalTime_seconds += deltaTime_seconds;
+	RotationOffset.x = sin(TotalTime_seconds * RotationSpeed) * RotationRadius;
+	RotationOffset.z = cos(TotalTime_seconds * RotationSpeed) * RotationRadius;
 }
 
 float RotatingLight::GetRotationSpeed() const
@@ -33,4 +33,11 @@ float RotatingLight::GetRotationRadius() const
 void RotatingLight::SetRotationRadius(const float& rotationRadius)
 {
 	RotationRadius = rotationRadius;
+}
+
+LightOptix RotatingLight::GetOptixLight() const
+{
+	LightOptix l;
+	l.Location = Location + RotationOffset;
+	return l;
 }

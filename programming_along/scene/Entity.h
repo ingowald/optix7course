@@ -16,6 +16,8 @@ public:
 		TransfomrationMatrix = affine3f::translate(vec3f(0.f));
 	}
 
+	virtual void Tick(const float& deltaTime_Seconds) = 0;
+
 	affine3f GetTransformationMatrix() const;
 	void SetTransformationMatrix(const affine3f& matrix);
 

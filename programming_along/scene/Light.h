@@ -25,8 +25,6 @@ public:
 
 	Light(const vec3f& location);
 
-	virtual void Tick(const float& deltaTime_Seconds);
-
 	vec3f GetLocation() const;
 
 	void SetLocation(const vec3f& location);
@@ -36,7 +34,7 @@ public:
 
 	std::shared_ptr<Model> GetProxy() const;
 
-	LightOptix GetOptixLight() const;
+	virtual LightOptix GetOptixLight() const;
 
 protected:
 	vec3f Location = vec3f(0.f);

@@ -78,6 +78,16 @@ void Renderer::Init()
 void Renderer::Tick(const float& deltaTime_seconds)
 {
 	SceneCamera.Tick(deltaTime_seconds);
+
+	for (std::shared_ptr<Model> model : ModelList)
+	{
+		model->Tick(deltaTime_seconds);
+	}
+
+	for (std::shared_ptr<Light> light : LightList)
+	{
+		light->Tick(deltaTime_seconds);
+	}
 }
 
 void Renderer::Render()

@@ -27,6 +27,11 @@ Model::~Model()
 
 }
 
+void Model::Tick(const float& deltaTime_Seconds)
+{
+
+}
+
 std::vector<std::shared_ptr<Mesh>> Model::GetMeshList() const
 {
 	return MeshList;
