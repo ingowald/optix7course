@@ -1,13 +1,14 @@
 
 #pragma once
 
+#include "../scene/Entity.h"
 #include "../scene/Mesh.h"
 #include "../util/Texture.h"
 
 #include <vector>
 #include <memory>
 
-class Model
+class Model : public Entity
 {
 public:
 	Model() {};

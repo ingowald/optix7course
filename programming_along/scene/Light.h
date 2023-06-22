@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "Entity.h"
+
 #include "gdt/math/vec.h"
 
 using namespace gdt;
@@ -8,7 +10,7 @@ using namespace gdt;
 struct Mesh;
 class Model;
 
-class Light
+class Light : public Entity
 {
 public:
 	Light();

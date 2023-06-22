@@ -18,6 +18,8 @@ set(SOURCE_LIST
 	util/Window.cpp
 	scene/Camera.h
 	scene/Camera.cpp
+	scene/Entity.h
+	scene/Entity.cpp
 	scene/Mesh.h
 	scene/Mesh.cpp
 	scene/Model.h
