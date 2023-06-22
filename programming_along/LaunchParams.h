@@ -3,8 +3,16 @@
 #include "gdt/math/vec.h"
 
 #include "scene/Camera.h"
+#include "scene/Light.h"
 
 using namespace gdt;
+
+// simple ray type
+enum {
+	RADIANCE_RAY_TYPE = 0,
+	SHADOW_RAY_TYPE,
+	RAY_TYPE_COUNT
+};
 
 struct LaunchParams
 {
@@ -13,6 +21,9 @@ struct LaunchParams
 	uint32_t* FramebufferData = nullptr;
 
 	CameraOptix Camera;
+
+	// TODO: support multiple light sources
+	LightOptix Light;
 
 	// the scene(?)
 	OptixTraversableHandle Traversable;

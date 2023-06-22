@@ -18,10 +18,16 @@ set(SOURCE_LIST
 	util/Window.cpp
 	scene/Camera.h
 	scene/Camera.cpp
+	scene/Entity.h
+	scene/Entity.cpp
 	scene/Mesh.h
 	scene/Mesh.cpp
 	scene/Model.h
 	scene/Model.cpp
+	scene/Light.h
+	scene/Light.cpp
+	scene/RotatingLight.h
+	scene/RotatingLight.cpp
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})

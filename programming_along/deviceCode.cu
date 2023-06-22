@@ -9,12 +9,6 @@
 
 extern "C" __constant__ LaunchParams launchParams;
 
-// simple ray type
-enum { 
-	SURFACE_RAY_TYPE = 0,
-	RAY_TYPE_COUNT
-};
-
 static __forceinline__ __device__
 void packPointer(void* ptr, uint32_t& i0, uint32_t& i1)
 {	
@@ -96,9 +90,9 @@ extern "C" __global__ void __raygen__renderFrame()
 		0.0f,	// ray time (has to be enabled in pipeline compile options, otherwise ignored)
 		OptixVisibilityMask(255),
 		OPTIX_RAY_FLAG_DISABLE_ANYHIT,
-		SURFACE_RAY_TYPE,
+		RADIANCE_RAY_TYPE,
 		RAY_TYPE_COUNT,
-		SURFACE_RAY_TYPE,
+		RADIANCE_RAY_TYPE,
 		u0, u1 // payload p0, p1 (, up to p7? up to 31?)
 	);
 
@@ -126,6 +120,13 @@ extern "C" __global__ void __raygen__renderFrame()
 	launchParams.FramebufferData[fbIndex] = rgba;
 }
 
+extern "C" __global__ void __miss__shadow()
+{
+	// the shadow ray has not hit anything,
+	// therefore the light hits the surface and fully lightens it
+	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
+	perRayData = vec3f(1.f);
+}
 
 extern "C" __global__ void __miss__radiance() 
 {
@@ -135,34 +136,57 @@ extern "C" __global__ void __miss__radiance()
 	perRayData = vec3f(1.f);
 }
 
+extern "C" __global__ void __closesthit__shadow()
+{
+	// nothing to do here, shadows will be handled in anyhit
+}
+
 extern "C" __global__ void __closesthit__radiance() 
 {
 	const MeshSbtData& meshData = *(const MeshSbtData*)optixGetSbtDataPointer();
+	const LightOptix& light = launchParams.Light;
 
 	// basic hit information
 	const int32_t primitiveId = optixGetPrimitiveIndex();
 	const vec3i index = meshData.Indices[primitiveId];
+	const vec3f rayDir = optixGetWorldRayDirection();
 
 	const float u = optixGetTriangleBarycentrics().x;
 	const float v = optixGetTriangleBarycentrics().y;
 
 	// read normal if one was provided, otherwise compute normal
-	vec3f normal;
+	vec3f geometryNormal;
+	vec3f surfaceNormal;
+
+	const vec3f& v0 = meshData.Vertices[index.x];
+	const vec3f& v1 = meshData.Vertices[index.y];
+	const vec3f& v2 = meshData.Vertices[index.z];
+	geometryNormal = normalize(cross(v1 - v0, v2 - v0));
+
 	if (meshData.Normals)
 	{
-		normal = (1.f - u - v) * meshData.Normals[index.x]
+		surfaceNormal = (1.f - u - v) * meshData.Normals[index.x]
 			+ u * meshData.Normals[index.y]
 			+ v * meshData.Normals[index.z];
 	}
 	else
 	{
-		const vec3f& v0 = meshData.Vertices[index.x];
-		const vec3f& v1 = meshData.Vertices[index.y];
-		const vec3f& v2 = meshData.Vertices[index.z];
-		normal = cross(v1 - v0, v2 - v0);
+		surfaceNormal = geometryNormal;
 	}
 
-	normal = normalize(normal);
+	// make sure the ray dir and calulated geometry normal point in opposite directions
+	if (dot(rayDir, geometryNormal) > 0.f)
+	{
+		geometryNormal = -geometryNormal;
+	}
+
+	// make sure the surface normal and geometry point into the same direction
+	// TODO: why not just invert surface normal direction?
+	if (dot(geometryNormal, surfaceNormal) < 0.f)
+	{
+		surfaceNormal -= 2.f * dot(geometryNormal, surfaceNormal) * geometryNormal;
+	}
+	surfaceNormal = normalize(surfaceNormal);
 
 	// get colour from color variable or texture
 	vec3f diffuseColor = meshData.DiffuseColor;
@@ -175,14 +199,55 @@ extern "C" __global__ void __closesthit__radiance()
 		const vec4f diffuseTexColor = tex2D<float4>(meshData.Texture, texCoord.x, texCoord.y);
 		diffuseColor *= (vec3f)diffuseTexColor;
 	}
+
+	// compute, if the pixel is in shadow
+	const vec3f surfacePosition =
+		(1.f - u - v) * meshData.Vertices[index.x]
+		+ u * meshData.Vertices[index.y]
+		+ v * meshData.Vertices[index.z];
+	const vec3f lightDir = light.Location - surfacePosition;
+
+	// trace a shadow ray
+	vec3f lightVisibility = 0.f;
+	uint32_t u0, u1;
+	packPointer(&lightVisibility, u0, u1);
+
+	optixTrace(launchParams.Traversable,
+		surfacePosition + 1e-3f * geometryNormal,
+		lightDir,
+		1e-3f,			// tmin
+		1.f - 1e-3f,	// tmax
+		0.f,			// ray time
+		OptixVisibilityMask(255),
+		// skip any/closest hit for shadow rays, and terminate on first intersection
+		// the actual work is done in the miss shader, since that dertermines, if 
+		// the light is visible from the given surface position
+		OPTIX_RAY_FLAG_DISABLE_ANYHIT
+		| OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
+		| OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
+		SHADOW_RAY_TYPE,	// Shader binding table offset
+		RAY_TYPE_COUNT,		// Sbt stride
+		SHADOW_RAY_TYPE,	// Sbt miss program index
+		u0, u1);
 	
 	// shade the model based on ray / triangle angle (i.e. abs(dot(rayDir, normal)) )
-	const vec3f rayDir = optixGetWorldRayDirection();
-	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, normal));
+	const float cosAlpha = 0.1f + .8f * fabsf(dot(rayDir, surfaceNormal));
 
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
-	perRayData = cosAlpha* diffuseColor;
+	perRayData = (.1f + (.2f + .8f * lightVisibility) * cosAlpha) * diffuseColor;
 }
 
-// dummy functions for OptiX pipeline
-extern "C" __global__ void __anyhit__radiance() {}
+extern "C" __global__ void __anyhit__shadow()
+{
+	// if the shadow ray hits, the corresponding pixel is in shadow.
+	// therefore, it should not (fullly) be shadded. 
+	// the idea is, to assume a pixel is shaded and only if a shadow 
+	// ray triggers the miss program (i.e. does not hit geometry)
+	// will the pixel be fully lighted. this makes any code 
+	// outside of the miss program obsolete
+	//		-> tl;dr: nothing to do here
+}
+
+extern "C" __global__ void __anyhit__radiance() 
+{// dummy functions for OptiX pipeline
+}

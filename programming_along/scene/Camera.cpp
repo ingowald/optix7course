@@ -140,8 +140,8 @@ void Camera::Move(const float& deltaTime_seconds)
 	}
 	if (KeyStatus[GLFW_KEY_8])
 	{
-		Eye = vec3f(-40.406, 48.918, 57.771);
-		At = vec3f(-39.874, 48.441, 57.071);
+		Eye = vec3f(-40.406f, 48.918f, 57.771f);
+		At = vec3f(-39.874f, 48.441f, 57.071f);
 		Up = vec3f(0.f, 1.f, 0.f);
 	}
 

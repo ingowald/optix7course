@@ -1,13 +1,14 @@
 
 #pragma once
 
+#include "../scene/Entity.h"
 #include "../scene/Mesh.h"
 #include "../util/Texture.h"
 
 #include <vector>
 #include <memory>
 
-class Model
+class Model : public Entity
 {
 public:
 	Model() {};
@@ -15,6 +16,8 @@ public:
 	Model(const std::string& meshFilePath, const std::string& name = "model");
 
 	~Model();
+
+	virtual void Tick(const float& deltaTime_Seconds) override;
 
 	std::vector<std::shared_ptr<Mesh>> GetMeshList() const;
 	std::vector<std::shared_ptr<Mesh>>& GetMeshList();
