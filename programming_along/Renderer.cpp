@@ -170,7 +170,7 @@ void Renderer::AddModel(std::shared_ptr<Model> model)
 
 void Renderer::AddLight(std::shared_ptr<Light> light)
 {
-	assert(LightList.size() == 0 && "Currently, onle one light source is supported!");
+	assert(LightList.size() == 0 && "Currently only one light source is supported!");
 	LightList.push_back(light);
 }
 
