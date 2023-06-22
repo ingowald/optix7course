@@ -670,7 +670,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 			VertexBufferList[bufferIndex].AllocAndUpload(mesh->Vertices);
 			if (!mesh->Normals.empty())
 			{
-				NormalBufferList[meshId].AllocAndUpload(mesh->Normals);
+				NormalBufferList[bufferIndex].AllocAndUpload(mesh->Normals);
 			}
 			IndexBufferList[bufferIndex].AllocAndUpload(mesh->Indices);
 			if (!mesh->TexCoords.empty())
