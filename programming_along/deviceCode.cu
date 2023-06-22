@@ -149,27 +149,44 @@ extern "C" __global__ void __closesthit__radiance()
 	// basic hit information
 	const int32_t primitiveId = optixGetPrimitiveIndex();
 	const vec3i index = meshData.Indices[primitiveId];
+	const vec3f rayDir = optixGetWorldRayDirection();
 
 	const float u = optixGetTriangleBarycentrics().x;
 	const float v = optixGetTriangleBarycentrics().y;
 
 	// read normal if one was provided, otherwise compute normal
-	vec3f normal;
+	vec3f geometryNormal;
+	vec3f surfaceNormal;
+
+	const vec3f& v0 = meshData.Vertices[index.x];
+	const vec3f& v1 = meshData.Vertices[index.y];
+	const vec3f& v2 = meshData.Vertices[index.z];
+	geometryNormal = normalize(cross(v1 - v0, v2 - v0));
+
 	if (meshData.Normals)
 	{
-		normal = (1.f - u - v) * meshData.Normals[index.x]
+		surfaceNormal = (1.f - u - v) * meshData.Normals[index.x]
 			+ u * meshData.Normals[index.y]
 			+ v * meshData.Normals[index.z];
 	}
 	else
 	{
-		const vec3f& v0 = meshData.Vertices[index.x];
-		const vec3f& v1 = meshData.Vertices[index.y];
-		const vec3f& v2 = meshData.Vertices[index.z];
-		normal = cross(v1 - v0, v2 - v0);
+		surfaceNormal = geometryNormal;
 	}
 
-	normal = normalize(normal);
+	// make sure the ray dir and calulated geometry normal point in opposite directions
+	if (dot(rayDir, geometryNormal) > 0.f)
+	{
+		geometryNormal = -geometryNormal;
+	}
+
+	// make sure the surface normal and geometry point into the same direction
+	// TODO: why not just invert surface normal direction?
+	if (dot(geometryNormal, surfaceNormal) < 0.f)
+	{
+		surfaceNormal -= 2.f * dot(geometryNormal, surfaceNormal) * geometryNormal;
+	}
+	surfaceNormal = normalize(surfaceNormal);
 
 	// get colour from color variable or texture
 	vec3f diffuseColor = meshData.DiffuseColor;
@@ -196,7 +213,7 @@ extern "C" __global__ void __closesthit__radiance()
 	packPointer(&lightVisibility, u0, u1);
 
 	optixTrace(launchParams.Traversable,
-		surfacePosition + 1e-3f * normal,
+		surfacePosition + 1e-3f * geometryNormal,
 		lightDir,
 		1e-3f,			// tmin
 		1.f - 1e-3f,	// tmax
@@ -214,11 +231,10 @@ extern "C" __global__ void __closesthit__radiance()
 		u0, u1);
 	
 	// shade the model based on ray / triangle angle (i.e. abs(dot(rayDir, normal)) )
-	const vec3f rayDir = optixGetWorldRayDirection();
-	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, normal));
+	const float cosAlpha = 0.2f + .8f * fabsf(dot(rayDir, surfaceNormal));
 
 	vec3f& perRayData = *(vec3f*)getPerRayData<vec3f>();
-	perRayData = cosAlpha* diffuseColor;
+	perRayData = (.1f + (.2f + .8f * lightVisibility) * cosAlpha) * diffuseColor;
 }
 
 extern "C" __global__ void __anyhit__shadow()

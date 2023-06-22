@@ -8,6 +8,7 @@
 #include "util/Window.h"
 #include "scene/Mesh.h"
 #include "scene/Model.h"
+#include "scene/RotatingLight.h"
 
 
 using namespace gdt;
@@ -40,11 +41,11 @@ int main(int ac, char **av)
 		// untested, but should work on linux
 		const std::string filePath = "../models/crytek_sponza/sponza.obj";
 #endif
-		Model sponza(filePath, "sponza scene");
+		//Model sponza(filePath, "sponza scene");
 
 		Renderer* renderer = window.GetRenderer();
-		renderer->AddModel(sponza);
-		renderer->AddModel(m1);
+		//renderer->AddModel(sponza);
+		//renderer->AddModel(m1);
 		renderer->AddModel(m2);
 
 		renderer->InitializeCamera(
@@ -52,6 +53,11 @@ int main(int ac, char **av)
 			vec3f(-774.f, 139.95f, 4.f),	//at
 			vec3f(0.f, 1.f, 0.f)			//up
 		);
+
+		std::shared_ptr<RotatingLight> light = std::make_shared<RotatingLight>(
+			vec3f(0.f, 10.f, 0.f), 1.f, 10.f
+		);
+		renderer->AddLight(light);
 
 		renderer->Init();
 
