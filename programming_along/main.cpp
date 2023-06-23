@@ -59,7 +59,7 @@ int main(int ac, char **av)
 		//);
 		std::shared_ptr<QuadLight> light = std::make_shared<QuadLight>(
 			vec3f(-1200.f, 800.f, -200.f),
-			vec3f(3000000.f),
+			vec3f(4000000.f),
 			vec2f(200.f, 200.f)
 		);
 		renderer->AddLight(light);
