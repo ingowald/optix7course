@@ -54,8 +54,13 @@ int main(int ac, char **av)
 			vec3f(0.f, 1.f, 0.f)			//up
 		);
 
-		std::shared_ptr<RotatingLight> light = std::make_shared<RotatingLight>(
-			vec3f(-907.108f, 2205.875f, -400.0267f), 1.f, 50.f
+		//std::shared_ptr<RotatingLight> light = std::make_shared<RotatingLight>(
+		//	vec3f(-907.108f, 2205.875f, -400.0267f), 1.f, 50.f
+		//);
+		std::shared_ptr<QuadLight> light = std::make_shared<QuadLight>(
+			vec3f(-1200.f, 800.f, -200.f),
+			vec3f(3000000.f),
+			vec2f(200.f, 200.f)
 		);
 		renderer->AddLight(light);
 

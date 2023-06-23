@@ -16,7 +16,7 @@ public:
 	float GetRotationRadius() const;
 	void SetRotationRadius(const float& rotationRadius);
 
-	virtual LightOptix GetOptixLight() const override;
+	virtual std::shared_ptr<LightOptix> GetOptixLight() const override;
 
 protected:
 
