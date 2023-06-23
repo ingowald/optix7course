@@ -3,7 +3,7 @@
 #include "gdt/math/vec.h"
 
 #include "scene/Camera.h"
-#include "scene/Light.h"
+#include "scene/Light/Light.h"
 
 using namespace gdt;
 

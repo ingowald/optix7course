@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Entity.h"
+#include "../Entity.h"
 
 #include "gdt/math/vec.h"
 

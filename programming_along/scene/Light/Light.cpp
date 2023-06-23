@@ -1,8 +1,8 @@
 
 #include "Light.h"
 
-#include "../scene/Mesh.h"
-#include "../scene/Model.h"
+#include "../../scene/Mesh.h"
+#include "../../scene/Model.h"
 
 Light::Light()
 {

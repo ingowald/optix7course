@@ -8,7 +8,7 @@
 #include "util/Window.h"
 #include "scene/Mesh.h"
 #include "scene/Model.h"
-#include "scene/RotatingLight.h"
+#include "scene/Light/RotatingLight.h"
 
 
 using namespace gdt;
