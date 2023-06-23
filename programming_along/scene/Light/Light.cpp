@@ -25,6 +25,16 @@ void Light::SetLocation(const vec3f& location)
 	Location = location;
 }
 
+float Light::GetPower() const
+{
+	return Power;
+}
+
+void Light::SetPower(const float& power)
+{
+	Power = power;
+}
+
 bool Light::GetShowProxyMesh() const
 {
 	return ShowProxyMesh;

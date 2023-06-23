@@ -16,6 +16,7 @@ class Model;
 struct LightOptix
 {
 	vec3f Location;
+	float Power;
 };
 
 class Light : public Entity
@@ -26,8 +27,10 @@ public:
 	Light(const vec3f& location);
 
 	vec3f GetLocation() const;
-
 	void SetLocation(const vec3f& location);
+
+	float GetPower() const;
+	void SetPower(const float& power);
 
 	bool GetShowProxyMesh() const;
 	void SetShowProxyMesh(const bool& showMesh);
@@ -38,8 +41,8 @@ public:
 
 protected:
 	vec3f Location = vec3f(0.f);
+	float Power;
 
 	bool ShowProxyMesh = false;
-
 	std::shared_ptr<Model> Proxy;
 };
