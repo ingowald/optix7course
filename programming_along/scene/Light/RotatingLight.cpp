@@ -35,9 +35,9 @@ void RotatingLight::SetRotationRadius(const float& rotationRadius)
 	RotationRadius = rotationRadius;
 }
 
-LightOptix RotatingLight::GetOptixLight() const
+std::shared_ptr<LightOptix> RotatingLight::GetOptixLight() const
 {
-	LightOptix l;
-	l.Location = Location + RotationOffset;
+	std::shared_ptr<LightOptix> l = this->GetOptixLight();
+	l->Location += RotationOffset;
 	return l;
 }

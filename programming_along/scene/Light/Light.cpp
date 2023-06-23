@@ -1,8 +1,8 @@
 
 #include "Light.h"
 
-#include "../scene/Mesh.h"
-#include "../scene/Model.h"
+#include "../../scene/Mesh.h"
+#include "../../scene/Model.h"
 
 Light::Light()
 {
@@ -10,9 +10,15 @@ Light::Light()
 	Proxy = std::make_shared<Model>(spherePath, "Light Proxy");
 }
 
-Light::Light(const vec3f& location)
+Light::Light(const vec3f& location, const vec3f& power /* = vec3f(1000000.f)*/)
 {
 	Location = location;
+	Power = power;
+}
+
+void Light::Tick(const float& deltaTime_Seconds)
+{
+
 }
 
 vec3f Light::GetLocation() const
@@ -23,6 +29,16 @@ vec3f Light::GetLocation() const
 void Light::SetLocation(const vec3f& location)
 {
 	Location = location;
+}
+
+vec3f Light::GetPower() const
+{
+	return Power;
+}
+
+void Light::SetPower(const vec3f& power)
+{
+	Power = power;
 }
 
 bool Light::GetShowProxyMesh() const
@@ -40,9 +56,9 @@ std::shared_ptr<Model> Light::GetProxy() const
 	return Proxy;
 }
 
-LightOptix Light::GetOptixLight() const
+std::shared_ptr<LightOptix> Light::GetOptixLight() const
 {
-	LightOptix l;
-	l.Location = Location;
+	std::shared_ptr<LightOptix> l = std::make_shared<LightOptix>();
+	l->Location = Location;
 	return l;
 }

@@ -98,13 +98,14 @@ void Renderer::Render()
 		return;
 	}
 
-	assert(IsInitialized && "Init has not been called. You should do this before rendering!");
+	assert(IsInitialized &&"Init has not been called. You should do this before rendering!");
 
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
 
 	// update light values
-	Params.Light = LightList[0]->GetOptixLight();
+	std::shared_ptr<LightOptix> l = LightList[0]->GetOptixLight();
+	Params.Light = *((QuadLightOptix*)l.get());
 
 	// upload the launch params and increment frame ID
 	ParamsBuffer.Upload(&Params, 1);

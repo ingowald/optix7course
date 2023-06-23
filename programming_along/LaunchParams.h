@@ -3,7 +3,7 @@
 #include "gdt/math/vec.h"
 
 #include "scene/Camera.h"
-#include "scene/Light.h"
+#include "scene/Light/QuadLight.h"
 
 using namespace gdt;
 
@@ -23,7 +23,7 @@ struct LaunchParams
 	CameraOptix Camera;
 
 	// TODO: support multiple light sources
-	LightOptix Light;
+	QuadLightOptix Light;
 
 	// the scene(?)
 	OptixTraversableHandle Traversable;

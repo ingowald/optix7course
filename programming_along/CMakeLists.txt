@@ -24,10 +24,12 @@ set(SOURCE_LIST
 	scene/Mesh.cpp
 	scene/Model.h
 	scene/Model.cpp
-	scene/Light.h
-	scene/Light.cpp
-	scene/RotatingLight.h
-	scene/RotatingLight.cpp
+	scene/Light/Light.h
+	scene/Light/Light.cpp
+	scene/Light/RotatingLight.h
+	scene/Light/RotatingLight.cpp
+	scene/Light/QuadLight.h
+	scene/Light/QuadLight.cpp
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})

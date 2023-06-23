@@ -8,7 +8,7 @@
 #include "util/Window.h"
 #include "scene/Mesh.h"
 #include "scene/Model.h"
-#include "scene/RotatingLight.h"
+#include "scene/Light/RotatingLight.h"
 
 
 using namespace gdt;
@@ -54,9 +54,16 @@ int main(int ac, char **av)
 			vec3f(0.f, 1.f, 0.f)			//up
 		);
 
-		std::shared_ptr<RotatingLight> light = std::make_shared<RotatingLight>(
-			vec3f(-907.108f, 2205.875f, -400.0267f), 1.f, 50.f
+		//std::shared_ptr<RotatingLight> light = std::make_shared<RotatingLight>(
+		//	vec3f(-907.108f, 2205.875f, -400.0267f), 1.f, 50.f
+		//);
+		std::shared_ptr<QuadLight> light = std::make_shared<QuadLight>(
+			vec3f(-1200.f, 800.f, -200.f),
+			vec3f(4000000.f),
+			vec2f(200.f, 200.f)
 		);
+		light->SetRotationEnabled(true);
+		light->SetRotationRadius(100.f);
 		renderer->AddLight(light);
 
 		renderer->Init();
