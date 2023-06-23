@@ -24,6 +24,8 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+	optixDenoiserDestroy(Denoiser);
+
 	optixPipelineDestroy(Pipeline);
 
 	for (OptixProgramGroup pg : HitgroupProgramGroups)
@@ -134,10 +136,64 @@ void Renderer::Resize(const vec2i& size)
 	{
 		return;
 	}
+
+	if (Denoiser)
+	{
+		OptixResult result = optixDenoiserDestroy(Denoiser);
+
+		if (result != OPTIX_SUCCESS)
+		{
+			throw std::runtime_error("Could not destroy OptiX denoiser!");
+		}
+	}
+
+
+
+	//(re-)create the denoiser
+	OptixDenoiserOptions denoiserOptions = {};
+	denoiserOptions.inputKind = OPTIX_DENOISER_INPUT_RGB;
+
+	OptixResult result = optixDenoiserCreate(OptixContext, &denoiserOptions, &Denoiser);
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not create OptiX denoiser!");
+	}
+
+	result = optixDenoiserSetModel(Denoiser, OPTIX_DENOISER_MODEL_KIND_LDR, nullptr, 0);
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not set OptiX denoiser model!");
+	}
+
+	OptixDenoiserSizes denoiserReturnSizes;
+	result = optixDenoiserComputeMemoryResources(Denoiser, size.x, size.y, &denoiserReturnSizes);
+	if (result != OPTIX_SUCCESS)
+	{
+		throw std::runtime_error("Could not compute memory resource sizes for OptiX denoiser");
+	}
+
+	DenoiserScratch.Resize(
+		std::max(
+			denoiserReturnSizes.withOverlapScratchSizeInBytes,
+			denoiserReturnSizes.withoutOverlapScratchSizeInBytes
+		));
+	DenoiserState.Resize(denoiserReturnSizes.stateSizeInBytes);
+
+	// resize the CUDA framebuffer and denoised buffer
+	const size_t bufferSize = size.x * size.y * sizeof(float4);
 	Params.FramebufferSize = size;
-	ColorBuffer.Resize(size.x * size.y * sizeof(uint32_t));
+	ColorBuffer.Resize(bufferSize);
 	Params.FramebufferData = reinterpret_cast<uint32_t*>(ColorBuffer.CudaPtr());
 	SceneCamera.SetFramebufferSize(size);
+	DenoisedBuffer.Resize(bufferSize);
+
+	// finally setup the denoiser
+	result = optixDenoiserSetup(Denoiser, 0,
+		size.x, size.y,
+		DenoiserState.CudaPtr(),
+		DenoiserState.Size_bytes,
+		DenoiserScratch.CudaPtr(),
+		DenoiserScratch.Size_bytes);
 }
 
 void Renderer::DownloadPixels(uint32_t pixels[])

@@ -159,6 +159,8 @@ protected:
 	CUDABuffer ParamsBuffer;
 	/** Framebuffer contents */
 	CUDABuffer ColorBuffer;
+	/** Denoised framebuffer contents */
+	CUDABuffer DenoisedBuffer;
 
 	/** Scene */
 	Camera SceneCamera;
@@ -197,4 +199,10 @@ private:
 	CUDABuffer MissRecordsBuffer;
 	std::vector<OptixProgramGroup> HitgroupProgramGroups;
 	CUDABuffer HitgroupRecordsBuffer;
+
+	// OptixDenoiser is a OptixDenoiser_t* (i.e. a pointer type)
+	// therefore no need to make a (new) pointer out of it for the member
+	OptixDenoiser Denoiser = nullptr;
+	CUDABuffer DenoiserScratch;
+	CUDABuffer DenoiserState;
 };
