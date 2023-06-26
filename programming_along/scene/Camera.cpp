@@ -138,6 +138,8 @@ void Camera::Move(const float& deltaTime_seconds)
 
 		Quaternion3f quatY = Quaternion3f::rotate(right, angleY);
 		forward = quatY * forward;
+
+		At = Eye + forward;
 	}
 	if (KeyStatus[GLFW_KEY_0])
 	{
