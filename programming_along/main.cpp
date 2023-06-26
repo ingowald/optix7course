@@ -62,7 +62,6 @@ int main(int ac, char **av)
 			vec3f(4000000.f),
 			vec2f(200.f, 200.f)
 		);
-		light->SetRotationEnabled(true);
 		light->SetRotationRadius(100.f);
 		renderer->AddLight(light);
 

@@ -303,6 +303,31 @@ void Renderer::AddLight(std::shared_ptr<Light> light)
 	}
 }
 
+bool Renderer::GetDynamicLightsMovementsEnabled() const
+{
+	return DynamicLightsMovementsEnabled;
+}
+
+void Renderer::EnableDynamicLightsMovements(const bool& enabled)
+{
+	DynamicLightsMovementsEnabled = enabled;
+
+	for (std::shared_ptr<Light> l : LightList)
+	{
+		IDynamicElement* dyn = dynamic_cast<IDynamicElement*>(l.get());
+		if (dyn)
+		{
+			dyn->SetDynamicEnabled(enabled);
+		}
+	}
+}
+
+void Renderer::ToggleDynamicLightsMovement()
+{
+	DynamicLightsMovementsEnabled = !DynamicLightsMovementsEnabled;
+	EnableDynamicLightsMovements(DynamicLightsMovementsEnabled);
+}
+
 bool Renderer::GetDenoiserEnabled() const
 {
 	return DenoiserEnabled;

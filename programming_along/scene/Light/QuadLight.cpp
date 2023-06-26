@@ -11,7 +11,7 @@ QuadLight::QuadLight(const vec3f& origin, const vec3f& power /*= vec3f(1000000.f
 void QuadLight::Tick(const float& deltaTime_seconds)
 {
 	DirtyBit = false;
-	if (RotationEnabled)
+	if (DynamicEnabled)
 	{
 		TotalTime_seconds += deltaTime_seconds;
 		RotationOffset.x = sin(TotalTime_seconds * RotationSpeed) * RotationRadius;
@@ -28,16 +28,6 @@ vec2f QuadLight::GetExtent() const
 void QuadLight::SetExtent(const vec2f& extent)
 {
 	Extent = extent;
-}
-
-bool QuadLight::IsRotationEnabled() const
-{
-	return RotationEnabled;
-}
-
-void QuadLight::SetRotationEnabled(const bool& enabled)
-{
-	RotationEnabled = enabled;
 }
 
 float QuadLight::GetRotationSpeed() const
@@ -64,7 +54,7 @@ std::shared_ptr<LightOptix> QuadLight::GetOptixLight() const
 {
 	std::shared_ptr<QuadLightOptix> optixLight = std::make_shared<QuadLightOptix>();
 	optixLight->Location = Location;
-	if (RotationEnabled)
+	if (DynamicEnabled)
 	{
 		optixLight->Location += RotationOffset;
 	}

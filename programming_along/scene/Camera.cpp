@@ -66,26 +66,32 @@ void Camera::Move(const float& deltaTime_seconds)
 	if (KeyStatus[GLFW_KEY_A])
 	{
 		Eye -= adjustedSpeed * deltaTime_seconds * right;
+		At = Eye + forward;
 	}
 	if (KeyStatus[GLFW_KEY_D])
 	{
 		Eye += adjustedSpeed * deltaTime_seconds * right;
+		At = Eye + forward;
 	}
 	if (KeyStatus[GLFW_KEY_W])
 	{
 		Eye += adjustedSpeed * deltaTime_seconds * forward;
+		At = Eye + forward;
 	}
 	if (KeyStatus[GLFW_KEY_S])
 	{
 		Eye -= adjustedSpeed * deltaTime_seconds * forward;
+		At = Eye + forward;
 	}
 	if (KeyStatus[GLFW_KEY_E])
 	{
 		Eye += adjustedSpeed * deltaTime_seconds * Up;
+		At = Eye + forward;
 	}
 	if (KeyStatus[GLFW_KEY_Q])
 	{
 		Eye -= adjustedSpeed * deltaTime_seconds * Up;
+		At = Eye + forward;
 	}
 
 	// safety net
@@ -137,8 +143,6 @@ void Camera::Move(const float& deltaTime_seconds)
 	{
 		Eye = vec3f(0.f, 0.f, 0.f);
 	}
-	
-	At = Eye + forward;
 
 	// if setting to a certain position and orientation,
 	// ignore any forward calculations!

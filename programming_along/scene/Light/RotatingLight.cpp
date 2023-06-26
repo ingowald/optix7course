@@ -12,10 +12,13 @@ RotatingLight::RotatingLight(const vec3f& location, float rotationSpeed /* = 1.f
 
 void RotatingLight::Tick(const float& deltaTime_seconds)
 {
-	TotalTime_seconds += deltaTime_seconds;
-	RotationOffset.x = sin(TotalTime_seconds * RotationSpeed) * RotationRadius;
-	RotationOffset.z = cos(TotalTime_seconds * RotationSpeed) * RotationRadius;
-	DirtyBit = true;
+	if (DynamicEnabled)
+	{
+		TotalTime_seconds += deltaTime_seconds;
+		RotationOffset.x = sin(TotalTime_seconds * RotationSpeed) * RotationRadius;
+		RotationOffset.z = cos(TotalTime_seconds * RotationSpeed) * RotationRadius;
+		DirtyBit = true;
+	}
 }
 
 float RotatingLight::GetRotationSpeed() const

@@ -14,6 +14,17 @@ public:
 		DirtyBit = false;
 	}
 
+	bool GetDynamicEnabled() const
+	{
+		return DynamicEnabled;
+	}
+
+	virtual void SetDynamicEnabled(const bool& enabled)
+	{
+		DynamicEnabled = enabled;
+	}
+
 protected:
 	bool DirtyBit = false;
+	bool DynamicEnabled = true;
 };

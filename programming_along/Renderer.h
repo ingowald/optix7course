@@ -61,6 +61,10 @@ public:
 
 	void AddLight(std::shared_ptr<Light> light);
 
+	bool GetDynamicLightsMovementsEnabled() const;
+	void EnableDynamicLightsMovements(const bool& enabled);
+	void ToggleDynamicLightsMovement();
+
 	bool GetDenoiserEnabled() const;
 	void SetDenoiserEnabled(const bool& enabled);
 	void ToggleDenoiserEnabled();
@@ -183,6 +187,7 @@ protected:
 	std::vector<std::shared_ptr<Model>> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
+	bool DynamicLightsMovementsEnabled = true;
 	std::vector<std::shared_ptr<Light>> LightList;
 
 	std::vector<std::shared_ptr<IDynamicElement>> DynamicElements;

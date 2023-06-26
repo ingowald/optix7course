@@ -200,6 +200,10 @@ void Window::OnKeyPressedOrReleased(GLFWwindow* window, int32_t key, int32_t san
 		{
 			win->GetRenderer()->ToggleAccumulationEnabled();
 		}
+		else if (key == GLFW_KEY_MINUS)
+		{
+			win->GetRenderer()->ToggleDynamicLightsMovement();
+		}
 
 		cam->KeyDown(key);
 	}
