@@ -229,13 +229,3 @@ std::shared_ptr<Mesh> Model::GetMeshAt(const size_t& index)
 {
 	return MeshList[index];
 }
-
-void Model::SetName(const std::string& name)
-{
-	Name = name;
-}
-
-std::string Model::GetName() const
-{
-	return Name;
-}
