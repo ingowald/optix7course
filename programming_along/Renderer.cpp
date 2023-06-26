@@ -950,7 +950,7 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 
 bool Renderer::HasSceneChanged() const
 {
-	for (const std::shared_ptr<IDynamicElement> e : DynamicElements)
+	for (std::shared_ptr<IDynamicElement> e : DynamicElements)
 	{
 		if (e->IsMarkedDirty())
 		{

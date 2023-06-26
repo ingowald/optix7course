@@ -38,7 +38,10 @@ void Camera::Tick(const float& deltaTime_seconds)
 {
 	// we track movement per frame for the accumulation of frames
 	// -> if the camera has moved, the accumulation has to be reset
-	HasMoved = false;
+	// it is more efficient, to reset the bit here, rather than query and
+	// reset the dirty bit of every dynamic element from the renderer
+	// seeing as we would only need changes that happend during the current frame
+	SetDirtyBitConsumed();
 	Move(deltaTime_seconds);
 }
 
@@ -155,7 +158,6 @@ void Camera::Move(const float& deltaTime_seconds)
 	if (lastEye != Eye || lastAt != At || lastUp != Up)
 	{
 		DirtyBit = true;
-		Location = Eye;
 	}
 }
 
@@ -241,11 +243,6 @@ void Camera::MouseDown(const int32_t& button)
 void Camera::MousUp(const int32_t& button)
 {
 	MouseStatus[button] = 0;
-}
-
-bool Camera::HasMovedThisFrame() const
-{
-	return HasMoved;
 }
 
 CameraOptix Camera::GetOptixCamera() const
