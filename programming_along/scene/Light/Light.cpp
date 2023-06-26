@@ -8,6 +8,8 @@ Light::Light()
 {
 	const std::string spherePath = "../../models/sphere/sphere.obj";
 	Proxy = std::make_shared<Model>(spherePath, "Light Proxy");
+
+	Name = "Light";
 }
 
 Light::Light(const vec3f& location, const vec3f& power /* = vec3f(1000000.f)*/)

@@ -34,9 +34,6 @@ public:
 
 	std::shared_ptr<Mesh> GetMeshAt(const size_t& index);
 
-	void SetName(const std::string& name);
-	std::string GetName() const;
-
 protected:
 	std::vector<std::shared_ptr<Mesh>> MeshList;
 	std::vector<std::shared_ptr<Texture2D>> TextureList;
@@ -46,8 +43,4 @@ protected:
 	*/
 	box3f BoundingBox;
 
-	/**
-	* name, not guaranteed to be unique, mostly for debugging purposes
-	*/
-	std::string Name = "";
 };

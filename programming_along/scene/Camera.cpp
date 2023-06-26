@@ -27,6 +27,8 @@ Camera::Camera(const vec3f& eye /* = vec3f(0.f, 0.f, 0.f)*/,
 
 	std::fill_n(KeyStatus, 256, 0);
 	std::fill_n(MouseStatus, 8, 0);
+
+	Name = "Camera";
 }
 
 Camera::~Camera()

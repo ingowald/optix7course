@@ -5,6 +5,7 @@ QuadLight::QuadLight(const vec3f& origin, const vec3f& power /*= vec3f(1000000.f
 	const vec2f& extent /*= vec2f(200.f, 200.f)*/)
 	: Light(origin, power), Extent(extent)
 {
+	Name = "QuadLight";
 }
 
 void QuadLight::Tick(const float& deltaTime_seconds)

@@ -6,6 +6,8 @@ RotatingLight::RotatingLight(const vec3f& location, float rotationSpeed /* = 1.f
 	Location = location;
 	RotationSpeed = rotationSpeed;
 	RotationRadius = rotationRadius;
+
+	Name = "RotatingLight";
 }
 
 void RotatingLight::Tick(const float& deltaTime_seconds)
