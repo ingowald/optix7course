@@ -21,6 +21,7 @@ Renderer::Renderer()
 
 	CreatePipeline();
 
+	SceneCamera = std::make_shared<Camera>();
 	DynamicElements.push_back(SceneCamera);
 }
 
@@ -81,7 +82,7 @@ void Renderer::Init()
 
 void Renderer::Tick(const float& deltaTime_seconds)
 {
-	SceneCamera.Tick(deltaTime_seconds);
+	SceneCamera->Tick(deltaTime_seconds);
 
 	for (std::shared_ptr<Model> model : ModelList)
 	{
