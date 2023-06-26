@@ -2,6 +2,7 @@
 #pragma once
 
 #include "../Entity.h"
+#include "../IDynamicElement.h"
 
 #include "gdt/math/vec.h"
 
@@ -19,7 +20,7 @@ struct LightOptix
 	vec3f Power;
 };
 
-class Light : public Entity
+class Light : public Entity, public IDynamicElement
 {
 public:
 	Light();

@@ -14,6 +14,7 @@
 
 #include "LaunchParams.h"
 
+class IDynamicElement;
 class Model;
 struct Mesh;
 class Light;
@@ -114,6 +115,12 @@ private:
 	*/
 	OptixTraversableHandle BuildAccelerationStructure();
 
+	/**
+	* Checks if any of the dynamic scene elements is marked as dirty.
+	* @returns true if any element is marked dirty, false otherwise
+	*/
+	bool HasSceneChanged() const;
+
 	void SynchCuda(const std::string& errorMsg = "");
 
 	uint32_t GetNumberMeshesFromScene(const bool& includeVisibleProxies = true) const;
@@ -166,12 +173,14 @@ protected:
 	CUDABuffer DenoisedBuffer;
 
 	/** Scene */
-	Camera SceneCamera;
+	std::shared_ptr<Camera> SceneCamera;
 
 	std::vector<std::shared_ptr<Model>> ModelList;
 	CUDABuffer AccelerationStructureBuffer;
 
 	std::vector<std::shared_ptr<Light>> LightList;
+
+	std::vector<std::shared_ptr<IDynamicElement>> DynamicElements;
 
 	std::vector<CUDABuffer> VertexBufferList;
 	std::vector<CUDABuffer> NormalBufferList;

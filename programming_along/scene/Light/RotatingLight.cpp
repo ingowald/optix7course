@@ -41,3 +41,8 @@ std::shared_ptr<LightOptix> RotatingLight::GetOptixLight() const
 	l->Location += RotationOffset;
 	return l;
 }
+
+bool RotatingLight::IsDynamic() const
+{
+	return true;
+}

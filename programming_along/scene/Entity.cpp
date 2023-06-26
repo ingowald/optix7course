@@ -10,3 +10,8 @@ void Entity::SetTransformationMatrix(const affine3f& matrix)
 {
 	TransfomrationMatrix = matrix;
 }
+
+bool Entity::IsDynamic() const
+{
+	return false;
+}

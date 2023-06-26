@@ -18,6 +18,8 @@ public:
 
 	virtual std::shared_ptr<LightOptix> GetOptixLight() const override;
 
+	virtual bool IsDynamic() const override;
+
 protected:
 
 	float TotalTime_seconds = 0.f;

@@ -30,6 +30,7 @@ set(SOURCE_LIST
 	scene/Light/RotatingLight.cpp
 	scene/Light/QuadLight.h
 	scene/Light/QuadLight.cpp
+	scene/IDynamicElement.h
 )
 
 add_executable(programming_along ${SOURCE_LIST} ${embedded_ptx_code})

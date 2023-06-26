@@ -154,7 +154,8 @@ void Camera::Move(const float& deltaTime_seconds)
 
 	if (lastEye != Eye || lastAt != At || lastUp != Up)
 	{
-		HasMoved = true;
+		DirtyBit = true;
+		Location = Eye;
 	}
 }
 
@@ -258,4 +259,9 @@ CameraOptix Camera::GetOptixCamera() const
 	cam.Vertical = CosFovy * normalize(cross(cam.Horizontal, cam.LookingDirection));
 
 	return cam;
+}
+
+bool Camera::IsDynamic() const
+{
+	return true;
 }

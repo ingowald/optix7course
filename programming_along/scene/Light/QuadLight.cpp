@@ -70,3 +70,8 @@ std::shared_ptr<LightOptix> QuadLight::GetOptixLight() const
 
 	return optixLight;
 }
+
+bool QuadLight::IsDynamic() const
+{
+	return true;
+}

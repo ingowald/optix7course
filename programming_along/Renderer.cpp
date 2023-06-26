@@ -20,6 +20,8 @@ Renderer::Renderer()
 	CreateHitgroupPrograms();
 
 	CreatePipeline();
+
+	DynamicElements.push_back(SceneCamera);
 }
 
 Renderer::~Renderer()
@@ -103,14 +105,14 @@ void Renderer::Render()
 	assert(IsInitialized && "Init has not been called. You should do this before rendering!");
 
 	// update the camera values
-	Params.Camera = SceneCamera.GetOptixCamera();
+	Params.Camera = SceneCamera->GetOptixCamera();
 
 	// update light values
 	std::shared_ptr<LightOptix> l = LightList[0]->GetOptixLight();
 	Params.Light = *((QuadLightOptix*)l.get());
 
 	// upload the launch params and increment frame ID
-	if (!AccumulatedDenoiseImages || SceneCamera.HasMovedThisFrame())
+	if (!AccumulatedDenoiseImages || SceneCamera->IsMarkedDirty())
 	{
 		// prevent accumulation if disabled by "going back" to first frame
 		Params.FrameID = 0;
@@ -245,7 +247,7 @@ void Renderer::Resize(const vec2i& size)
 	Params.FramebufferSize = size;
 	ColorBuffer.Resize(bufferSize);
 	Params.FramebufferData = reinterpret_cast<float4*>(ColorBuffer.CudaPtr());
-	SceneCamera.SetFramebufferSize(size);
+	SceneCamera->SetFramebufferSize(size);
 	DenoisedBuffer.Resize(bufferSize);
 
 	// finally setup the denoiser
@@ -265,16 +267,16 @@ void Renderer::DownloadPixels(vec4f pixels[])
 
 Camera* Renderer::GetCameraPtr()
 {
-	return &SceneCamera;
+	return SceneCamera.get();
 }
 
 void Renderer::InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& up)
 {
-	SceneCamera.SetEye(eye);
-	SceneCamera.SetAt(at);
-	SceneCamera.SetUp(up);
+	SceneCamera->SetEye(eye);
+	SceneCamera->SetAt(at);
+	SceneCamera->SetUp(up);
 
-	SceneCamera.UpdateInitialEyeAtUp();
+	SceneCamera->UpdateInitialEyeAtUp();
 
 	Params.FrameID = 0;
 }
@@ -293,6 +295,11 @@ void Renderer::AddLight(std::shared_ptr<Light> light)
 {
 	assert(LightList.size() == 0 && "Currently only one light source is supported!");
 	LightList.push_back(light);
+
+	if (light->IsDynamic())
+	{
+		DynamicElements.push_back(light);
+	}
 }
 
 bool Renderer::GetDenoiserEnabled() const
@@ -939,6 +946,19 @@ OptixTraversableHandle Renderer::BuildAccelerationStructure()
 	std::cout << "finished building acceleration structure" << std::endl;
 
 	return handle;
+}
+
+bool Renderer::HasSceneChanged() const
+{
+	for (const std::shared_ptr<IDynamicElement> e : DynamicElements)
+	{
+		if (e->IsMarkedDirty())
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void Renderer::SynchCuda(const std::string& errorMsg /* = "" */)

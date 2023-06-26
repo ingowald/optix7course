@@ -19,7 +19,9 @@ public:
 	virtual void Tick(const float& deltaTime_Seconds) = 0;
 
 	affine3f GetTransformationMatrix() const;
-	void SetTransformationMatrix(const affine3f& matrix);
+	virtual void SetTransformationMatrix(const affine3f& matrix);
+
+	virtual bool IsDynamic() const;
 
 protected:
 	affine3f TransfomrationMatrix;
