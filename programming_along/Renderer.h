@@ -63,6 +63,11 @@ public:
 
 	bool GetDenoiserEnabled() const;
 	void SetDenoiserEnabled(const bool& enabled);
+	void ToggleDenoiserEnabled();
+
+	bool GetAccumulationEnabled() const;
+	void SetAccumulationEnabled(const bool& enabled);
+	void ToggleAccumulationEnabled();
 
 private:
 	/**

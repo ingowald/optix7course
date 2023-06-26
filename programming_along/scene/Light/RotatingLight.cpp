@@ -13,6 +13,7 @@ void RotatingLight::Tick(const float& deltaTime_seconds)
 	TotalTime_seconds += deltaTime_seconds;
 	RotationOffset.x = sin(TotalTime_seconds * RotationSpeed) * RotationRadius;
 	RotationOffset.z = cos(TotalTime_seconds * RotationSpeed) * RotationRadius;
+	DirtyBit = true;
 }
 
 float RotatingLight::GetRotationSpeed() const

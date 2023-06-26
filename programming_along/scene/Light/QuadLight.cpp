@@ -9,11 +9,13 @@ QuadLight::QuadLight(const vec3f& origin, const vec3f& power /*= vec3f(1000000.f
 
 void QuadLight::Tick(const float& deltaTime_seconds)
 {
+	DirtyBit = false;
 	if (RotationEnabled)
 	{
 		TotalTime_seconds += deltaTime_seconds;
 		RotationOffset.x = sin(TotalTime_seconds * RotationSpeed) * RotationRadius;
 		RotationOffset.z = cos(TotalTime_seconds * RotationSpeed) * RotationRadius;
+		DirtyBit = true;
 	}
 }
 

@@ -113,7 +113,7 @@ void Renderer::Render()
 	Params.Light = *((QuadLightOptix*)l.get());
 
 	// upload the launch params and increment frame ID
-	if (!AccumulatedDenoiseImages || SceneCamera->IsMarkedDirty())
+	if (!AccumulatedDenoiseImages || HasSceneChanged())
 	{
 		// prevent accumulation if disabled by "going back" to first frame
 		Params.FrameID = 0;
@@ -311,6 +311,26 @@ bool Renderer::GetDenoiserEnabled() const
 void Renderer::SetDenoiserEnabled(const bool& enabled)
 {
 	DenoiserEnabled = enabled;
+}
+
+void Renderer::ToggleDenoiserEnabled()
+{
+	DenoiserEnabled = !DenoiserEnabled;
+}
+
+bool Renderer::GetAccumulationEnabled() const
+{
+	return AccumulatedDenoiseImages;
+}
+
+void Renderer::SetAccumulationEnabled(const bool& enabled)
+{
+	AccumulatedDenoiseImages = enabled;
+}
+
+void Renderer::ToggleAccumulationEnabled()
+{
+	AccumulatedDenoiseImages = !AccumulatedDenoiseImages;
 }
 
 void Renderer::InitOptix()
