@@ -48,7 +48,7 @@ public:
 	/**
 	* Download the rendered color buffer from the device into a host array
 	*/
-	void DownloadPixels(uint32_t pixels[]);
+	void DownloadPixels(vec4f pixels[]);
 
 	Camera* GetCameraPtr();
 
@@ -59,6 +59,9 @@ public:
 	void AddModel(std::shared_ptr<Model> model);
 
 	void AddLight(std::shared_ptr<Light> light);
+
+	bool GetDenoiserEnabled() const;
+	void SetDenoiserEnabled(const bool& enabled);
 
 private:
 	/**
@@ -179,6 +182,8 @@ protected:
 	std::vector<cudaTextureObject_t> TextureObjects;
 
 	bool IsInitialized = false;
+	bool AccumulatedDenoiseImages = false;
+	bool DenoiserEnabled = true;
 
 private:
 	cudaStream_t CudaStream;

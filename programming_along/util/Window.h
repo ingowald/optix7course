@@ -51,7 +51,7 @@ protected:
 
 	vec2i FramebufferSize;
 	GLuint FramebufferTexture{ 0 };
-	std::vector<uint32_t> Pixels;
+	std::vector<vec4f> Pixels;
 
 	// controls
 	vec2f MousePos;

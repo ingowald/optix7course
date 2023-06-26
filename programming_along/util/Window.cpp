@@ -77,9 +77,9 @@ void Window::Draw()
 
 	glBindTexture(GL_TEXTURE_2D, FramebufferTexture);
 	GLenum texFormat = GL_RGBA;
-	GLenum texType = GL_UNSIGNED_BYTE;
+	GLenum texelType = GL_FLOAT;
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FramebufferSize.x, FramebufferSize.y, 0, 
-		GL_RGBA, GL_UNSIGNED_BYTE, Pixels.data());
+		GL_RGBA, texelType, Pixels.data());
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

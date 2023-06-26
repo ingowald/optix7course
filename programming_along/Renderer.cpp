@@ -100,7 +100,7 @@ void Renderer::Render()
 		return;
 	}
 
-	assert(IsInitialized &&"Init has not been called. You should do this before rendering!");
+	assert(IsInitialized && "Init has not been called. You should do this before rendering!");
 
 	// update the camera values
 	Params.Camera = SceneCamera.GetOptixCamera();
@@ -110,6 +110,11 @@ void Renderer::Render()
 	Params.Light = *((QuadLightOptix*)l.get());
 
 	// upload the launch params and increment frame ID
+	if (!AccumulatedDenoiseImages || SceneCamera.HasMovedThisFrame())
+	{
+		// prevent accumulation if disabled by "going back" to first frame
+		Params.FrameID = 0;
+	}
 	ParamsBuffer.Upload(&Params, 1);
 	Params.FrameID++;
 
@@ -124,6 +129,62 @@ void Renderer::Render()
 	if (result != OPTIX_SUCCESS)
 	{
 		throw std::runtime_error("Could not execute optixLaunch!");
+	}
+
+	// framebuffer is written to, now denoise and write to denoised image buffer
+	// this can be done before cuda synch (-> asynch with regards to the new image rendering)
+	OptixDenoiserParams denoiserParams;
+	denoiserParams.hdrIntensity = (CUdeviceptr)0;
+	if (AccumulatedDenoiseImages)
+	{
+		denoiserParams.blendFactor = 1.f / Params.FrameID;
+	}
+	else
+	{
+		denoiserParams.blendFactor = 0.f;
+	}
+
+	OptixImage2D inputLayer;
+	inputLayer.data = ColorBuffer.CudaPtr();
+	inputLayer.width = Params.FramebufferSize.x;
+	inputLayer.height = Params.FramebufferSize.y;
+	inputLayer.rowStrideInBytes = Params.FramebufferSize.x * sizeof(float4);
+	inputLayer.pixelStrideInBytes = sizeof(float4);
+	inputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+	OptixImage2D outputLayer;
+	outputLayer.data = DenoisedBuffer.CudaPtr();
+	outputLayer.width = Params.FramebufferSize.x;
+	outputLayer.height = Params.FramebufferSize.y;
+	outputLayer.rowStrideInBytes = Params.FramebufferSize.x * sizeof(float4);
+	outputLayer.pixelStrideInBytes = sizeof(float4);
+	outputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+	if (DenoiserEnabled)
+	{
+		result = optixDenoiserInvoke(Denoiser,
+			0, //stream
+			&denoiserParams,
+			DenoiserState.CudaPtr(),
+			DenoiserState.Size_bytes,
+			&inputLayer, 1,
+			0, // input offset x
+			0, // input offset y
+			&outputLayer,
+			DenoiserScratch.CudaPtr(),
+			DenoiserScratch.Size_bytes
+		);
+
+		if (result != OPTIX_SUCCESS)
+		{
+			throw std::runtime_error("OptiX Denoiser invocation failed!");
+		}
+	}
+	else
+	{
+		cudaMemcpy((void*)outputLayer.data, (void*)inputLayer.data,
+			outputLayer.width * outputLayer.height * sizeof(float4),
+			cudaMemcpyDeviceToDevice);
 	}
 
 	// make sure the frame is rendered before it is downloaded (only for this easy example!")
@@ -183,7 +244,7 @@ void Renderer::Resize(const vec2i& size)
 	const size_t bufferSize = size.x * size.y * sizeof(float4);
 	Params.FramebufferSize = size;
 	ColorBuffer.Resize(bufferSize);
-	Params.FramebufferData = reinterpret_cast<uint32_t*>(ColorBuffer.CudaPtr());
+	Params.FramebufferData = reinterpret_cast<float4*>(ColorBuffer.CudaPtr());
 	SceneCamera.SetFramebufferSize(size);
 	DenoisedBuffer.Resize(bufferSize);
 
@@ -194,10 +255,12 @@ void Renderer::Resize(const vec2i& size)
 		DenoiserState.Size_bytes,
 		DenoiserScratch.CudaPtr(),
 		DenoiserScratch.Size_bytes);
+
 }
 
-void Renderer::DownloadPixels(uint32_t pixels[])
+void Renderer::DownloadPixels(vec4f pixels[])
 {
+	//DenoisedBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
 	ColorBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
 }
 
@@ -213,6 +276,8 @@ void Renderer::InitializeCamera(const vec3f& eye, const vec3f& at, const vec3f& 
 	SceneCamera.SetUp(up);
 
 	SceneCamera.UpdateInitialEyeAtUp();
+
+	Params.FrameID = 0;
 }
 
 void Renderer::AddMesh(std::shared_ptr<Mesh> mesh)
@@ -229,6 +294,16 @@ void Renderer::AddLight(std::shared_ptr<Light> light)
 {
 	assert(LightList.size() == 0 && "Currently only one light source is supported!");
 	LightList.push_back(light);
+}
+
+bool Renderer::GetDenoiserEnabled() const
+{
+	return DenoiserEnabled;
+}
+
+void Renderer::SetDenoiserEnabled(const bool& enabled)
+{
+	DenoiserEnabled = enabled;
 }
 
 void Renderer::InitOptix()

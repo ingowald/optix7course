@@ -61,6 +61,8 @@ public:
 	void MouseDown(const int32_t& button);
 	void MousUp(const int32_t& button);
 
+	bool HasMovedThisFrame() const;
+
 	CameraOptix GetOptixCamera() const;
 
 private:
@@ -81,4 +83,6 @@ private:
 	vec2f CurrentMousePos_Normalized;
 	uint8_t MouseStatus[8];
 	float Speed = 100.0f;
+
+	bool HasMoved = false;
 };

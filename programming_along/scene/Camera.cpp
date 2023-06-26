@@ -36,6 +36,9 @@ Camera::~Camera()
 
 void Camera::Tick(const float& deltaTime_seconds)
 {
+	// we track movement per frame for the accumulation of frames
+	// -> if the camera has moved, the accumulation has to be reset
+	HasMoved = false;
 	Move(deltaTime_seconds);
 }
 
@@ -45,6 +48,8 @@ void Camera::Move(const float& deltaTime_seconds)
 	vec3f right = cross(forward, Up);
 
 	vec3f lastEye = Eye;
+	vec3f lastAt = At;
+	vec3f lastUp = Up;
 
 	float adjustedSpeed = Speed;
 
@@ -146,6 +151,11 @@ void Camera::Move(const float& deltaTime_seconds)
 	}
 
 	LastMousePos_Normalized = CurrentMousePos_Normalized;
+
+	if (lastEye != Eye || lastAt != At || lastUp != Up)
+	{
+		HasMoved = true;
+	}
 }
 
 void Camera::SetFramebufferSize(const vec2i& fbSize)
@@ -230,6 +240,11 @@ void Camera::MouseDown(const int32_t& button)
 void Camera::MousUp(const int32_t& button)
 {
 	MouseStatus[button] = 0;
+}
+
+bool Camera::HasMovedThisFrame() const
+{
+	return HasMoved;
 }
 
 CameraOptix Camera::GetOptixCamera() const

@@ -113,17 +113,19 @@ extern "C" __global__ void __raygen__renderFrame()
 	// the ray was traced and returned a value here
 	// so we can write the result to the frame buffer
 
-	const int32_t r = int32_t(255.99 * min(pixelColor.x / numPixelSamples, 1.f));
-	const int32_t g = int32_t(255.99 * min(pixelColor.y / numPixelSamples, 1.f));
-	const int32_t b = int32_t(255.99 * min(pixelColor.z / numPixelSamples, 1.f));
+	vec4f rgba(pixelColor / numPixelSamples, 1.f);
 
-	// convert to 32-bit rgba value, with alpha explicitly 0xff
-	const uint32_t rgba = 0xff000000 | (r << 0) | (g << 8) | (b << 16);
-
+	// write / accumulate frame buffer
 	const uint32_t fbIndex = ix + iy * launchParams.FramebufferSize.x;
 
+	if (launchParams.FrameID > 0)
+	{
+		rgba += float(launchParams.FrameID)
+			* vec4f(launchParams.FramebufferData[fbIndex]);
+		rgba /= (launchParams.FrameID + 1.f);
+	}
 	// finally write to frame buffer
-	launchParams.FramebufferData[fbIndex] = rgba;
+	launchParams.FramebufferData[fbIndex] = (float4)rgba;
 }
 
 extern "C" __global__ void __miss__shadow()
