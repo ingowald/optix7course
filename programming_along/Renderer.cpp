@@ -260,8 +260,7 @@ void Renderer::Resize(const vec2i& size)
 
 void Renderer::DownloadPixels(vec4f pixels[])
 {
-	//DenoisedBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
-	ColorBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
+	DenoisedBuffer.Download(pixels, Params.FramebufferSize.x * Params.FramebufferSize.y);
 }
 
 Camera* Renderer::GetCameraPtr()
