@@ -21,11 +21,17 @@
 // glfw framework
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <gl/GL.h>
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
   using namespace gdt;
 
+  struct RGBColor {//定义颜色空间
+      char R;
+      char G;
+      char B;
+  };
 
   struct GLFWindow {
     GLFWindow(const std::string &title);
@@ -212,6 +218,23 @@ namespace osc {
       case 'Z':
         fc.setUpVector(fc.upVector==vec3f(0,0,1)?vec3f(0,0,-1):vec3f(0,0,1));
         break;
+        /*增加键盘控制功能*/
+      case GLFW_KEY_LEFT:
+          std::cout << "press left" << std::endl;
+          strafe(vec3f(1e-2, 0, 0) * fc.motionSpeed);
+          break;
+      case GLFW_KEY_RIGHT:
+          std::cout << "press right" << std::endl;
+          strafe(vec3f(1e-2, 0, 0) * fc.motionSpeed * -1);
+          break;
+      case GLFW_KEY_UP:
+          std::cout << "press up" << std::endl;
+          move(1e-2 * fc.motionSpeed);
+          break;
+      case GLFW_KEY_DOWN:
+          std::cout << "press down" << std::endl;
+          move(1e-2 * fc.motionSpeed * -1);
+          break;
       default:
         break;
       }
@@ -312,12 +335,67 @@ namespace osc {
         std::cout << "Entering 'inspect' mode" << std::endl;
         if (inspectModeManip) cameraFrameManip = inspectModeManip;
         break;
+      case 'S':
+          std::cout << "press s" << std::endl;
+          screenShot();
+          break;
       default:
         if (cameraFrameManip)
           cameraFrameManip->key(key,mods);
       }
     }
-    
+    void WriteBMP(const char* FileName, RGBColor* ColorBuffer, int ImageWidth, int ImageHeight)
+    {
+        //std::cout << "enter" << std::endl;
+        //颜色数据总尺寸：
+        const int ColorBufferSize = ImageHeight * ImageWidth * sizeof(RGBColor);
+
+        //文件头
+        BITMAPFILEHEADER fileHeader;
+        fileHeader.bfType = 0x4D42;	//0x42是'B'；0x4D是'M'
+        fileHeader.bfReserved1 = 0;
+        fileHeader.bfReserved2 = 0;
+        fileHeader.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + ColorBufferSize;
+        fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+        //信息头
+        BITMAPINFOHEADER bitmapHeader = { 0 };
+        bitmapHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bitmapHeader.biHeight = ImageHeight;
+        bitmapHeader.biWidth = ImageWidth;
+        bitmapHeader.biPlanes = 1;
+        bitmapHeader.biBitCount = 24;
+        bitmapHeader.biSizeImage = ColorBufferSize;
+        bitmapHeader.biCompression = 0; //BI_RGB
+
+
+        FILE* fp;//文件指针
+
+        //打开文件（没有则创建）
+        fopen_s(&fp, FileName, "wb");
+        //std::cout << fp << std::endl;
+        if (fp == NULL) {
+            std::cout << "open file failed" << std::endl;
+            return;
+        }
+        //写入文件头和信息头
+        fwrite(&fileHeader, sizeof(BITMAPFILEHEADER), 1, fp);
+        fwrite(&bitmapHeader, sizeof(BITMAPINFOHEADER), 1, fp);
+        //写入颜色数据
+        fwrite(ColorBuffer, ColorBufferSize, 1, fp);
+
+        fclose(fp);
+    }
+
+    virtual void screenShot() {
+        vec2i windowSize;
+        glfwGetWindowSize(handle, &windowSize.x, &windowSize.y);
+        //std::cout << windowSize.x << " " << windowSize.y << std::endl;
+        RGBColor* ColorBuffer = new RGBColor[windowSize.x * windowSize.y];
+        glReadPixels(0, 0, windowSize.x, windowSize.y, GL_BGR_EXT, GL_UNSIGNED_BYTE, ColorBuffer);
+        WriteBMP("../../screenshot/output.bmp", ColorBuffer, windowSize.x, windowSize.y);
+        delete[] ColorBuffer;
+    }
     /*! callback that window got resized */
     virtual void mouseMotion(const vec2i &newPos) override
     {
