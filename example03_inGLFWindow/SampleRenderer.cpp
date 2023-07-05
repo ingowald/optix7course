@@ -161,7 +161,8 @@ namespace osc {
       
     char log[2048];
     size_t sizeof_log = sizeof( log );
-    OPTIX_CHECK(optixModuleCreateFromPTX(optixContext,
+#if OPTIX_VERSION >= 70700
+    OPTIX_CHECK(optixModuleCreate(optixContext,
                                          &moduleCompileOptions,
                                          &pipelineCompileOptions,
                                          ptxCode.c_str(),
@@ -169,6 +170,17 @@ namespace osc {
                                          log,&sizeof_log,
                                          &module
                                          ));
+#else
+    OPTIX_CHECK(optixModuleCreateFromPTX(optixContext,
+                                         &moduleCompileOptions,
+                                         &pipelineCompileOptions,
+                                         ptxCode.c_str(),
+                                         ptxCode.size(),
+                                         log,      // Log string
+                                         &sizeof_log,// Log string sizse
+                                         &module
+                                         ));
+#endif
     if (sizeof_log > 1) PRINT(log);
   }
     
