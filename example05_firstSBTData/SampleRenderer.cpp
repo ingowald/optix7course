@@ -326,7 +326,7 @@ namespace osc {
       
     char log[2048];
     size_t sizeof_log = sizeof( log );
-    OPTIX_CHECK(optixModuleCreateFromPTX(optixContext,
+    OPTIX_CHECK(optixModuleCreate(optixContext,
                                          &moduleCompileOptions,
                                          &pipelineCompileOptions,
                                          ptxCode.c_str(),
