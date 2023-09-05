@@ -638,8 +638,9 @@ namespace osc {
                             1
                             ));
 
-    OptixDenoiserParams denoiserParams;
-#if OPTIX_VERSION > 70500
+    OptixDenoiserParams denoiserParams = {};
+#if OPTIX_VERSION >= 80000
+#elif OPTIX_VERSION > 70500
     denoiserParams.denoiseAlpha = OPTIX_DENOISER_ALPHA_MODE_ALPHA_AS_AOV;
 #endif
     denoiserParams.hdrIntensity = (CUdeviceptr)0;
@@ -649,7 +650,7 @@ namespace osc {
         denoiserParams.blendFactor = 0.0f;
     
     // -------------------------------------------------------
-    OptixImage2D inputLayer;
+    OptixImage2D inputLayer = {};
     inputLayer.data = renderBuffer.d_pointer();
     /// Width of the image (in pixels)
     inputLayer.width = launchParams.frame.size.x;

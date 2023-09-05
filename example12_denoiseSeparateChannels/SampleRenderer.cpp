@@ -640,8 +640,9 @@ namespace osc {
 
     denoiserIntensity.resize(sizeof(float));
 
-    OptixDenoiserParams denoiserParams;
-#if OPTIX_VERSION > 70500
+    OptixDenoiserParams denoiserParams = {};
+#if OPTIX_VERSION >= 80000
+#elif OPTIX_VERSION > 70500
     denoiserParams.denoiseAlpha = OPTIX_DENOISER_ALPHA_MODE_ALPHA_AS_AOV;
 #endif
 #if OPTIX_VERSION >= 70300
