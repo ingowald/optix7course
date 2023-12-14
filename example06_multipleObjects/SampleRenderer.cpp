@@ -52,7 +52,7 @@ namespace osc {
   //! add aligned cube with front-lower-left corner and size
   void TriangleMesh::addCube(const vec3f &center, const vec3f &size)
   {
-    PING; 
+    PING;
     affine3f xfm;
     xfm.p = center - 0.5f*size;
     xfm.l.vx = vec3f(size.x,0.f,0.f);
@@ -60,7 +60,7 @@ namespace osc {
     xfm.l.vz = vec3f(0.f,0.f,size.z);
     addUnitCube(xfm);
   }
-  
+
   /*! add a unit cube (subject to given xfm matrix) to the current
       triangleMesh */
   void TriangleMesh::addUnitCube(const affine3f &xfm)
@@ -76,7 +76,7 @@ namespace osc {
     vertex.push_back(xfmPoint(xfm,vec3f(1.f,1.f,1.f)));
 
 
-    int indices[] = {0,1,3, 2,3,0,
+    int indices[] = {0,1,3, 2,0,3,
                      5,7,6, 5,6,4,
                      0,4,5, 0,5,1,
                      2,3,7, 2,7,6,
@@ -88,18 +88,18 @@ namespace osc {
                                           indices[3*i+1],
                                           indices[3*i+2]));
   }
-    
-  
+
+
   /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const std::vector<TriangleMesh> &meshes)
     : meshes(meshes)
   {
     initOptix();
-      
+
     std::cout << "#osc: creating optix context ..." << std::endl;
     createContext();
-      
+
     std::cout << "#osc: setting up module ..." << std::endl;
     createModule();
 
@@ -111,7 +111,7 @@ namespace osc {
     createHitgroupPrograms();
 
     launchParams.traversable = buildAccel();
-    
+
     std::cout << "#osc: setting up optix pipeline ..." << std::endl;
     createPipeline();
 
@@ -132,14 +132,14 @@ namespace osc {
 
     vertexBuffer.resize(meshes.size());
     indexBuffer.resize(meshes.size());
-    
+
     OptixTraversableHandle asHandle { 0 };
-    
+
     // ==================================================================
     // triangle inputs
     // ==================================================================
 	std::vector<OptixBuildInput> triangleInput(meshes.size());
-    std::vector<CUdeviceptr> d_vertices(meshes.size());
+  std::vector<CUdeviceptr> d_vertices(meshes.size());
 	std::vector<CUdeviceptr> d_indices(meshes.size());
 	std::vector<uint32_t> triangleInputFlags(meshes.size());
 
@@ -157,38 +157,38 @@ namespace osc {
     // device pointers
     d_vertices[meshID] = vertexBuffer[meshID].d_pointer();
     d_indices[meshID]  = indexBuffer[meshID].d_pointer();
-      
+
     triangleInput[meshID].triangleArray.vertexFormat        = OPTIX_VERTEX_FORMAT_FLOAT3;
     triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(vec3f);
     triangleInput[meshID].triangleArray.numVertices         = (int)model.vertex.size();
     triangleInput[meshID].triangleArray.vertexBuffers       = &d_vertices[meshID];
-    
+
     triangleInput[meshID].triangleArray.indexFormat         = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
     triangleInput[meshID].triangleArray.indexStrideInBytes  = sizeof(vec3i);
     triangleInput[meshID].triangleArray.numIndexTriplets    = (int)model.index.size();
     triangleInput[meshID].triangleArray.indexBuffer         = d_indices[meshID];
-    
+
     triangleInputFlags[meshID] = 0 ;
-    
+
     // in this example we have one SBT entry, and no per-primitive
     // materials:
     triangleInput[meshID].triangleArray.flags               = &triangleInputFlags[meshID];
     triangleInput[meshID].triangleArray.numSbtRecords               = 1;
-    triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 0; 
-    triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
-    triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0; 
+    triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer        = 0;
+    triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes   = 0;
+    triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0;
     }
     // ==================================================================
     // BLAS setup
     // ==================================================================
-    
+
     OptixAccelBuildOptions accelOptions = {};
     accelOptions.buildFlags             = OPTIX_BUILD_FLAG_NONE
       | OPTIX_BUILD_FLAG_ALLOW_COMPACTION
       ;
     accelOptions.motionOptions.numKeys  = 1;
     accelOptions.operation              = OPTIX_BUILD_OPERATION_BUILD;
-    
+
     OptixAccelBufferSizes blasBufferSizes;
     OPTIX_CHECK(optixAccelComputeMemoryUsage
                 (optixContext,
@@ -197,28 +197,28 @@ namespace osc {
                  (int)meshes.size(),  // num_build_inputs
                  &blasBufferSizes
                  ));
-    
+
     // ==================================================================
     // prepare compaction
     // ==================================================================
-    
+
     CUDABuffer compactedSizeBuffer;
     compactedSizeBuffer.alloc(sizeof(uint64_t));
-    
+
     OptixAccelEmitDesc emitDesc;
     emitDesc.type   = OPTIX_PROPERTY_TYPE_COMPACTED_SIZE;
     emitDesc.result = compactedSizeBuffer.d_pointer();
-    
+
     // ==================================================================
     // execute build (main stage)
     // ==================================================================
-    
+
     CUDABuffer tempBuffer;
     tempBuffer.alloc(blasBufferSizes.tempSizeInBytes);
-    
+
     CUDABuffer outputBuffer;
     outputBuffer.alloc(blasBufferSizes.outputSizeInBytes);
-      
+
     OPTIX_CHECK(optixAccelBuild(optixContext,
                                 /* stream */0,
                                 &accelOptions,
@@ -226,22 +226,22 @@ namespace osc {
                                 (int)meshes.size(),
                                 tempBuffer.d_pointer(),
                                 tempBuffer.sizeInBytes,
-                                
+
                                 outputBuffer.d_pointer(),
                                 outputBuffer.sizeInBytes,
-                                
+
                                 &asHandle,
-                                
+
                                 &emitDesc,1
                                 ));
     CUDA_SYNC_CHECK();
-    
+
     // ==================================================================
     // perform compaction
     // ==================================================================
     uint64_t compactedSize;
     compactedSizeBuffer.download(&compactedSize,1);
-    
+
     asBuffer.alloc(compactedSize);
     OPTIX_CHECK(optixAccelCompact(optixContext,
                                   /*stream:*/0,
@@ -250,22 +250,22 @@ namespace osc {
                                   asBuffer.sizeInBytes,
                                   &asHandle));
     CUDA_SYNC_CHECK();
-    
+
     // ==================================================================
     // aaaaaand .... clean up
     // ==================================================================
     outputBuffer.free(); // << the UNcompacted, temporary output buffer
     tempBuffer.free();
     compactedSizeBuffer.free();
-    
+
     return asHandle;
   }
-  
+
   /*! helper function that initializes optix and checks for errors */
   void SampleRenderer::initOptix()
   {
     std::cout << "#osc: initializing optix..." << std::endl;
-      
+
     // -------------------------------------------------------
     // check for available optix7 capable devices
     // -------------------------------------------------------
@@ -301,14 +301,14 @@ namespace osc {
     const int deviceID = 0;
     CUDA_CHECK(SetDevice(deviceID));
     CUDA_CHECK(StreamCreate(&stream));
-      
+
     cudaGetDeviceProperties(&deviceProps, deviceID);
     std::cout << "#osc: running on device: " << deviceProps.name << std::endl;
-      
+
     CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
-    if( cuRes != CUDA_SUCCESS ) 
+    if( cuRes != CUDA_SUCCESS )
       fprintf( stderr, "Error querying current context: error code %d\n", cuRes );
-      
+
     OPTIX_CHECK(optixDeviceContextCreate(cudaContext, 0, &optixContext));
     OPTIX_CHECK(optixDeviceContextSetLogCallback
                 (optixContext,context_log_cb,nullptr,4));
@@ -332,11 +332,11 @@ namespace osc {
     pipelineCompileOptions.numAttributeValues = 2;
     pipelineCompileOptions.exceptionFlags     = OPTIX_EXCEPTION_FLAG_NONE;
     pipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
-      
+
     pipelineLinkOptions.maxTraceDepth          = 2;
-      
+
     const std::string ptxCode = embedded_ptx_code;
-      
+
     char log[2048];
     size_t sizeof_log = sizeof( log );
 #if OPTIX_VERSION >= 70700
@@ -361,7 +361,7 @@ namespace osc {
 #endif
     if (sizeof_log > 1) PRINT(log);
   }
-    
+
 
 
   /*! does all setup for the raygen program(s) we are going to use */
@@ -369,11 +369,11 @@ namespace osc {
   {
     // we do a single ray gen program in this example:
     raygenPGs.resize(1);
-      
+
     OptixProgramGroupOptions pgOptions = {};
     OptixProgramGroupDesc pgDesc    = {};
     pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_RAYGEN;
-    pgDesc.raygen.module            = module;           
+    pgDesc.raygen.module            = module;
     pgDesc.raygen.entryFunctionName = "__raygen__renderFrame";
 
     // OptixProgramGroup raypg;
@@ -388,17 +388,17 @@ namespace osc {
                                         ));
     if (sizeof_log > 1) PRINT(log);
   }
-    
+
   /*! does all setup for the miss program(s) we are going to use */
   void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
     missPGs.resize(1);
-      
+
     OptixProgramGroupOptions pgOptions = {};
     OptixProgramGroupDesc pgDesc    = {};
     pgDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_MISS;
-    pgDesc.miss.module            = module;           
+    pgDesc.miss.module            = module;
     pgDesc.miss.entryFunctionName = "__miss__radiance";
 
     // OptixProgramGroup raypg;
@@ -413,7 +413,7 @@ namespace osc {
                                         ));
     if (sizeof_log > 1) PRINT(log);
   }
-    
+
   /*! does all setup for the hitgroup program(s) we are going to use */
   void SampleRenderer::createHitgroupPrograms()
   {
@@ -439,7 +439,7 @@ namespace osc {
                                         ));
     if (sizeof_log > 1) PRINT(log);
   }
-    
+
 
   /*! assembles the full pipeline of all programs */
   void SampleRenderer::createPipeline()
@@ -451,7 +451,7 @@ namespace osc {
       programGroups.push_back(pg);
     for (auto pg : hitgroupPGs)
       programGroups.push_back(pg);
-      
+
     char log[2048];
     size_t sizeof_log = sizeof( log );
     OPTIX_CHECK(optixPipelineCreate(optixContext,
@@ -466,12 +466,12 @@ namespace osc {
 
     OPTIX_CHECK(optixPipelineSetStackSize
                 (/* [in] The pipeline to configure the stack size for */
-                 pipeline, 
+                 pipeline,
                  /* [in] The direct stack size requirement for direct
                     callables invoked from IS or AH. */
                  2*1024,
                  /* [in] The direct stack size requirement for direct
-                    callables invoked from RG, MS, or CH.  */                 
+                    callables invoked from RG, MS, or CH.  */
                  2*1024,
                  /* [in] The continuation stack requirement. */
                  2*1024,
@@ -541,9 +541,9 @@ namespace osc {
     // sanity check: make sure we launch only after first resize is
     // already done:
     if (launchParams.frame.size.x == 0) return;
-      
+
     launchParamsBuffer.upload(&launchParams,1);
-      
+
     OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
                             pipeline,stream,
                             /*! parameters and SBT */
@@ -577,13 +577,13 @@ namespace osc {
       = cosFovy * normalize(cross(launchParams.camera.horizontal,
                                   launchParams.camera.direction));
   }
-  
+
   /*! resize frame buffer to given resolution */
   void SampleRenderer::resize(const vec2i &newSize)
   {
     // if window minimized
     if (newSize.x == 0 | newSize.y == 0) return;
-    
+
     // resize our cuda frame buffer
     colorBuffer.resize(newSize.x*newSize.y*sizeof(uint32_t));
 
@@ -602,5 +602,5 @@ namespace osc {
     colorBuffer.download(h_pixels,
                          launchParams.frame.size.x*launchParams.frame.size.y);
   }
-  
+
 } // ::osc
