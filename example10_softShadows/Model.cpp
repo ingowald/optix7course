@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2018-2019 Ingo Wald                                            //
+// Copyright 2018-20124 Ingo Wald                                            //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -24,7 +24,7 @@
 //std
 #include <set>
 
-namespace std {
+namespace tinyobj {
   inline bool operator<(const tinyobj::index_t &a,
                         const tinyobj::index_t &b)
   {
