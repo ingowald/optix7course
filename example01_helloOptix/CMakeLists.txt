@@ -1,5 +1,5 @@
 # ======================================================================== #
-# Copyright 2018-2019 Ingo Wald                                            #
+# Copyright 2018-2025 Ingo Wald                                            #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License");          #
 # you may not use this file except in compliance with the License.         #
@@ -14,15 +14,10 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
-include_directories(${OptiX_INCLUDE})
-
 add_executable(ex01_helloOptix
   optix7.h
   main.cpp
-  )
+)
 target_link_libraries(ex01_helloOptix
   gdt
-  ${optix_LIBRARY}
-  ${CUDA_LIBRARIES}
-  ${CUDA_CUDA_LIBRARY}
-  )
+)

@@ -1,5 +1,5 @@
 # ======================================================================== #
-# Copyright 2018-2019 Ingo Wald                                            #
+# Copyright 2018-2025 Ingo Wald                                            #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License");          #
 # you may not use this file except in compliance with the License.         #
@@ -14,17 +14,26 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
-find_package(OpenGL REQUIRED)
-
-include_directories(${OptiX_INCLUDE})
-
-cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
-
-cuda_add_library(toneMap
-  toneMap.cu)
-add_executable(ex12_denoiseSeparateChannels
-  ${embedded_ptx_code}
+embed_ptx(
+  OUTPUT_TARGET
+  sample12_devicePrograms
+  PTX_LINK_LIBRARIES
+  gdt
+  SOURCES
   devicePrograms.cu
+)
+
+add_library(toneMap
+  toneMap.cu
+)
+target_link_libraries(toneMap PUBLIC
+  gdt
+)
+
+
+
+add_executable(ex12_denoiseSeparateChannels
+#  devicePrograms.cu
   optix7.h
   CUDABuffer.h
   LaunchParams.h
@@ -33,17 +42,11 @@ add_executable(ex12_denoiseSeparateChannels
   Model.h
   Model.cpp
   main.cpp
-  )
+)
 
 target_link_libraries(ex12_denoiseSeparateChannels
+  sample12_devicePrograms
   toneMap
   gdt
-  # optix dependencies, for rendering
-  ${optix_LIBRARY}
-  ${CUDA_LIBRARIES}
-  ${CUDA_CUDA_LIBRARY}
-  # glfw and opengl, for display
   glfWindow
-  glfw
-  ${OPENGL_gl_LIBRARY}
-  )
+)

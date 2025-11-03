@@ -1,5 +1,5 @@
 # ======================================================================== #
-# Copyright 2018-2019 Ingo Wald                                            #
+# Copyright 2018-2025 Ingo Wald                                            #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License");          #
 # you may not use this file except in compliance with the License.         #
@@ -14,22 +14,24 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
-include_directories(${OptiX_INCLUDE})
-
-cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
+embed_ptx(
+  OUTPUT_TARGET
+  sample02-devicePrograms
+  PTX_LINK_LIBRARIES
+  gdt
+  SOURCES
+  devicePrograms.cu
+)
 
 add_executable(ex02_pipelineAndRayGen
-  ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
   LaunchParams.h
   SampleRenderer.h
   SampleRenderer.cpp
   main.cpp
-  )
+)
 target_link_libraries(ex02_pipelineAndRayGen
+  sample02-devicePrograms
   gdt
-  ${optix_LIBRARY}
-  ${CUDA_LIBRARIES}
-  ${CUDA_CUDA_LIBRARY}
-  )
+)

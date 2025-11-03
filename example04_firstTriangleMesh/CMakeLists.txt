@@ -1,5 +1,5 @@
 # ======================================================================== #
-# Copyright 2018-2019 Ingo Wald                                            #
+# Copyright 2018-2025 Ingo Wald                                            #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License");          #
 # you may not use this file except in compliance with the License.         #
@@ -14,14 +14,16 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
-find_package(OpenGL REQUIRED)
-
-include_directories(${OptiX_INCLUDE})
-
-cuda_compile_and_embed(embedded_ptx_code devicePrograms.cu)
+embed_ptx(
+  OUTPUT_TARGET
+  sample04_devicePrograms
+  PTX_LINK_LIBRARIES
+  gdt
+  SOURCES
+  devicePrograms.cu
+)
 
 add_executable(ex04_firstTriangleMesh
-  ${embedded_ptx_code}
   optix7.h
   CUDABuffer.h
   LaunchParams.h
@@ -31,13 +33,9 @@ add_executable(ex04_firstTriangleMesh
   )
 
 target_link_libraries(ex04_firstTriangleMesh
+  sample04_devicePrograms
+  # gdt, pulls in optix and cuda 
   gdt
-  # optix dependencies, for rendering
-  ${optix_LIBRARY}
-  ${CUDA_LIBRARIES}
-  ${CUDA_CUDA_LIBRARY}
   # glfw and opengl, for display
   glfWindow
-  glfw
-  ${OPENGL_gl_LIBRARY}
   )

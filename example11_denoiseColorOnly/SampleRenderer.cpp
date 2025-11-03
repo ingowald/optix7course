@@ -22,7 +22,9 @@
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
 
-  extern "C" char embedded_ptx_code[];
+  /*! generated from base name component of source file
+      (devicePrograms.cu), plus "_ptx" */
+  extern "C" char devicePrograms_ptx[];
 
   /*! SBT record for a raygen program */
   struct __align__( OPTIX_SBT_RECORD_ALIGNMENT ) RaygenRecord
@@ -361,7 +363,7 @@ namespace osc {
       
     pipelineLinkOptions.maxTraceDepth          = 2;
       
-    const std::string ptxCode = embedded_ptx_code;
+    const std::string ptxCode = devicePrograms_ptx;
       
     char log[2048];
     size_t sizeof_log = sizeof( log );

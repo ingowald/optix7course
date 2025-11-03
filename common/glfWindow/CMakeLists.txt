@@ -1,5 +1,5 @@
 # ======================================================================== #
-# Copyright 2018-2019 Ingo Wald                                            #
+# Copyright 2018-2025 Ingo Wald                                            #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License");          #
 # you may not use this file except in compliance with the License.         #
@@ -14,7 +14,25 @@
 # limitations under the License.                                           #
 # ======================================================================== #
 
+set(OpenGL_GL_PREFERENCE "LEGACY")
+find_package(OpenGL REQUIRED OPTIONAL_COMPONENTS OpenGL)
+
 add_library(glfWindow
   GLFWindow.h
   GLFWindow.cpp
-  )
+)
+
+if(TARGET OpenGL::OpenGL)
+  target_link_libraries(glfWindow PUBLIC OpenGL::OpenGL)
+else()
+  target_link_libraries(glfWindow PUBLIC OpenGL::GL)
+endif()
+
+target_link_libraries(glfWindow
+  PUBLIC
+  gdt
+  glfw
+#  stb_image
+)
+
+
