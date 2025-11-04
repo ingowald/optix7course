@@ -1,25 +1,93 @@
-# Siggraph 2019/2020 OptiX 7/7.3 Course Tutorial Code
+# Siggraph 2019/2020 OptiX 7 (and newer) Course Tutorial Code
 
-## Note on OWL Version
+## General Note(s) on this Repo/Sample Code
 
-May 10, 2021: This repo was originally created as sample code
-for the OptiX 7 course at Siggraph 2019/2020. The goal of this
-was to teach OptiX 7 step by step, from first principles, and
-with mininal external dependencies. This makes this particular
-codebase great for learning the basics; however, it is not 
-necessarily the greatest resource to eventually use to build
-your own advanced projects with. If you do want to follow up and
-build your owl OptiX projects, I would suggest to also
-have a look at my other OptiX 7 resource, the OWL project
-(at http://owl-project.github.io or https://gitee.com/games-assignment/owl), which in particular aims at
-making it easier to write OptiX programs by wrapping all or most
-of the techniques you have learned in this course in some
-much easier to use "convenience layer" API on top of OptiX 7.
-OWL does, in fact, now also contain a sample that reproduces
-exactly this course's final sample within the OWL framework.
+Nov,4 2025: This repo was originally created as sample code for the
+OptiX 7 course at Siggraph 2019/2020. It has received quite some
+attention (over 500 stars at the time of this writing, which makes
+this my third-highest-starred repo, right after Embree and OSPRay!),
+but clearly also start showing its age. As such, I'd like to leave two
+IMHO important notes here:
+
+### You Might Want to (also) look at OWL (https://github.com/NVIDIA/owl)!
+
+The goal of this repo - together with the Siggraph course that it was
+originally accompanying - was to *teach* OptiX step by step, from
+first principles, and with mininal external dependencies. This makes
+this particular codebase great for learning the basics, in particular
+if you view each 'example<N>/' directory as a "step", and compare it
+to its preceding step. 
+
+However, this step-by-step organization is not necessarily the
+greatest resource to eventually use to build your own advanced
+projects with. If you do want to follow up and build your own
+OptiX-accelerated ray tracer(s), I would suggest that after glacing
+through (and maybe playing with) this repo's examples you will
+eventually *not* base your renderer off this repo's latest sample, and
+instead have a look at my other OptiX 7 resource, the OWL project (now
+an official NVIDIA github project located at
+http://github.com/NVIDIA/owl). 
+
+OWL is particularly aimed at making it easier to write OptiX programs
+by wrapping all or most of the techniques you have learned in this
+course in some much easier to use "convenience layer" API on top of
+OptiX, and in a much more coherent and cleaned-up form that any of
+this repo's (by necessity minimalisitc) samples. OWL does, in fact,
+now also contain a sample that reproduces exactly this course's final
+sample within the OWL framework; comparing how OWL can be used to
+realize this repo's sample in a much cleaner way is a good way to get
+started. 
+
+Bottom line: *This* repo is great to learn the basics - but you *do*
+want to swtich to OWL at some point in time (and probably sooner
+rather than later).
+
+### How up to date is this repo?
+
+This project was originally created in 2019, not only with a much
+older OptiX (version 7 at the time; today we are at 9!) but also with
+a much, much older version of cmake, CUDA, etc. I do every now and
+then check up this repo, and update to newer toolchains, etc; and have
+even added some additional samples (on denoising) after the original
+release.
+
+BUT: I do not actively develop new samples in this repo - e.g., there
+are no samples on ray re-ordering, or on any of the other new OptiX
+features that got added in newer versions. If you do happen to feel
+the urge to create some and add these I'd be happy to host them, but
+(mostly due to missing time) *I* will likely not be adding any myself.
+
+# How to use this Repo?
+
+The best way to use this repo is to view each `example<N>/` directory
+as a *step* in a sequence of such steps that build on each
+other. E.g., the first sample is just a trivial hello-world example
+that checks that the optix headers are found, that the code builds,
+that optix can be initialized (ie, the driver supports that version of
+optix), etc. 
+
+The next then creates a trivially simple raygen program to test that
+there is actual code running on the GPU (though it doesn't do much,
+yet), etc.
+
+Look at each sample one after another, and note, in particular, where
+and how each sample differs from the previous one.
+
+If you want to start with a minimalistic "interactive renderer" with
+shadows, textures, denoising, etc, you can of course also start at the
+end, and (only) look at the last sample. Most of the code in there
+should be self-explanatory (it really isn't that big of a codebase!),
+so "have fun" is all I can say. However - should you get tempted to
+take that last example as a stepping stone for your own renderer, and
+think of simply copy-and-modify .... then please read the "You Should
+Also Look at OWL" note above.
 
 
 ## Latest Updates:
+
+* Oct/Nov 2025: Updated to "modern cmake" and more recent versions
+  of OptiX, CUDA, cmake, VS, etc. Code now works again in both
+  windows and linux.
 
 * 6/14/2021: Bugfix - normal and albedo buffer values for denoiser
   were not correctly set
