@@ -13,7 +13,7 @@ IMHO important notes here:
 
 The goal of this repo - together with the Siggraph course that it was
 originally accompanying - was to *teach* OptiX step by step, from
-first principles, and with mininal external dependencies. This makes
+first principles, and with minimal external dependencies. This makes
 this particular codebase great for learning the basics, in particular
 if you view each 'example<N>/' directory as a "step", and compare it
 to its preceding step. 
@@ -21,7 +21,7 @@ to its preceding step.
 However, this step-by-step organization is not necessarily the
 greatest resource to eventually use to build your own advanced
 projects with. If you do want to follow up and build your own
-OptiX-accelerated ray tracer(s), I would suggest that after glacing
+OptiX-accelerated ray tracer(s), I would suggest that after glancing
 through (and maybe playing with) this repo's examples you will
 eventually *not* base your renderer off this repo's latest sample, and
 instead have a look at my other OptiX 7 resource, the OWL project (now
@@ -32,14 +32,14 @@ OWL is particularly aimed at making it easier to write OptiX programs
 by wrapping all or most of the techniques you have learned in this
 course in some much easier to use "convenience layer" API on top of
 OptiX, and in a much more coherent and cleaned-up form that any of
-this repo's (by necessity minimalisitc) samples. OWL does, in fact,
+this repo's (by necessity minimalistic) samples. OWL does, in fact,
 now also contain a sample that reproduces exactly this course's final
 sample within the OWL framework; comparing how OWL can be used to
 realize this repo's sample in a much cleaner way is a good way to get
 started. 
 
 Bottom line: *This* repo is great to learn the basics - but you *do*
-want to swtich to OWL at some point in time (and probably sooner
+want to switch to OWL at some point in time (and probably sooner
 rather than later).
 
 ### How up to date is this repo?
@@ -63,8 +63,8 @@ The best way to use this repo is to view each `example<N>/` directory
 as a *step* in a sequence of such steps that build on each
 other. E.g., the first sample is just a trivial hello-world example
 that checks that the optix headers are found, that the code builds,
-that optix can be initialized (ie, the driver supports that version of
-optix), etc. 
+that OptiX can be initialized (ie, the driver supports that version of
+OptiX), etc. 
 
 The next then creates a trivially simple raygen program to test that
 there is actual code running on the GPU (though it doesn't do much,
@@ -87,15 +87,15 @@ Also Look at OWL" note above.
 
 * Oct/Nov 2025: Updated to "modern cmake" and more recent versions
   of OptiX, CUDA, cmake, VS, etc. Code now works again in both
-  windows and linux.
+  windows and Linux.
 
 * 6/14/2021: Bugfix - normal and albedo buffer values for denoiser
   were not correctly set
 
 * 4/16/2021: Updated to also compile on OptiX 7.3
 
-* 10/21/2020: Bugfix: all moduleCompileOptions and
-  pipelineCompileOptions are now properly zero-initialized by default.
+* 10/21/2020: Bugfix: all `moduleCompileOptions` and
+  `pipelineCompileOptions` are now properly zero-initialized by default.
   Otherwise, variables not set in these struct might have invalid values.
 
 * 8/3/2020: Updated to also compile on OptiX 7.1
